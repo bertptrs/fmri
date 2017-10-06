@@ -1,10 +1,12 @@
 #include <iostream>
+#include "Options.hpp"
 
 using namespace std;
+using namespace fmri;
 
-int main(int argc, const char* argv[])
+int main(int argc, char * const argv[])
 {
-	cout << "This is just a test." << endl;
+	Options options = Options::parse(argc, argv);
 
 	return 0;
 }

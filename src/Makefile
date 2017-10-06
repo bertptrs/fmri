@@ -1,14 +1,15 @@
 .PHONY: all clean
 
 # Compilation settings
-CXXFLAGS=-Wall -Wextra -pedantic -std=c++14 -g -O2
+CXXFLAGS=-Wall -Wextra -pedantic -std=c++17 -g -O2
 LDLIBS=
 
 
 # Project artifacts
 _EXE=fmri
 _OBJECTS=\
-		 main.o
+		 main.o \
+		 Options.o
 
 all: fmri
 
@@ -17,11 +18,11 @@ fmri: $(_OBJECTS)
 
 clean:
 	$(RM) *.o *.d
-	$(RM)
+	$(RM) $(_EXE)
 
 # Automatic header dependency detection
 %.d: %.cpp
-	$(CXX) -MM -MF $@ $<
+	$(CXX) $(CXXFLAGS) -MM -MF $@ $<
 
 _DEPFILES=$(patsubst %.cpp, %.d, $(wildcard *.cpp))
 -include $(_DEPFILES)
