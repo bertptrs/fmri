@@ -1,15 +1,13 @@
 .PHONY: all clean
 
 # Compilation settings
-CXXFLAGS=-Wall -Wextra -pedantic -std=c++17 -g -O2
-LDLIBS=
+CXXFLAGS=-Wall -Wextra -pedantic -std=c++17 -g -O2 -DCPU_ONLY
+LDLIBS=-lcaffe -lboost_system -lglog
 
 
 # Project artifacts
 _EXE=fmri
-_OBJECTS=\
-		 main.o \
-		 Options.o
+_OBJECTS=$(patsubst %.cpp, %.o, $(wildcard *.cpp))
 
 all: fmri
 
