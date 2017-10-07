@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdio>
 #include <iostream>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,7 +27,7 @@ Options:
 static void check_file(const char * filename)
 {
 	if (access(filename, R_OK) != 0) {
-		cerr << filename << " could not be read" << endl;
+		perror(filename);
 		exit(1);
 	}
 }
