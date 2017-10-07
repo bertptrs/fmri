@@ -56,7 +56,6 @@ Options Options::parse(const int argc, char * const argv[])
 				break;
 
 			case '?':
-				cerr << "Unknown option character: " << char(optopt) << endl;
 				show_help(argv[0], 1);
 				break;
 
