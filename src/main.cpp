@@ -16,5 +16,7 @@ int main(int argc, char *const argv[]) {
         simulator.simulate(image);
     }
 
+    ::google::ShutdownGoogleLogging();
+
     return 0;
 }
