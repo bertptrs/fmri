@@ -5,17 +5,16 @@
 using namespace std;
 using namespace fmri;
 
-int main(int argc, char * const argv[])
-{
-	::google::InitGoogleLogging(argv[0]);
+int main(int argc, char *const argv[]) {
+    ::google::InitGoogleLogging(argv[0]);
 
-	Options options = Options::parse(argc, argv);
+    Options options = Options::parse(argc, argv);
 
-	Simulator simulator(options.model(), options.weights());
+    Simulator simulator(options.model(), options.weights());
 
-	for (const auto& image : options.inputs()) {
-		simulator.simulate(image);
-	}
+    for (const auto &image : options.inputs()) {
+        simulator.simulate(image);
+    }
 
-	return 0;
+    return 0;
 }
