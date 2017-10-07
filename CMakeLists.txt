@@ -18,7 +18,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 add_executable(fmri ${fmri_SRC})
 
 # Add libraries to link
-target_link_libraries(fmri ${OpenCV_libs})
+target_link_libraries(fmri ${OpenCV_LIBS})
 target_link_libraries(fmri ${Boost_LIBRARIES})
 # These do not have CMake support, so link manually
 target_link_libraries(fmri caffe glog)
