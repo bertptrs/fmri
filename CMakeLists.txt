@@ -30,8 +30,8 @@ target_link_libraries(fmri ${Boost_LIBRARIES})
 
 # Require Caffe
 find_package(Caffe REQUIRED)
-include_directories(${Caffe_INCLUDE_DIR})
-target_link_libraries(fmri ${Caffe_LIBS})
+include_directories(${Caffe_INCLUDE_DIRS})
+target_link_libraries(fmri ${Caffe_LIBRARIES})
 
 # Require glog
 find_package(Glog REQUIRED)
