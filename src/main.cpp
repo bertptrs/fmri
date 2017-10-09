@@ -10,7 +10,7 @@ int main(int argc, char *const argv[]) {
 
     Options options = Options::parse(argc, argv);
 
-    Simulator simulator(options.model(), options.weights());
+    Simulator simulator(options.model(), options.weights(), options.means());
 
     for (const auto &image : options.inputs()) {
         simulator.simulate(image);

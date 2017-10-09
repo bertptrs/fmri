@@ -17,16 +17,18 @@ namespace fmri {
     public:
         typedef float DType;
 
-        Simulator(const string &model_file, const string &weights_file);
+        Simulator(const string &model_file, const string &weights_file, const string &means_file = "");
 
-        void simulate(const string &input_file);
+        vector<DType> simulate(const string &input_file);
 
     private:
         caffe::Net<DType> net;
         cv::Size input_geometry;
+        cv::Mat means;
         unsigned int num_channels;
 
         vector<cv::Mat> getWrappedInputLayer();
         cv::Mat preprocess(cv::Mat original) const;
+        cv::Mat processMeans(const string &means_file) const;
     };
 }
