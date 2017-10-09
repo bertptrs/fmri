@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 3.1.0)
 project(FMRI CXX)
 
+# Allow us to define custom modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
+
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB fmri_SRC
@@ -12,13 +15,25 @@ add_definitions(-DCPU_ONLY)
 
 
 # Locate libraries
-find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
 
 add_executable(fmri ${fmri_SRC})
 
-# Add libraries to link
+# Require OpenCV
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 target_link_libraries(fmri ${OpenCV_LIBS})
+
+# Require Boost
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(fmri ${Boost_LIBRARIES})
-# These do not have CMake support, so link manually
-target_link_libraries(fmri caffe glog)
+
+# Require Caffe
+find_package(Caffe REQUIRED)
+include_directories(${Caffe_INCLUDE_DIR})
+target_link_libraries(fmri ${Caffe_LIBS})
+
+# Require glog
+find_package(Glog REQUIRED)
+include_directories(${GLOG_INCLUDE_DIRS})
+target_link_libraries(fmri ${GLOG_LIBRARIES})
