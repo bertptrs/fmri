@@ -1,13 +1,20 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
-#include <vector>
+#include <iterator>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace fmri
 {
+
+    template<class T>
+    inline T identity(T t) {
+        return t;
+    }
 
     template<class T>
     inline std::vector <T> read_vector(const std::string& filename)
@@ -15,12 +22,10 @@ namespace fmri
         std::ifstream input(filename);
         assert(input.good());
 
-        T t;
         std::vector<T> res;
-
-        while (input >> t) {
-            res.push_back(t);
-        }
+        std::transform(std::istream_iterator<T>(input),
+                       std::istream_iterator<T>(),
+                       identity<T>, std::back_inserter(res));
 
         return res;
     }
@@ -44,12 +49,10 @@ namespace fmri
     template<class T, class U>
     std::vector<std::pair<T, U>> combine(const std::vector<T>& a, const std::vector<U>& b)
     {
-        assert(a.size() == b.size());
         std::vector<std::pair<T, U>> res;
-
-        for (size_t i = 0; i < a.size(); ++i) {
-            res.emplace_back(a[i], b[i]);
-        }
+        std::transform(a.begin(), a.end(), b.begin(),
+                       std::back_inserter(res),
+                       [] (const T& a, const U& b) -> auto { return std::make_pair(a, b); });
 
         return res;
     }
