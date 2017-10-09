@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <utility>
 
 namespace fmri
 {
@@ -35,6 +36,19 @@ namespace fmri
 
         while (getline(input, v)) {
             res.push_back(v);
+        }
+
+        return res;
+    }
+
+    template<class T, class U>
+    std::vector<std::pair<T, U>> combine(const std::vector<T>& a, const std::vector<U>& b)
+    {
+        assert(a.size() == b.size());
+        std::vector<std::pair<T, U>> res;
+
+        for (size_t i = 0; i < a.size(); ++i) {
+            res.emplace_back(a[i], b[i]);
         }
 
         return res;

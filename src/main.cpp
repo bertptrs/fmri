@@ -22,8 +22,10 @@ int main(int argc, char *const argv[]) {
         cout << "Result for " << image << ":" << endl;
         auto res = simulator.simulate(image);
         if (!labels.empty()) {
-            for (unsigned int i = 0; i < res.size(); ++i) {
-                cout << res[i] << " " << labels[i] << endl;
+            auto scores = combine(res, labels);
+            sort(scores.begin(), scores.end(), greater<>());
+            for (unsigned int i = 0; i < scores.size() && i < 5; ++i) {
+                cout << scores[i].first << " " << scores[i].second << endl;
             }
         } else {
             cout << "Best result: " << *(max_element(res.begin(), res.end())) << endl;
