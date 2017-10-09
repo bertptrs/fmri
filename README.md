@@ -13,6 +13,9 @@ The following programs/libraries need to be installed on your system:
 - OpenCV
 - Boost System
 
+Note that most of these are dependencies of Caffe, and thus will
+probably already be on your system.
+
 ## Building
 
 The build process is based on CMake. This means you can easily create a
