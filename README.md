@@ -12,6 +12,7 @@ The following programs/libraries need to be installed on your system:
 - Google log (glog)
 - OpenCV
 - Boost System
+- PNG++
 
 Note that most of these are dependencies of Caffe, and thus will
 probably already be on your system.

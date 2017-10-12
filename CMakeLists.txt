@@ -37,3 +37,8 @@ target_link_libraries(fmri ${Caffe_LIBRARIES})
 find_package(Glog REQUIRED)
 include_directories(${GLOG_INCLUDE_DIRS})
 target_link_libraries(fmri ${GLOG_LIBRARIES})
+
+# Require png++
+find_package(png++ REQUIRED)
+include_directories(${png++_INCLUDE_DIRS})
+target_link_libraries(fmri ${png++-LIBRARIES})
