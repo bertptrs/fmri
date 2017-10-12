@@ -12,11 +12,24 @@ namespace fmri
 {
 	typedef float DType;
 
+    /**
+     * Identity function that simply returns whatever is put in.
+     *
+     * @tparam T The type of the function
+     * @param t The value to return.
+     * @return The original value.
+     */
     template<class T>
     inline T identity(T t) {
         return t;
     }
 
+    /**
+     * Read a file into a vector of given type.
+     * @tparam T The type to read.
+     * @param filename the file to read
+     * @return A vector of type T.
+     */
     template<class T>
     inline std::vector <T> read_vector(const std::string& filename)
     {
@@ -31,6 +44,12 @@ namespace fmri
         return res;
     }
 
+    /**
+     * String specialisation of read_vector.
+     *
+     * @param filename The filename to load.
+     * @return A vector of the lines in the source file.
+     */
     template<>
     inline std::vector<std::string> read_vector<std::string>(const std::string& filename)
     {
@@ -47,6 +66,15 @@ namespace fmri
         return res;
     }
 
+    /**
+     * Create a vector of pairs.
+     *
+     * @tparam T The first type
+     * @tparam U The second type
+     * @param a First vector
+     * @param b Second vector
+     * @return A vector of pair<U, V>
+     */
     template<class T, class U>
     std::vector<std::pair<T, U>> combine(const std::vector<T>& a, const std::vector<U>& b)
     {
