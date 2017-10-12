@@ -28,8 +28,10 @@ Simulator::Simulator(const string& model_file, const string& weights_file, const
 
 }
 
-vector<Simulator::DType> Simulator::simulate(const string& image_file)
+vector<LayerData> Simulator::simulate(const string& image_file)
 {
+	typedef LayerData::Type LType;
+
 	cv::Mat im = cv::imread(image_file, -1);
 
     assert(!im.empty());
@@ -41,10 +43,20 @@ vector<Simulator::DType> Simulator::simulate(const string& image_file)
 
     net.Forward();
 
-    Blob<DType> *output_layer = net.output_blobs()[0];
-    const DType *begin = output_layer->cpu_data();
-    const DType *end = begin + output_layer->channels();
-    vector<DType> result(begin, end);
+	vector<LayerData> result;
+
+    Blob<DType>* input_layer = net.input_blobs()[0];
+
+	const auto& names = net.layer_names();
+	const auto& results = net.top_vecs();
+	const auto& layers = net.layers();
+
+	for (unsigned int i = 0; i < names.size(); ++i) {
+		CHECK_EQ(results[i].size(), 1) << "Multiple outputs per layer are not supported!" << endl;
+		const auto blob = results[i][0];
+
+		result.emplace_back(names[i], blob->shape(), blob->cpu_data(), LayerData::typeFromString(layers[i]->type()));
+	}
 
     return result;
 }
@@ -67,10 +79,6 @@ vector<cv::Mat> Simulator::getWrappedInputLayer()
 }
 
 static cv::Mat fix_channels(const int num_channels, cv::Mat original) {
-    if (num_channels == original.channels()) {
-        return original;
-    }
-
     cv::Mat converted;
 
     if (num_channels == 1 && original.channels() == 3) {
@@ -82,8 +90,8 @@ static cv::Mat fix_channels(const int num_channels, cv::Mat original) {
     } else if (num_channels == 3 && original.channels() == 4) {
         cv::cvtColor(original, converted, cv::COLOR_BGRA2BGR);
     } else {
-        // Don't know how to convert.
-        abort();
+		CHECK(num_channels == original.channels()) << "Cannot convert between channel types. ";
+        return original;
     }
 
     return converted;

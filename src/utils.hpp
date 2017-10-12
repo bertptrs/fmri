@@ -10,6 +10,7 @@
 
 namespace fmri
 {
+	typedef float DType;
 
     template<class T>
     inline T identity(T t) {

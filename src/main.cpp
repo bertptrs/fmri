@@ -8,7 +8,7 @@ using namespace std;
 using namespace fmri;
 
 int main(int argc, char *const argv[]) {
-    ::google::InitGoogleLogging(argv[0]);
+    google::InitGoogleLogging(argv[0]);
 
     Options options = Options::parse(argc, argv);
     vector<string> labels;
@@ -18,23 +18,24 @@ int main(int argc, char *const argv[]) {
 
     Simulator simulator(options.model(), options.weights(), options.means());
 
-    for (const auto &image : options.inputs()) {
-        cout << "Result for " << image << ":" << endl;
-        auto res = simulator.simulate(image);
-        if (!labels.empty()) {
-            auto scores = combine(res, labels);
-            sort(scores.begin(), scores.end(), greater<>());
-            for (unsigned int i = 0; i < scores.size() && i < 5; ++i) {
-                cout << scores[i].first << " " << scores[i].second << endl;
-            }
-        } else {
-            cout << "Best result: " << *(max_element(res.begin(), res.end())) << endl;
-        }
+	for (const auto &image : options.inputs()) {
+		const auto res = simulator.simulate(image);
+		LOG(INFO) << "Result for " << image << ":" << endl;
 
-        cout << endl;
-    }
+		const auto& resultRow = res[res.size() - 1];
+		if (!labels.empty()) {
+			vector<DType> weights(resultRow.data(), resultRow.data() + resultRow.numEntries());
+			auto scores = combine(weights, labels);
+			sort(scores.begin(), scores.end(), greater<>());
+			for (unsigned int i = 0; i < scores.size() && i < 5; ++i) {
+				LOG(INFO) << scores[i].first << " " << scores[i].second << endl;
+			}
+		} else {
+			LOG(INFO) << "Best result: " << *(resultRow.data(), resultRow.data() + resultRow.numEntries()) << endl;
+		}
+	}
 
-    ::google::ShutdownGoogleLogging();
+    google::ShutdownGoogleLogging();
 
     return 0;
 }
