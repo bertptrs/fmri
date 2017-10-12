@@ -16,6 +16,7 @@ namespace fmri {
         const string& weights() const;
         const string& means() const;
         const string& labels() const;
+        const string& imageDump() const;
 
         const vector<string>& inputs() const;
 
@@ -24,8 +25,9 @@ namespace fmri {
         const string weightsPath;
         const string meansPath;
         const string labelsPath;
+        const string dumpPath;
         const vector<string> inputPaths;
 
-        Options(string &&, string &&, string&&, string&&, vector<string> &&) noexcept;
+        Options(string &&, string &&, string&&, string&&, string&&, vector<string> &&) noexcept;
     };
 }

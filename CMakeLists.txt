@@ -41,4 +41,4 @@ target_link_libraries(fmri ${GLOG_LIBRARIES})
 # Require png++
 find_package(png++ REQUIRED)
 include_directories(${png++_INCLUDE_DIRS})
-target_link_libraries(fmri ${png++-LIBRARIES})
+target_link_libraries(fmri ${png++_LIBRARIES})

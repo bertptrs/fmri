@@ -86,4 +86,18 @@ namespace fmri
         return res;
     }
 
+    template<class It>
+    void clamp(It begin, It end,
+               typename std::iterator_traits<It>::value_type minimum,
+               typename std::iterator_traits<It>::value_type maximum)
+    {
+        const auto extremes = std::minmax(begin, end);
+        const auto diff = *extremes.second - *extremes.first;
+
+        const auto offset = minimum - *extremes.first;
+        const auto scaling = diff / (maximum - minimum);
+
+        std::for_each(begin, end, [offset, scaling] (typename std::iterator_traits<It>::reference v) { v = (v + offset) * scaling;});
+    }
+
 }

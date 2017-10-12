@@ -17,7 +17,8 @@ Options:
 	-n	(required) the model file to simulate
 	-w	(required) the trained weights
     -m  means file. Will be substracted from input if available.
-    -l  labels file. Will be used to print prediction labels if available.)END" << endl;
+    -l  labels file. Will be used to print prediction labels if available.
+    -d  Image dump dir. Will be filled with PNG images of intermediate results.)END" << endl;
 
     exit(exitcode);
 }
@@ -33,11 +34,12 @@ Options Options::parse(const int argc, char *const argv[]) {
     string model;
     string weights;
     string means;
+    string dump;
     string labels;
 
     char c;
 
-    while ((c = getopt(argc, argv, "hm:w:n:l:")) != -1) {
+    while ((c = getopt(argc, argv, "hm:w:n:l:d:")) != -1) {
         switch (c) {
             case 'h':
                 show_help(argv[0], 0);
@@ -61,6 +63,10 @@ Options Options::parse(const int argc, char *const argv[]) {
             case 'l':
                 check_file(optarg);
                 labels = optarg;
+                break;
+
+            case 'd':
+                dump = optarg;
                 break;
 
             case '?':
@@ -91,14 +97,15 @@ Options Options::parse(const int argc, char *const argv[]) {
         show_help(argv[0], 1);
     }
 
-    return Options(move(model), move(weights), move(means), move(labels), move(inputs));
+    return Options(move(model), move(weights), move(means), move(labels), move(dump), move(inputs));
 }
 
-Options::Options(string &&model, string &&weights, string&& means, string&& labels, vector<string> &&inputs) noexcept:
+Options::Options(string &&model, string &&weights, string&& means, string&& labels, string&& dumpPath, vector<string> &&inputs) noexcept:
         modelPath(move(model)),
         weightsPath(move(weights)),
         meansPath(means),
         labelsPath(labels),
+        dumpPath(dumpPath),
         inputPaths(move(inputs))
 {
 }
@@ -123,4 +130,9 @@ const string& Options::means() const
 const string& Options::labels() const
 {
     return labelsPath;
+}
+
+const string &Options::imageDump() const
+{
+    return dumpPath;
 }

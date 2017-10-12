@@ -50,7 +50,7 @@ find_path(png++_INCLUDE_DIR
         src)
 
 set(png++_INCLUDE_DIRS ${png++_INCLUDE_DIR} ${PNG_INCLUDE_DIRS})
-set(png++_LIBRARIES ${PNG_LIBRARIES})
+set(png++_LIBRARY ${PNG_LIBRARIES})
 
 find_package_handle_standard_args(png++ DEFAULT_MSG
     png++_INCLUDE_DIR)
