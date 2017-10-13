@@ -91,11 +91,11 @@ namespace fmri
                typename std::iterator_traits<It>::value_type minimum,
                typename std::iterator_traits<It>::value_type maximum)
     {
-        const auto extremes = std::minmax(begin, end);
-        const auto diff = *extremes.second - *extremes.first;
+        const auto[minElem, maxElem] = std::minmax(begin, end);
+        const auto diff = *maxElem - *minElem;
 
-        const auto offset = minimum - *extremes.first;
-        const auto scaling = diff / (maximum - minimum);
+        const auto offset = minimum - *minElem;
+        const auto scaling = (maximum - minimum) / diff;
 
         std::for_each(begin, end, [offset, scaling] (typename std::iterator_traits<It>::reference v) { v = (v + offset) * scaling;});
     }
