@@ -54,6 +54,8 @@ void PNGDumper::dumpImageSeries(const LayerData &layer)
 
     auto data = layer.data();
 
+    png::image<png::gray_pixel> image(shape[2], shape[3]);
+
     for (int i = 0; i < shape[0]; ++i) {
         for (int j = 0; j < shape[1]; ++j) {
             memcpy(buffer.data(), data, imagePixels * sizeof(DType));
@@ -62,8 +64,6 @@ void PNGDumper::dumpImageSeries(const LayerData &layer)
             data += imagePixels;
 
             clamp(buffer.begin(), buffer.end(), 0.0, 255.0);
-
-            png::image<png::gray_pixel> image(shape[2], shape[3]);
 
             for (int y = 0; y < shape[2]; ++y) {
                 for (int x = 0; x < shape[3]; ++x) {
