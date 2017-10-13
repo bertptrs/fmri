@@ -64,7 +64,7 @@ void PNGDumper::dumpImageSeries(const LayerData &layer)
             // advance the buffer;
             data += imagePixels;
 
-            clamp(buffer.begin(), buffer.end(), 0.0, 255.0);
+            rescale(buffer.begin(), buffer.end(), 0.0, 255.0);
 
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {

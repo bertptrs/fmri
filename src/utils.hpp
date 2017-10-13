@@ -86,18 +86,39 @@ namespace fmri
         return res;
     }
 
+    /**
+     * @brief Scales a range of values into a fixed range of values.
+     *
+     * This method traverses the range twice, once to determine maximum
+     * and minimum, and once again to modify all the values.
+     *
+     * @tparam It Iterator type. Will be used to determine value type.
+     * @param first The start of the range to scale
+     * @param last The end of the range to scale
+     * @param minimum The desired minimum of the range.
+     * @param maximum The desired maximum of the range.
+     */
     template<class It>
-    void clamp(It begin, It end,
-               typename std::iterator_traits<It>::value_type minimum,
-               typename std::iterator_traits<It>::value_type maximum)
+    void rescale(const It first, const It last,
+                 typename std::iterator_traits<It>::value_type minimum,
+                 typename std::iterator_traits<It>::value_type maximum)
     {
-        const auto[minElem, maxElem] = std::minmax(begin, end);
-        const auto diff = *maxElem - *minElem;
+        const auto[minElem, maxElem] = std::minmax_element(first, last);
+        const auto rangeWidth = maximum - minimum;
+        const auto valWidth = *maxElem - *minElem;
 
-        const auto offset = minimum - *minElem;
-        const auto scaling = (maximum - minimum) / diff;
+        if (valWidth == 0) {
+            // Just fill the range with the minimum value, since
+            std::fill(first, last, minimum);
+        } else {
+            const auto scaling = rangeWidth / valWidth;
 
-        std::for_each(begin, end, [offset, scaling] (typename std::iterator_traits<It>::reference v) { v = (v + offset) * scaling;});
+            const auto minVal = *minElem;
+
+            std::for_each(first, last, [=](typename std::iterator_traits<It>::reference v) {
+                v = std::clamp((v - minVal) * scaling + minimum, minimum, maximum);
+            });
+        }
     }
 
 }
