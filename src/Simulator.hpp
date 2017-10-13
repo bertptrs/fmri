@@ -10,6 +10,7 @@
 #include "utils.hpp"
 #include "LayerData.hpp"
 
+// Forward declare caffe::net so we don't have to include it here.
 namespace caffe
 {
     template<class DType>
