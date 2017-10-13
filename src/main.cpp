@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <glog/logging.h>
+
 #include "Options.hpp"
 #include "Simulator.hpp"
 #include "PNGDumper.hpp"

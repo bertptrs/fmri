@@ -3,24 +3,29 @@
 #include <vector>
 
 #include "Simulator.hpp"
+#include <caffe/caffe.hpp>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 using namespace caffe;
 using namespace std;
 using namespace fmri;
 
 Simulator::Simulator(const string& model_file, const string& weights_file, const string& means_file) :
-	net(model_file, TEST)
+	net(new Net<DType>(model_file, TEST))
 {
-	net.CopyTrainedLayersFrom(weights_file);
+	net->CopyTrainedLayersFrom(weights_file);
 
-	Blob<DType>* input_layer = net.input_blobs()[0];
+	Blob<DType>* input_layer = net->input_blobs()[0];
 	input_geometry = cv::Size(input_layer->width(), input_layer->height());
 	num_channels = input_layer->channels();
 
 	input_layer->Reshape(1, num_channels,
 			input_geometry.height, input_geometry.width);
 	/* Forward dimension change to all layers. */
-	net.Reshape();
+	net->Reshape();
 
     if (means_file != "")  {
         means = processMeans(means_file);
@@ -41,15 +46,15 @@ vector<LayerData> Simulator::simulate(const string& image_file)
 
     cv::split(input, channels);
 
-    net.Forward();
+    net->Forward();
 
 	vector<LayerData> result;
 
-    Blob<DType>* input_layer = net.input_blobs()[0];
+    Blob<DType>* input_layer = net->input_blobs()[0];
 
-	const auto& names = net.layer_names();
-	const auto& results = net.top_vecs();
-	const auto& layers = net.layers();
+	const auto& names = net->layer_names();
+	const auto& results = net->top_vecs();
+	const auto& layers = net->layers();
 
 	for (unsigned int i = 0; i < names.size(); ++i) {
 		CHECK_EQ(results[i].size(), 1) << "Multiple outputs per layer are not supported!" << endl;
@@ -64,7 +69,7 @@ vector<LayerData> Simulator::simulate(const string& image_file)
 vector<cv::Mat> Simulator::getWrappedInputLayer()
 {
     vector<cv::Mat> channels;
-    Blob<DType>* input_layer = net.input_blobs()[0];
+    Blob<DType>* input_layer = net->input_blobs()[0];
 
     const int width = input_geometry.width;
     const int height = input_geometry.height;
@@ -150,4 +155,9 @@ cv::Mat Simulator::processMeans(const string &means_file) const
     cv::merge(channels, mean);
 
     return cv::Mat(input_geometry, mean.type(), cv::mean(mean));
+}
+
+Simulator::~Simulator()
+{
+    // Empty but defined constructor.
 }
