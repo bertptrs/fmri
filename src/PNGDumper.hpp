@@ -15,13 +15,11 @@ namespace fmri
     {
     public:
         PNGDumper(string_view baseDir);
-        PNGDumper(PNGDumper&&) = default;
-        PNGDumper(const PNGDumper&) = default;
 
         void dump(const LayerData& layerData);
 
     private:
-        const string baseDir_;
+        string baseDir_;
 
         void dumpImageSeries(const LayerData &data);
 
