@@ -1,7 +1,10 @@
 #pragma once
 
-#include <vector>
+#include <optional>
 #include <string>
+#include <vector>
+
+#include "PNGDumper.hpp"
 
 namespace fmri {
 
@@ -15,8 +18,8 @@ namespace fmri {
         const string& model() const;
         const string& weights() const;
         const string& means() const;
-        const string& labels() const;
-        const string& imageDump() const;
+        std::optional<vector<string>> labels() const;
+        std::optional<fmri::PNGDumper> imageDumper() const;
 
         const vector<string>& inputs() const;
 

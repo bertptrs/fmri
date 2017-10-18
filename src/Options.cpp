@@ -3,6 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "Options.hpp"
+#include "utils.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -127,12 +128,20 @@ const string& Options::means() const
     return meansPath;
 }
 
-const string& Options::labels() const
+optional<vector<string>> Options::labels() const
 {
-    return labelsPath;
+    if (labelsPath.empty()) {
+        return nullopt;
+    } else {
+        return read_vector<string>(labelsPath);
+    }
 }
 
-const string &Options::imageDump() const
+std::optional<PNGDumper> Options::imageDumper() const
 {
-    return dumpPath;
+    if (dumpPath.empty()) {
+        return nullopt;
+    } else {
+        return move(PNGDumper(dumpPath));
+    }
 }
