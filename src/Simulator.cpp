@@ -1,39 +1,84 @@
 #include <cassert>
 #include <iostream>
+#include <optional>
 #include <vector>
 
-#include "Simulator.hpp"
 #include <caffe/caffe.hpp>
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include "Simulator.hpp"
+#include "utils.hpp"
 
 using namespace caffe;
 using namespace std;
 using namespace fmri;
 
-Simulator::Simulator(const string& model_file, const string& weights_file, const string& means_file) :
-	net(new Net<DType>(model_file, TEST))
+struct Simulator::Impl
 {
-	net->CopyTrainedLayersFrom(weights_file);
+    caffe::Net<DType> net;
+    cv::Size input_geometry;
+    optional<cv::Mat> means;
+    unsigned int num_channels;
 
-	Blob<DType>* input_layer = net->input_blobs()[0];
+    Impl(const string& model_file, const string& weights_file, const string& means_file);
+
+    vector<cv::Mat> getWrappedInputLayer();
+    cv::Mat preprocess(cv::Mat original) const;
+    vector<LayerData> simulate(const string &input_file);
+};
+
+// Create simple forwarding functions.
+Simulator::Simulator(const string& model_file, const string& weights_file, const string& means_file) :
+	pImpl(new Impl(model_file, weights_file, means_file))
+{
+}
+
+vector<LayerData> Simulator::simulate(const string& image_file)
+{
+    return pImpl->simulate(image_file);
+}
+
+Simulator::Impl::Impl(const string& model_file, const string& weights_file, const string& means_file) :
+	net(model_file, TEST)
+{
+	net.CopyTrainedLayersFrom(weights_file);
+
+	auto input_layer = net.input_blobs()[0];
 	input_geometry = cv::Size(input_layer->width(), input_layer->height());
 	num_channels = input_layer->channels();
 
 	input_layer->Reshape(1, num_channels,
 			input_geometry.height, input_geometry.width);
 	/* Forward dimension change to all layers. */
-	net->Reshape();
+	net.Reshape();
 
-    if (means_file != "")  {
-        means = processMeans(means_file);
+    if (!means_file.empty()) {
+        // Read in the means file
+        BlobProto proto;
+        ReadProtoFromBinaryFileOrDie(means_file, &proto);
+
+        Blob<DType> mean_blob;
+        mean_blob.FromProto(proto);
+
+        CHECK_EQ(mean_blob.channels(), num_channels) << "Number of channels should match!" << endl;
+
+        vector<cv::Mat> channels;
+        float* data = mean_blob.mutable_cpu_data();
+        for (unsigned int i = 0; i < num_channels; ++i) {
+            channels.emplace_back(mean_blob.height(), mean_blob.width(), CV_32FC1, data);
+            data += mean_blob.height() * mean_blob.width();
+        }
+
+        cv::Mat mean;
+        cv::merge(channels, mean);
+
+        means = cv::Mat(input_geometry, mean.type(), cv::mean(mean));
     }
-
 }
 
-vector<LayerData> Simulator::simulate(const string& image_file)
+vector<LayerData> Simulator::Impl::simulate(const string& image_file)
 {
 	typedef LayerData::Type LType;
 
@@ -46,15 +91,15 @@ vector<LayerData> Simulator::simulate(const string& image_file)
 
     cv::split(input, channels);
 
-    net->Forward();
+    net.Forward();
 
 	vector<LayerData> result;
 
-    Blob<DType>* input_layer = net->input_blobs()[0];
+    auto input_layer = net.input_blobs()[0];
 
-	const auto& names = net->layer_names();
-	const auto& results = net->top_vecs();
-	const auto& layers = net->layers();
+	const auto& names = net.layer_names();
+	const auto& results = net.top_vecs();
+	const auto& layers = net.layers();
 
 	for (unsigned int i = 0; i < names.size(); ++i) {
 		CHECK_EQ(results[i].size(), 1) << "Multiple outputs per layer are not supported!" << endl;
@@ -66,10 +111,10 @@ vector<LayerData> Simulator::simulate(const string& image_file)
     return result;
 }
 
-vector<cv::Mat> Simulator::getWrappedInputLayer()
+vector<cv::Mat> Simulator::Impl::getWrappedInputLayer()
 {
     vector<cv::Mat> channels;
-    Blob<DType>* input_layer = net->input_blobs()[0];
+    auto input_layer = net.input_blobs()[0];
 
     const int width = input_geometry.width;
     const int height = input_geometry.height;
@@ -114,7 +159,7 @@ static cv::Mat resize(const cv::Size& targetSize, cv::Mat original)
     return original;
 }
 
-cv::Mat Simulator::preprocess(cv::Mat original) const
+cv::Mat Simulator::Impl::preprocess(cv::Mat original) const
 {
     auto converted = fix_channels(num_channels, original);
 
@@ -123,38 +168,15 @@ cv::Mat Simulator::preprocess(cv::Mat original) const
     cv::Mat sample_float;
     resized.convertTo(sample_float, num_channels == 3 ? CV_32FC3 : CV_32FC1);
 
-    if (means.empty()) {
+    if (!means) {
         return sample_float;
     }
 
     cv::Mat normalized;
-    cv::subtract(sample_float, means, normalized);
+    cv::subtract(sample_float, *means, normalized);
 
     return normalized;
 
-}
-
-cv::Mat Simulator::processMeans(const string &means_file) const
-{
-    BlobProto proto;
-    ReadProtoFromBinaryFileOrDie(means_file, &proto);
-
-    Blob<DType> mean_blob;
-    mean_blob.FromProto(proto);
-
-    assert(mean_blob.channels() == num_channels);
-
-    vector<cv::Mat> channels;
-    float* data = mean_blob.mutable_cpu_data();
-    for (unsigned int i = 0; i < num_channels; ++i) {
-        channels.emplace_back(mean_blob.height(), mean_blob.width(), CV_32FC1, data);
-        data += mean_blob.height() * mean_blob.width();
-    }
-
-    cv::Mat mean;
-    cv::merge(channels, mean);
-
-    return cv::Mat(input_geometry, mean.type(), cv::mean(mean));
 }
 
 Simulator::~Simulator()

@@ -3,19 +3,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-
-#include <opencv2/core/types.hpp>
-#include <opencv2/core/mat.hpp>
-
-#include "utils.hpp"
 #include "LayerData.hpp"
-
-// Forward declare caffe::net so we don't have to include it here.
-namespace caffe
-{
-    template<class DType>
-    class Net;
-}
 
 namespace fmri {
     using std::string;
@@ -29,13 +17,7 @@ namespace fmri {
         vector<LayerData> simulate(const string &input_file);
 
     private:
-        std::unique_ptr<caffe::Net<DType>> net;
-        cv::Size input_geometry;
-        cv::Mat means;
-        unsigned int num_channels;
-
-        vector<cv::Mat> getWrappedInputLayer();
-        cv::Mat preprocess(cv::Mat original) const;
-        cv::Mat processMeans(const string &means_file) const;
+		struct Impl;
+		std::unique_ptr<Impl> pImpl;
     };
 }

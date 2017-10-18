@@ -6,18 +6,19 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Define executable and dependencies
 file(GLOB fmri_SRC
 	"src/*.cpp"
+	"src/*.hpp"
 )
+
+add_executable(fmri ${fmri_SRC})
 
 # Build without GPU support for quicker development
 add_definitions(-DCPU_ONLY)
 
 
-# Locate libraries
-
-add_executable(fmri ${fmri_SRC})
-
+# Library dependencies
 # Require OpenCV
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -38,7 +39,12 @@ find_package(Glog REQUIRED)
 include_directories(${GLOG_INCLUDE_DIRS})
 target_link_libraries(fmri ${GLOG_LIBRARIES})
 
-# Require png++
+# Require png++ (dumping to file)
 find_package(png++ REQUIRED)
 include_directories(${png++_INCLUDE_DIRS})
 target_link_libraries(fmri ${png++_LIBRARIES})
+
+# Require GLUT (visualisation)
+find_package(GLUT REQUIRED)
+include_directories(${GLUT_INCLUDE_DIRS})
+target_link_libraries(fmri ${GLUT_LIBRARIES})
