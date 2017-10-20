@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <map>
-#include <tuple>
 
 #include "LayerData.hpp"
 #include "Options.hpp"
@@ -14,27 +13,36 @@
 using namespace std;
 using namespace fmri;
 
-struct {
+struct
+{
     optional<vector<string>> labels;
     vector<vector<LayerData>> data;
     float angle = 0;
     map<tuple<string, int, int>, GLuint> textureMap;
+
+    struct
+    {
+        float pitch = 0;
+        float yaw = 0;
+
+        float x = 0, y = 0, z = 0;
+    } camera;
 } rendererData;
 
-static vector<vector<LayerData>> getSimulationData(const Options& options)
+static vector<vector<LayerData>> getSimulationData(const Options &options)
 {
     vector<vector<LayerData>> results;
     auto dumper = options.imageDumper();
     Simulator simulator(options.model(), options.weights(), options.means());
 
-    for (const auto& image : options.inputs()) {
+    for (const auto &image : options.inputs()) {
         results.emplace_back(simulator.simulate(image));
     }
 
     CHECK_GT(results.size(), 0) << "Should have some results" << endl;
 
     if (dumper) {
-        for (auto& layer : *results.begin()) {
+        for (auto &layer : *results.begin()) {
             dumper->dump(layer);
         }
     }
@@ -51,19 +59,19 @@ static void render()
     // Reset transformations
     glLoadIdentity();
     // Set the camera
-    gluLookAt(	0.0f, 0.0f, 10.0f,
-                  0.0f, 0.0f,  0.0f,
-                  0.0f, 1.0f,  0.0f);
+    gluLookAt(rendererData.camera.x, rendererData.camera.y, rendererData.camera.z - 10,
+              rendererData.camera.x, rendererData.camera.y, rendererData.camera.z,
+              0.0f, 1.0f, 0.0f);
 
     glRotatef(rendererData.angle, 0.0f, 1.0f, 0.0f);
 
     glBegin(GL_TRIANGLES);
-    glVertex3f(-2.0f,-2.0f, 0.0f);
-    glVertex3f( 2.0f, 0.0f, 0.0);
-    glVertex3f( 0.0f, 2.0f, 0.0);
+    glVertex3f(-2.0f, -2.0f, 0.0f);
+    glVertex3f(2.0f, 0.0f, 0.0);
+    glVertex3f(0.0f, 2.0f, 0.0);
     glEnd();
 
-    rendererData.angle+=0.1f;
+    rendererData.angle += 0.1f;
 
     glutSwapBuffers();
 }
@@ -71,15 +79,15 @@ static void render()
 static void reloadTextures(unsigned dataIndex)
 {
     // First, release any existing textures
-    for (auto& entry : rendererData.textureMap) {
+    for (auto &entry : rendererData.textureMap) {
         glDeleteTextures(0, &entry.second);
     }
 
     rendererData.textureMap.clear();
 
-    const auto& dataSet = rendererData.data[dataIndex];
+    const auto &dataSet = rendererData.data[dataIndex];
 
-    for (auto& layer : dataSet) {
+    for (auto &layer : dataSet) {
         auto dimensions = layer.shape();
         if (dimensions.size() != 4) {
             continue;
@@ -100,9 +108,41 @@ static void reloadTextures(unsigned dataIndex)
     }
 }
 
+static void handleKeys(unsigned char key, int, int)
+{
+    constexpr float rotationScaling = 0.2f;
+    constexpr float movementScaling = 0.2f;
+    switch (key) {
+        case 'a':
+            // TODO: handle rotations
+            rendererData.camera.x += movementScaling;
+            break;
+
+        case 'd':
+            rendererData.camera.x -= rotationScaling;
+            break;
+
+        case 'w':
+            rendererData.camera.z += movementScaling;
+            break;
+
+        case 's':
+            rendererData.camera.z -= movementScaling;
+            break;
+
+        case 'q':
+            // Utility quit function.
+            exit(0);
+
+        default:
+            LOG(INFO) << "Received key: " << key << endl;
+            break;
+    }
+}
 
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[])
+{
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
 
@@ -112,13 +152,14 @@ int main(int argc, char * argv[]) {
 
     // Prepare data for simulations
     Options options = Options::parse(argc, argv);
-    rendererData.labels =  options.labels();
+    rendererData.labels = options.labels();
     rendererData.data = getSimulationData(options);
 
     // Register callbacks
     glutDisplayFunc(render);
     glutIdleFunc(render);
     glutReshapeFunc(changeWindowSize);
+    glutKeyboardFunc(handleKeys);
 
     glewInit();
     if (!GLEW_VERSION_2_0) {

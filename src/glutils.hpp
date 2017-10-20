@@ -13,7 +13,7 @@ namespace fmri {
      * @param height
      * @return A texture reference.
      */
-    GLuint loadTexture(DType const * data, unsigned int width, unsigned int height);
+    GLuint loadTexture(DType const * data, int width, int height);
 
     /**
      *

@@ -30,7 +30,7 @@ static void show_info_log(
     LOG(INFO) << log.get() << endl;
 }
 
-GLuint fmri::loadTexture(DType const *data, unsigned int width, unsigned int height)
+GLuint fmri::loadTexture(DType const *data, int width, int height)
 {
     // Load and scale texture
     vector<DType> textureBuffer(data, data + (width * height));
