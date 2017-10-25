@@ -4,12 +4,12 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <map>
-#include <cmath>
 
 #include "LayerData.hpp"
 #include "Options.hpp"
 #include "Simulator.hpp"
 #include "glutils.hpp"
+#include "camera.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -20,14 +20,6 @@ struct
     vector<vector<LayerData>> data;
     float angle = 0;
     map<tuple<string, int, int>, GLuint> textureMap;
-
-    struct
-    {
-        float pitch = 0;
-        float yaw = 0;
-
-        float x = 0, y = 0, z = -10;
-    } camera;
 } rendererData;
 
 static vector<vector<LayerData>> getSimulationData(const Options &options)
@@ -49,14 +41,6 @@ static vector<vector<LayerData>> getSimulationData(const Options &options)
     }
 
     return results;
-}
-
-static void configureCamera()
-{
-    glLoadIdentity();
-    glRotatef(rendererData.camera.yaw, 0, 1, 0);
-    glRotatef(rendererData.camera.pitch, 1, 0, 0);
-    glTranslatef(rendererData.camera.x, rendererData.camera.y, rendererData.camera.z);
 }
 
 static void render()
@@ -111,48 +95,6 @@ static void reloadTextures(unsigned dataIndex)
     }
 }
 
-static void handleKeys(unsigned char key, int, int)
-{
-    constexpr float rotationScaling = 0.2f;
-    constexpr float movementScaling = 0.2f;
-    switch (key) {
-        case 'a':
-            // TODO: handle rotations
-            rendererData.camera.x += movementScaling;
-            break;
-
-        case 'd':
-            rendererData.camera.x -= rotationScaling;
-            break;
-
-        case 'w':
-            rendererData.camera.z += movementScaling;
-            break;
-
-        case 's':
-            rendererData.camera.z -= movementScaling;
-            break;
-
-        case 'q':
-            // Utility quit function.
-            exit(0);
-
-        default:
-            LOG(INFO) << "Received key: " << key << endl;
-            break;
-    }
-}
-
-static void handleMouseMove(int x, int y)
-{
-    const float width = glutGet(GLUT_WINDOW_WIDTH) / 2;
-    const float height = glutGet(GLUT_WINDOW_HEIGHT) / 2;
-
-    rendererData.camera.yaw = (x - width) / width * 180;
-    rendererData.camera.pitch = (y - height) / height * 90;
-}
-
-
 int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
@@ -171,8 +113,7 @@ int main(int argc, char *argv[])
     glutDisplayFunc(render);
     glutIdleFunc(render);
     glutReshapeFunc(changeWindowSize);
-    glutKeyboardFunc(handleKeys);
-    glutPassiveMotionFunc(handleMouseMove);
+    registerCameraControls();
 
     glewInit();
     if (!GLEW_VERSION_2_0) {
