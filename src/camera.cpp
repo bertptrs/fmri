@@ -1,11 +1,15 @@
 #include <GL/glut.h>
+#include <cmath>
+#include <iostream>
 #include "camera.hpp"
+#include "utils.hpp"
+
+using namespace fmri;
+using namespace std;
 
 static float yaw, pitch;
 
-static struct {
-    float x, y, z;
-} camera;
+static float pos[3];
 
 static void handleMouseMove(int x, int y)
 {
@@ -16,26 +20,38 @@ static void handleMouseMove(int x, int y)
     pitch = (y - height) / height * 90;
 }
 
+static void move(unsigned char key)
+{
+    float speed = 0.2;
+    float dir[3];
+    if (key == 'w' || key == 's') {
+        dir[0] = -sin(deg2rad(yaw)) * cos(deg2rad(pitch));
+        dir[1] = -sin(deg2rad(pitch));
+        dir[2] = -cos(deg2rad(yaw)) * cos(deg2rad(pitch));
+    } else {
+        dir[0] = -cos(deg2rad(yaw));
+        dir[1] = 0;
+        dir[2] = sin(deg2rad(yaw));
+    }
+
+    if (key == 's' || key == 'd') {
+        speed *= -1;
+    }
+
+    for (unsigned int i = 0; i < 3; ++i) {
+        cout << i << " " << dir[i] << " " << deg2rad(pitch) << " " << deg2rad(yaw) << endl;
+        pos[i] += speed * dir[i];
+    }
+}
+
 static void handleKeys(unsigned char key, int, int)
 {
-    constexpr float rotationScaling = 0.2f;
-    constexpr float movementScaling = 0.2f;
     switch (key) {
-        case 'a':
-            // TODO: handle rotations
-            camera.x += movementScaling;
-            break;
-
-        case 'd':
-            camera.x -= rotationScaling;
-            break;
-
         case 'w':
-            camera.z += movementScaling;
-            break;
-
+        case 'a':
         case 's':
-            camera.z -= movementScaling;
+        case 'd':
+            move(key);
             break;
 
         case 'q':
@@ -57,12 +73,12 @@ void fmri::registerCameraControls()
 
 void fmri::resetCamera()
 {
-    camera.x = 0;
-    camera.y = 0;
-    camera.z = -10;
-
     pitch = 0;
     yaw = 0;
+
+    pos[0] = 0;
+    pos[1] = 0;
+    pos[2] = 10;
 }
 
 void fmri::configureCamera()
@@ -70,5 +86,5 @@ void fmri::configureCamera()
     glLoadIdentity();
     glRotatef(yaw, 0, 1, 0);
     glRotatef(pitch, 1, 0, 0);
-    glTranslatef(camera.x, camera.y, camera.z);
+    glTranslatef(-pos[0], -pos[1], -pos[2]);
 }

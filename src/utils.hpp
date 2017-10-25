@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -119,6 +120,11 @@ namespace fmri
                 v = std::clamp((v - minVal) * scaling + minimum, minimum, maximum);
             });
         }
+    }
+
+    template<class T>
+    constexpr inline T deg2rad(T val) {
+        return val / 180 * M_PI;
     }
 
 }
