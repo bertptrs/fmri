@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <map>
+#include <cmath>
 
 #include "LayerData.hpp"
 #include "Options.hpp"
@@ -25,7 +26,7 @@ struct
         float pitch = 0;
         float yaw = 0;
 
-        float x = 0, y = 0, z = 0;
+        float x = 0, y = 0, z = -10;
     } camera;
 } rendererData;
 
@@ -50,18 +51,20 @@ static vector<vector<LayerData>> getSimulationData(const Options &options)
     return results;
 }
 
+static void configureCamera()
+{
+    glLoadIdentity();
+    glRotatef(rendererData.camera.yaw, 0, 1, 0);
+    glRotatef(rendererData.camera.pitch, 1, 0, 0);
+    glTranslatef(rendererData.camera.x, rendererData.camera.y, rendererData.camera.z);
+}
+
 static void render()
 {
-
     // Clear Color and Depth Buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Reset transformations
-    glLoadIdentity();
-    // Set the camera
-    gluLookAt(rendererData.camera.x, rendererData.camera.y, rendererData.camera.z - 10,
-              rendererData.camera.x, rendererData.camera.y, rendererData.camera.z,
-              0.0f, 1.0f, 0.0f);
+    configureCamera();
 
     glRotatef(rendererData.angle, 0.0f, 1.0f, 0.0f);
 
@@ -140,6 +143,15 @@ static void handleKeys(unsigned char key, int, int)
     }
 }
 
+static void handleMouseMove(int x, int y)
+{
+    const float width = glutGet(GLUT_WINDOW_WIDTH) / 2;
+    const float height = glutGet(GLUT_WINDOW_HEIGHT) / 2;
+
+    rendererData.camera.yaw = (x - width) / width * 180;
+    rendererData.camera.pitch = (y - height) / height * 90;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -160,6 +172,7 @@ int main(int argc, char *argv[])
     glutIdleFunc(render);
     glutReshapeFunc(changeWindowSize);
     glutKeyboardFunc(handleKeys);
+    glutPassiveMotionFunc(handleMouseMove);
 
     glewInit();
     if (!GLEW_VERSION_2_0) {
@@ -168,6 +181,9 @@ int main(int argc, char *argv[])
     }
 
     reloadTextures(0);
+
+    // Enable depth test to fix objects behind you
+    glEnable(GL_DEPTH_TEST);
 
     // Start visualisation
     glutMainLoop();
