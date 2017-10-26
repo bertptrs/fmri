@@ -50,15 +50,11 @@ static void render()
 
     configureCamera();
 
-    glRotatef(rendererData.angle, 0.0f, 1.0f, 0.0f);
-
     glBegin(GL_TRIANGLES);
     glVertex3f(-2.0f, -2.0f, 0.0f);
     glVertex3f(2.0f, 0.0f, 0.0);
     glVertex3f(0.0f, 2.0f, 0.0);
     glEnd();
-
-    rendererData.angle += 0.1f;
 
     glutSwapBuffers();
 }

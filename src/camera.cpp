@@ -1,8 +1,6 @@
 #include <GL/glut.h>
 #include <cmath>
-#include <iostream>
 #include "camera.hpp"
-#include "utils.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -24,14 +22,15 @@ static void move(unsigned char key)
 {
     float speed = 0.2;
     float dir[3];
+    // Currently very buggy
     if (key == 'w' || key == 's') {
-        dir[0] = -sin(deg2rad(yaw)) * cos(deg2rad(pitch));
-        dir[1] = -sin(deg2rad(pitch));
-        dir[2] = -cos(deg2rad(yaw)) * cos(deg2rad(pitch));
-    } else {
-        dir[0] = -cos(deg2rad(yaw));
+        dir[0] = 0;
         dir[1] = 0;
-        dir[2] = sin(deg2rad(yaw));
+        dir[2] = -1;
+    } else {
+        dir[0] = -1;
+        dir[1] = 0;
+        dir[2] = 0;
     }
 
     if (key == 's' || key == 'd') {
@@ -39,7 +38,6 @@ static void move(unsigned char key)
     }
 
     for (unsigned int i = 0; i < 3; ++i) {
-        cout << i << " " << dir[i] << " " << deg2rad(pitch) << " " << deg2rad(yaw) << endl;
         pos[i] += speed * dir[i];
     }
 }
