@@ -48,13 +48,18 @@ static void render()
     // Clear Color and Depth Buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    configureCamera();
+    auto& camera = Camera::instance();
+
+    camera.configureRenderingContext();
 
     glBegin(GL_TRIANGLES);
     glVertex3f(-2.0f, -2.0f, 0.0f);
     glVertex3f(2.0f, 0.0f, 0.0);
     glVertex3f(0.0f, 2.0f, 0.0);
     glEnd();
+
+    // Draw the status line on screen
+    glRasterPos2i(0, 0);
 
     glutSwapBuffers();
 }
@@ -109,7 +114,8 @@ int main(int argc, char *argv[])
     glutDisplayFunc(render);
     glutIdleFunc(render);
     glutReshapeFunc(changeWindowSize);
-    registerCameraControls();
+
+    Camera::instance().registerControls();
 
     glewInit();
     if (!GLEW_VERSION_2_0) {

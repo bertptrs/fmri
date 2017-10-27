@@ -1,21 +1,20 @@
 #include <GL/glut.h>
 #include <cmath>
+#include <sstream>
 #include "camera.hpp"
 
 using namespace fmri;
 using namespace std;
 
-static float yaw, pitch;
-
-static float pos[3];
+static Camera& camera = Camera::instance();
 
 static void handleMouseMove(int x, int y)
 {
     const float width = glutGet(GLUT_WINDOW_WIDTH) / 2;
     const float height = glutGet(GLUT_WINDOW_HEIGHT) / 2;
 
-    yaw = (x - width) / width * 180;
-    pitch = (y - height) / height * 90;
+    camera.angle[0] = (x - width) / width * 180;
+    camera.angle[1] = (y - height) / height * 90;
 }
 
 static void move(unsigned char key)
@@ -38,7 +37,7 @@ static void move(unsigned char key)
     }
 
     for (unsigned int i = 0; i < 3; ++i) {
-        pos[i] += speed * dir[i];
+        camera.pos[i] += speed * dir[i];
     }
 }
 
@@ -62,27 +61,41 @@ static void handleKeys(unsigned char key, int, int)
     }
 }
 
-void fmri::registerCameraControls()
+std::string Camera::infoLine()
 {
-    resetCamera();
-    glutPassiveMotionFunc(handleMouseMove);
-    glutKeyboardFunc(handleKeys);
+    stringstream buffer;
+    buffer << "Pos(x,y,z) = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ")\n";
+    buffer << "Angle(p,y) = (" << angle[0] << ", " << angle[1] << ")\n";
+    return buffer.str();
 }
 
-void fmri::resetCamera()
+void Camera::reset()
 {
-    pitch = 0;
-    yaw = 0;
-
     pos[0] = 0;
     pos[1] = 0;
     pos[2] = 10;
+
+    angle[0] = 0;
+    angle[1] = 0;
 }
 
-void fmri::configureCamera()
+void Camera::configureRenderingContext()
 {
     glLoadIdentity();
-    glRotatef(yaw, 0, 1, 0);
-    glRotatef(pitch, 1, 0, 0);
+    glRotatef(angle[0], 0, 1, 0);
+    glRotatef(angle[1], 1, 0, 0);
     glTranslatef(-pos[0], -pos[1], -pos[2]);
+}
+
+Camera &Camera::instance()
+{
+    static Camera camera;
+    return camera;
+}
+
+void Camera::registerControls()
+{
+    reset();
+    glutPassiveMotionFunc(handleMouseMove);
+    glutKeyboardFunc(handleKeys);
 }

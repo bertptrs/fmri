@@ -1,10 +1,21 @@
 #pragma once
 
+#include <string>
+
 namespace fmri
 {
-    void registerCameraControls();
+    struct Camera {
+        float pos[3];
+        float angle[2];
 
-    void configureCamera();
+        void reset();
+        void configureRenderingContext();
+        void registerControls();
+        std::string infoLine();
 
-    void resetCamera();
+        static Camera& instance();
+
+    private:
+        Camera() = default;
+    };
 }
