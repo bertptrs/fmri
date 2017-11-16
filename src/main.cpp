@@ -57,7 +57,9 @@ static void render()
 
     glPushMatrix();
     for (auto& layer : *rendererData.currentData) {
+        glPushMatrix();
         renderLayer(layer);
+        glPopMatrix();
         glTranslatef(-5, 0, 0);
     }
     glPopMatrix();
@@ -90,10 +92,10 @@ static void renderFlatLayer(const LayerData& data)
     // Color depends on current value.
     vector<float> intensities(data.data(), data.data() + data.numEntries());
     rescale(intensities.begin(), intensities.end(), 0, 1);
-    glColor3f(1, 1, 1);
 
     glPushMatrix();
     for (auto i : intensities) {
+        setColorFromIntensity(i);
         drawOneParticle();
         glTranslatef(0, 0, -2);
     }
@@ -118,6 +120,8 @@ static void renderLayer(const LayerData& data)
     // Draw the name of the layer for reference.
     glColor3f(0.5, 0.5, 0.5);
     renderText(data.name());
+
+    glTranslatef(0, 0, -2);
     switch (shape.size()) {
         case 4:
             // TODO: implement this.

@@ -33,4 +33,11 @@ namespace fmri {
      * @param h new Height.
      */
     void changeWindowSize(int w, int h);
+
+    /**
+     * Set the current drawing color based on some intensity value.
+     *
+     * @param i The intensity.
+     */
+    void setColorFromIntensity(float i);
 }

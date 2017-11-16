@@ -102,3 +102,9 @@ GLuint fmri::compileShader(GLenum type, char const *source)
         abort();
     }
 }
+
+void ::fmri::setColorFromIntensity(float i)
+{
+    // TODO: something more expressive.
+    glColor3f(i, i, i);
+}
