@@ -19,6 +19,7 @@ struct
     optional<vector<string>> labels;
     vector<vector<LayerData>> data;
     float angle = 0;
+    vector<LayerData>* currentData = nullptr;
     map<tuple<string, int, int>, GLuint> textureMap;
 } rendererData;
 
@@ -43,6 +44,8 @@ static vector<vector<LayerData>> getSimulationData(const Options &options)
     return results;
 }
 
+static void renderLayer(const LayerData& data);
+
 static void render()
 {
     // Clear Color and Depth Buffers
@@ -52,16 +55,81 @@ static void render()
 
     camera.configureRenderingContext();
 
-    glBegin(GL_TRIANGLES);
-    glVertex3f(-2.0f, -2.0f, 0.0f);
-    glVertex3f(2.0f, 0.0f, 0.0);
-    glVertex3f(0.0f, 2.0f, 0.0);
-    glEnd();
-
-    // Draw the status line on screen
-    glRasterPos2i(0, 0);
+    glPushMatrix();
+    for (auto& layer : *rendererData.currentData) {
+        renderLayer(layer);
+        glTranslatef(-5, 0, 0);
+    }
+    glPopMatrix();
 
     glutSwapBuffers();
+}
+
+static void drawOneParticle()
+{
+    // Code taken from CG workshop 1. Should probably replace with something nicer.
+    glBegin(GL_TRIANGLE_STRIP);
+    // triangle 1
+    glVertex3f(-0.5, 0.0, 0.5); // A
+    glVertex3f(0.0, 0.0, -0.5); // B
+    glVertex3f(0.0, 1.0, 0.0); // top
+    // triangle 2
+    glVertex3f(0.5, 0.0, 0.5); // C
+    // triangle 3
+    glVertex3f(-0.5, 0.0, 0.5); // A again
+    // triangle 4 (bottom)
+    glVertex3f(0.0, 0.0, -0.5); // B again
+    glEnd();
+}
+
+static void renderFlatLayer(const LayerData& data)
+{
+    auto& shape = data.shape();
+    CHECK_EQ(shape[0], 1) << "Should have only one instance per layer." << endl;
+    // Draw one triangle for every point in the layer
+    // Color depends on current value.
+    vector<float> intensities(data.data(), data.data() + data.numEntries());
+    rescale(intensities.begin(), intensities.end(), 0, 1);
+    glColor3f(1, 1, 1);
+
+    glPushMatrix();
+    for (auto i : intensities) {
+        drawOneParticle();
+        glTranslatef(0, 0, -2);
+    }
+
+    glPopMatrix();
+
+
+}
+
+static void renderText(string_view text)
+{
+    constexpr auto font = GLUT_BITMAP_HELVETICA_10;
+    glRasterPos2i(0, 0);
+    for (char c : text) {
+        glutBitmapCharacter(font, c);
+    }
+}
+
+static void renderLayer(const LayerData& data)
+{
+    auto& shape = data.shape();
+    // Draw the name of the layer for reference.
+    glColor3f(0.5, 0.5, 0.5);
+    renderText(data.name());
+    switch (shape.size()) {
+        case 4:
+            // TODO: implement this.
+            return;
+
+        case 2:
+            renderFlatLayer(data);
+            return;
+
+        default:
+            cerr << "What is this even: " << data << endl;
+    }
 }
 
 static void reloadTextures(unsigned dataIndex)
@@ -72,10 +140,9 @@ static void reloadTextures(unsigned dataIndex)
     }
 
     rendererData.textureMap.clear();
+    rendererData.currentData = &rendererData.data[dataIndex];
 
-    const auto &dataSet = rendererData.data[dataIndex];
-
-    for (auto &layer : dataSet) {
+    for (auto &layer : *rendererData.currentData) {
         auto dimensions = layer.shape();
         if (dimensions.size() != 4) {
             continue;

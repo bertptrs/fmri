@@ -73,7 +73,7 @@ void Camera::reset()
 {
     pos[0] = 0;
     pos[1] = 0;
-    pos[2] = 10;
+    pos[2] = 3;
 
     angle[0] = 0;
     angle[1] = 0;
