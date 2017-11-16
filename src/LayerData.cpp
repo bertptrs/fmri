@@ -63,3 +63,23 @@ LayerData::Type LayerData::typeFromString(string_view typeName)
 		return Type::Other;
 	}
 }
+
+ostream& operator<< (ostream& o, const LayerData& layer)
+{
+    o << layer.name() << '(';
+    bool first = true;
+
+    for (auto d : layer.shape()) {
+        if (!first) {
+            o << ", ";
+        } else {
+            first = false;
+        }
+
+        o << d;
+    }
+
+    o << ')';
+
+    return o;
+}
