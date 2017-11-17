@@ -55,6 +55,10 @@ static void handleKeys(unsigned char key, int, int)
             // Utility quit function.
             exit(0);
 
+        case 'h':
+            camera.reset();
+            break;
+
         default:
             // Do nothing.
             break;

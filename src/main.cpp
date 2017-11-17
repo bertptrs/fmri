@@ -56,6 +56,7 @@ static void render()
     camera.configureRenderingContext();
 
     glPushMatrix();
+    glTranslatef(5 * rendererData.currentData->size(), 0, 0);
     for (auto& layer : *rendererData.currentData) {
         glPushMatrix();
         renderLayer(layer);
@@ -128,7 +129,7 @@ static void renderLayer(const LayerData& data)
     glColor3f(0.5, 0.5, 0.5);
     renderText(data.name());
 
-    glTranslatef(0, 0, -2);
+    glTranslatef(0, 0, -10);
     switch (shape.size()) {
         case 4:
             // TODO: implement this.
