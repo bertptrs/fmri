@@ -91,11 +91,16 @@ static void renderFlatLayer(const LayerData& data)
     // Draw one triangle for every point in the layer
     // Color depends on current value.
     vector<float> intensities(data.data(), data.data() + data.numEntries());
-    rescale(intensities.begin(), intensities.end(), 0, 1);
+    transform(intensities.begin(), intensities.end(), intensities.begin(), [](auto x) { return clamp(x, -1.0f, 1.0f);});
 
     glPushMatrix();
     for (auto i : intensities) {
-        setColorFromIntensity(i);
+        auto intensity = min(-log(abs(i)) / 20.0f, 1.0f);
+        if (i > 0) {
+            glColor3f(intensity, intensity, 1);
+        } else {
+            glColor3f(1, intensity, intensity);
+        }
         drawOneParticle();
         glTranslatef(0, 0, -2);
     }
