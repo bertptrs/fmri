@@ -82,8 +82,8 @@ void Camera::reset()
 void Camera::configureRenderingContext()
 {
     glLoadIdentity();
-    glRotatef(angle[0], 0, 1, 0);
     glRotatef(angle[1], 1, 0, 0);
+    glRotatef(angle[0], 0, 1, 0);
     glTranslatef(-pos[0], -pos[1], -pos[2]);
 }
 
