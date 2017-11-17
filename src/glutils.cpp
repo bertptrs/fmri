@@ -79,7 +79,7 @@ void fmri::changeWindowSize(int w, int h)
     glViewport(0, 0, w, h);
 
     // Set the correct perspective.
-    gluPerspective(45.0f, ratio, 0.1f, 100.0f);
+    gluPerspective(45.0f, ratio, 0.1f, 10000.0f);
 
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);

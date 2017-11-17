@@ -60,7 +60,7 @@ static void render()
         glPushMatrix();
         renderLayer(layer);
         glPopMatrix();
-        glTranslatef(-5, 0, 0);
+        glTranslatef(-10, 0, 0);
     }
     glPopMatrix();
 
