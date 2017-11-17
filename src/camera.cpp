@@ -19,7 +19,7 @@ static void handleMouseMove(int x, int y)
 
 static void move(unsigned char key)
 {
-    float speed = 0.2;
+    float speed = 0.5;
     float dir[3];
     // Currently very buggy
     if (key == 'w' || key == 's') {

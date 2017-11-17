@@ -86,16 +86,18 @@ static void drawOneParticle()
 
 static void renderFlatLayer(const LayerData& data)
 {
+    const auto [minElem,maxElem] = minmax_element(data.data(), data.data() + data.numEntries());
+    const float intensityLimit = max(abs(*minElem), abs(*maxElem));
     auto& shape = data.shape();
     CHECK_EQ(shape[0], 1) << "Should have only one instance per layer." << endl;
     // Draw one triangle for every point in the layer
     // Color depends on current value.
     vector<float> intensities(data.data(), data.data() + data.numEntries());
-    transform(intensities.begin(), intensities.end(), intensities.begin(), [](auto x) { return clamp(x, -1.0f, 1.0f);});
+    transform(intensities.begin(), intensities.end(), intensities.begin(), [=](auto x) { return clamp(x, -intensityLimit, intensityLimit);});
 
     glPushMatrix();
     for (auto i : intensities) {
-        auto intensity = min(-log(abs(i)) / 20.0f, 1.0f);
+        auto intensity = min(-log(abs(i) / intensityLimit) / 10.0f, 1.0f);
         if (i > 0) {
             glColor3f(intensity, intensity, 1);
         } else {
