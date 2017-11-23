@@ -86,7 +86,7 @@ void FlatLayerVisualisation::render()
 
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
     glColorPointer(3, GL_FLOAT, 0, colorBuffer.data());
-    glDrawElements(GL_TRIANGLES, faceCount, GL_UNSIGNED_INT, indexBuffer.data());
+    glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_INT, indexBuffer.data());
 
     glDisable(GL_VERTEX_ARRAY);
     glDisable(GL_COLOR_ARRAY);
