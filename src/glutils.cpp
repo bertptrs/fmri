@@ -111,3 +111,17 @@ void fmri::renderText(std::string_view text)
         glutBitmapCharacter(font, c);
     }
 }
+
+void fmri::checkGLErrors()
+{
+    while (auto error = glGetError()) {
+        switch (glGetError()) {
+            case GL_NO_ERROR:
+                // Should not get here, but whatever.
+                return;
+
+            default:
+                cerr << "OpenGL error: " << (const char*) glewGetErrorString(error) << endl;
+        }
+    }
+}

@@ -41,4 +41,9 @@ namespace fmri {
      * @param text The text to draw.
      */
     void renderText(std::string_view text);
+
+    /**
+     * Check if there are OpenGL errors and report them.
+     */
+    void checkGLErrors();
 }

@@ -110,6 +110,11 @@ static void updateVisualisers(unsigned int dataset)
     }
 }
 
+static void idleFunc()
+{
+    checkGLErrors();
+}
+
 int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
@@ -126,7 +131,7 @@ int main(int argc, char *argv[])
 
     // Register callbacks
     glutDisplayFunc(render);
-    glutIdleFunc(glutPostRedisplay);
+    glutIdleFunc(idleFunc);
     glutReshapeFunc(changeWindowSize);
 
     Camera::instance().registerControls();
