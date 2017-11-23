@@ -34,9 +34,9 @@ static void move(unsigned char key)
         dir[1] = -sin(pitch);
         dir[2] = -cos(yaw) * cos(pitch);
     } else {
-        dir[0] = -cos(yaw) * cos(pitch);
-        dir[1] = -sin(pitch);
-        dir[2] = sin(yaw) * cos(pitch);
+        dir[0] = -cos(yaw);
+        dir[1] = 0;
+        dir[2] = -sin(yaw);
     }
 
     if (key == 's' || key == 'd') {
