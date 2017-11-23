@@ -29,8 +29,6 @@ static void move(unsigned char key)
     const auto yaw = deg2rad(camera.angle[0]);
     const auto pitch = deg2rad(camera.angle[1]);
 
-    cerr << camera.infoLine() << endl;
-
     if (key == 'w' || key == 's') {
         dir[0] = sin(yaw) * cos(pitch);
         dir[1] = -sin(pitch);
