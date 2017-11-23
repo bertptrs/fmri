@@ -15,6 +15,8 @@ static void handleMouseMove(int x, int y)
 
     camera.angle[0] = (x - width) / width * 180;
     camera.angle[1] = (y - height) / height * 90;
+
+    glutPostRedisplay();
 }
 
 static void move(unsigned char key)
@@ -63,6 +65,8 @@ static void handleKeys(unsigned char key, int, int)
             // Do nothing.
             break;
     }
+
+    glutPostRedisplay();
 }
 
 std::string Camera::infoLine()

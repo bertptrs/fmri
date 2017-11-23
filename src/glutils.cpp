@@ -103,8 +103,11 @@ GLuint fmri::compileShader(GLenum type, char const *source)
     }
 }
 
-void ::fmri::setColorFromIntensity(float i)
+void fmri::renderText(std::string_view text)
 {
-    // TODO: something more expressive.
-    glColor3f(i, i, i);
+    constexpr auto font = GLUT_BITMAP_HELVETICA_10;
+    glRasterPos2i(0, 0);
+    for (char c : text) {
+        glutBitmapCharacter(font, c);
+    }
 }

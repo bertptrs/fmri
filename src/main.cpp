@@ -10,6 +10,9 @@
 #include "Simulator.hpp"
 #include "glutils.hpp"
 #include "camera.hpp"
+#include "LayerVisualisation.hpp"
+#include "FlatLayerVisualisation.hpp"
+#include "MultiImageVisualisation.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -21,6 +24,7 @@ struct
     float angle = 0;
     vector<LayerData>* currentData = nullptr;
     map<tuple<string, int, int>, GLuint> textureMap;
+    vector<unique_ptr<LayerVisualisation>> layerVisualisations;
 } rendererData;
 
 static vector<vector<LayerData>> getSimulationData(const Options &options)
@@ -44,7 +48,7 @@ static vector<vector<LayerData>> getSimulationData(const Options &options)
     return results;
 }
 
-static void renderLayer(const LayerData& data);
+static void renderLayerName(const LayerData &data);
 
 static void render()
 {
@@ -55,11 +59,16 @@ static void render()
 
     camera.configureRenderingContext();
 
+    const auto& dataSet = *rendererData.currentData;
+
     glPushMatrix();
-    glTranslatef(5 * rendererData.currentData->size(), 0, 0);
-    for (auto& layer : *rendererData.currentData) {
+    glTranslatef(5 * dataSet.size(), 0, 0);
+
+    for (unsigned int i = 0; i < dataSet.size(); ++i) {
         glPushMatrix();
-        renderLayer(layer);
+        renderLayerName(dataSet[i]);
+        rendererData.layerVisualisations[i]->render();
+
         glPopMatrix();
         glTranslatef(-10, 0, 0);
     }
@@ -68,110 +77,36 @@ static void render()
     glutSwapBuffers();
 }
 
-static void drawOneParticle()
+static void renderLayerName(const LayerData &data)
 {
-    // Code taken from CG workshop 1. Should probably replace with something nicer.
-    glBegin(GL_TRIANGLE_STRIP);
-    // triangle 1
-    glVertex3f(-0.5, 0.0, 0.5); // A
-    glVertex3f(0.0, 0.0, -0.5); // B
-    glVertex3f(0.0, 1.0, 0.0); // top
-    // triangle 2
-    glVertex3f(0.5, 0.0, 0.5); // C
-    // triangle 3
-    glVertex3f(-0.5, 0.0, 0.5); // A again
-    // triangle 4 (bottom)
-    glVertex3f(0.0, 0.0, -0.5); // B again
-    glEnd();
-}
-
-static void renderFlatLayer(const LayerData& data)
-{
-    const auto [minElem,maxElem] = minmax_element(data.data(), data.data() + data.numEntries());
-    const float intensityLimit = max(abs(*minElem), abs(*maxElem));
-    auto& shape = data.shape();
-    CHECK_EQ(shape[0], 1) << "Should have only one instance per layer." << endl;
-    // Draw one triangle for every point in the layer
-    // Color depends on current value.
-    vector<float> intensities(data.data(), data.data() + data.numEntries());
-    transform(intensities.begin(), intensities.end(), intensities.begin(), [=](auto x) { return clamp(x, -intensityLimit, intensityLimit);});
-
-    glPushMatrix();
-    for (auto i : intensities) {
-        auto intensity = min(-log(abs(i) / intensityLimit) / 10.0f, 1.0f);
-        if (i > 0) {
-            glColor3f(intensity, intensity, 1);
-        } else {
-            glColor3f(1, intensity, intensity);
-        }
-        drawOneParticle();
-        glTranslatef(0, 0, -2);
-    }
-
-    glPopMatrix();
-
-
-}
-
-static void renderText(string_view text)
-{
-    constexpr auto font = GLUT_BITMAP_HELVETICA_10;
-    glRasterPos2i(0, 0);
-    for (char c : text) {
-        glutBitmapCharacter(font, c);
-    }
-}
-
-static void renderLayer(const LayerData& data)
-{
-    auto& shape = data.shape();
     // Draw the name of the layer for reference.
     glColor3f(0.5, 0.5, 0.5);
     renderText(data.name());
 
     glTranslatef(0, 0, -10);
-    switch (shape.size()) {
-        case 4:
-            // TODO: implement this.
-            return;
-
-        case 2:
-            renderFlatLayer(data);
-            return;
-
-        default:
-            cerr << "What is this even: " << data << endl;
-    }
 }
 
-static void reloadTextures(unsigned dataIndex)
+static void updateVisualisers(unsigned int dataset)
 {
-    // First, release any existing textures
-    for (auto &entry : rendererData.textureMap) {
-        glDeleteTextures(0, &entry.second);
-    }
+    rendererData.layerVisualisations.clear();
 
-    rendererData.textureMap.clear();
-    rendererData.currentData = &rendererData.data[dataIndex];
-
+    rendererData.currentData = &rendererData.data[dataset];
     for (auto &layer : *rendererData.currentData) {
-        auto dimensions = layer.shape();
-        if (dimensions.size() != 4) {
-            continue;
+        LayerVisualisation* visualisation = nullptr;
+        switch (layer.shape().size()) {
+            case 2:
+                visualisation = new FlatLayerVisualisation(layer);
+                break;
+
+            case 4:
+                visualisation = new MultiImageVisualisation(layer);
+                break;
+
+            default:
+                abort();
         }
 
-        const auto images = dimensions[0],
-                channels = dimensions[1],
-                width = dimensions[2],
-                height = dimensions[3];
-
-        auto dataPtr = layer.data();
-        for (auto i = 0; i < images; ++i) {
-            for (auto j = 0; j < channels; ++j) {
-                rendererData.textureMap[make_tuple(layer.name(), i, j)] = loadTexture(dataPtr, width, height);
-                dataPtr += width * height;
-            }
-        }
+        rendererData.layerVisualisations.emplace_back(visualisation);
     }
 }
 
@@ -191,7 +126,7 @@ int main(int argc, char *argv[])
 
     // Register callbacks
     glutDisplayFunc(render);
-    glutIdleFunc(render);
+    glutIdleFunc(glutPostRedisplay);
     glutReshapeFunc(changeWindowSize);
 
     Camera::instance().registerControls();
@@ -202,7 +137,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    reloadTextures(0);
+    updateVisualisers(0);
 
     // Enable depth test to fix objects behind you
     glEnable(GL_DEPTH_TEST);

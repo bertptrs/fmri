@@ -3,6 +3,7 @@
 #include "LayerData.hpp"
 #include "utils.hpp"
 #include <GL/glut.h>
+#include <string_view>
 
 namespace fmri {
     /**
@@ -35,9 +36,9 @@ namespace fmri {
     void changeWindowSize(int w, int h);
 
     /**
-     * Set the current drawing color based on some intensity value.
+     * Draw a bitmap string at the current location.
      *
-     * @param i The intensity.
+     * @param text The text to draw.
      */
-    void setColorFromIntensity(float i);
+    void renderText(std::string_view text);
 }
