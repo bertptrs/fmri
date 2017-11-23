@@ -22,15 +22,15 @@ static inline void computeColor(float intensity, float limit, float* destination
 
 FlatLayerVisualisation::FlatLayerVisualisation(const fmri::LayerData &layer) :
         faceCount(layer.numEntries() * 4),
-        vertexBuffer(faceCount * 3),
-        colorBuffer(faceCount * 3),
-        indexBuffer(faceCount * 3)
+        vertexBuffer(new float[faceCount * 3]),
+        colorBuffer(new float[faceCount * 3]),
+        indexBuffer(new int[faceCount * 3])
 {
     auto& shape = layer.shape();
     CHECK_EQ(shape.size(), 2) << "layer should be flat!" << endl;
     CHECK_EQ(shape[0], 1) << "Only single images supported." << endl;
 
-    const int limit = static_cast<const int>(layer.numEntries());
+    const auto limit = (int) layer.numEntries();
     auto data = layer.data();
     const auto [minElem, maxElem] = minmax_element(data, data + limit);
 
@@ -84,9 +84,9 @@ void FlatLayerVisualisation::render()
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
 
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
-    glColorPointer(3, GL_FLOAT, 0, colorBuffer.data());
-    glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_INT, indexBuffer.data());
+    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
+    glColorPointer(3, GL_FLOAT, 0, colorBuffer.get());
+    glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_INT, indexBuffer.get());
 
     glDisable(GL_VERTEX_ARRAY);
     glDisable(GL_COLOR_ARRAY);

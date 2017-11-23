@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <memory>
 
 #include "LayerData.hpp"
 #include "LayerVisualisation.hpp"
@@ -16,8 +16,8 @@ namespace fmri
 
     private:
         std::size_t faceCount;
-        std::vector<float> vertexBuffer;
-        std::vector<float> colorBuffer;
-        std::vector<int> indexBuffer;
+        std::unique_ptr<float[]> vertexBuffer;
+        std::unique_ptr<float[]> colorBuffer;
+        std::unique_ptr<int[]> indexBuffer;
     };
 }
