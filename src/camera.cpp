@@ -1,7 +1,9 @@
 #include <GL/glut.h>
 #include <cmath>
 #include <sstream>
+#include <iostream>
 #include "camera.hpp"
+#include "utils.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -23,15 +25,20 @@ static void move(unsigned char key)
 {
     float speed = 0.5;
     float dir[3];
-    // Currently very buggy
+
+    const auto yaw = deg2rad(camera.angle[0]);
+    const auto pitch = deg2rad(camera.angle[1]);
+
+    cerr << camera.infoLine() << endl;
+    
     if (key == 'w' || key == 's') {
-        dir[0] = 0;
-        dir[1] = 0;
-        dir[2] = -1;
+        dir[0] = sin(yaw) * cos(pitch);
+        dir[1] = -sin(pitch);
+        dir[2] = -cos(yaw) * cos(pitch);
     } else {
-        dir[0] = -1;
-        dir[1] = 0;
-        dir[2] = 0;
+        dir[0] = -cos(yaw) * cos(pitch);
+        dir[1] = -sin(pitch);
+        dir[2] = sin(yaw) * cos(pitch);
     }
 
     if (key == 's' || key == 'd') {
