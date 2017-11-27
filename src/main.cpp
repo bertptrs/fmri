@@ -21,9 +21,7 @@ struct
 {
     optional<vector<string>> labels;
     vector<vector<LayerData>> data;
-    float angle = 0;
-    vector<LayerData>* currentData = nullptr;
-    map<tuple<string, int, int>, GLuint> textureMap;
+    vector<vector<LayerData>>::iterator currentData;
     vector<unique_ptr<LayerVisualisation>> layerVisualisations;
 } rendererData;
 
@@ -86,11 +84,10 @@ static void renderLayerName(const LayerData &data)
     glTranslatef(0, 0, -10);
 }
 
-static void updateVisualisers(unsigned int dataset)
+static void updateVisualisers()
 {
     rendererData.layerVisualisations.clear();
 
-    rendererData.currentData = &rendererData.data[dataset];
     for (auto &layer : *rendererData.currentData) {
         LayerVisualisation* visualisation = nullptr;
         switch (layer.shape().size()) {
@@ -107,6 +104,32 @@ static void updateVisualisers(unsigned int dataset)
         }
 
         rendererData.layerVisualisations.emplace_back(visualisation);
+    }
+
+    glutPostRedisplay();
+}
+
+static void specialKeyFunc(int key, int, int)
+{
+    switch (key) {
+        case GLUT_KEY_LEFT:
+            if (rendererData.currentData == rendererData.data.begin()) {
+                rendererData.currentData = rendererData.data.end();
+            }
+            --rendererData.currentData;
+            updateVisualisers();
+            break;
+
+        case GLUT_KEY_RIGHT:
+            ++rendererData.currentData;
+            if (rendererData.currentData == rendererData.data.end()) {
+                rendererData.currentData = rendererData.data.begin();
+            }
+            updateVisualisers();
+            break;
+
+        default:
+            LOG(INFO) << "Received keystroke " << key;
     }
 }
 
@@ -133,6 +156,7 @@ int main(int argc, char *argv[])
     glutDisplayFunc(render);
     glutIdleFunc(idleFunc);
     glutReshapeFunc(changeWindowSize);
+    glutSpecialFunc(specialKeyFunc);
 
     Camera::instance().registerControls();
 
@@ -142,7 +166,8 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    updateVisualisers(0);
+    rendererData.currentData = rendererData.data.begin();
+    updateVisualisers();
 
     // Enable depth test to fix objects behind you
     glEnable(GL_DEPTH_TEST);
