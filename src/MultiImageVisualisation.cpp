@@ -17,24 +17,20 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
     CHECK_EQ(1, images) << "Only single input image is supported" << endl;
 
-    vertexBuffer = std::make_unique<float[]>(channels * 12);
-
-    auto dataPtr = layer.data();
-    for (auto i = 0; i < images; ++i) {
-        for (auto j = 0; j < channels; ++j) {
-            textureReferences[make_pair(i, j)] = loadTexture(dataPtr, width, height);
-            dataPtr += width * height;
-        }
-    }
-
     int columns = sqrt(channels);
     while (channels % columns) columns++;
-    int rows = channels / columns;
 
     // Create the quads for the images.
     int r = 0, c = 0;
     int v = 0;
+
+    vertexBuffer = std::make_unique<float[]>(channels * 12);
+    textureReferences.resize(channels);
+
+    auto dataPtr = layer.data();
+
     for (int i = 0; i < channels; ++i) {
+        textureReferences[i] = loadTexture(dataPtr, width, height);
         vertexBuffer[v++] = 0;
         vertexBuffer[v++] = 0 + 3 * r;
         vertexBuffer[v++] = 0 - 3 * c;
@@ -55,13 +51,14 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
             c = 0;
             ++r;
         }
+        dataPtr += width * height;
     }
 }
 
 MultiImageVisualisation::~MultiImageVisualisation()
 {
     for (auto entry : textureReferences) {
-        glDeleteTextures(0, &entry.second);
+        glDeleteTextures(0, &entry);
     }
 }
 

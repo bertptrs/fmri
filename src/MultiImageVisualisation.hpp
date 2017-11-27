@@ -17,7 +17,7 @@ namespace fmri
         void render() override;
 
     private:
-        std::map<std::pair<int, int>, GLuint> textureReferences;
+        std::vector<GLuint> textureReferences;
         std::unique_ptr<float[]> vertexBuffer;
     };
 }
