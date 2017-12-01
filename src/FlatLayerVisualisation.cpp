@@ -37,23 +37,9 @@ FlatLayerVisualisation::FlatLayerVisualisation(const fmri::LayerData &layer) :
     auto scalingMax = max(abs(*minElem), abs(*maxElem));
 
     int v = 0;
-    int j = 0;
     for (int i = 0; i < limit; ++i) {
-        const float zOffset = -2 * i;
+        setVertexPositions(i, vertexBuffer.get() + 12 * i);
         const int vertexBase = i * 4;
-        // Create the 4 vertices for the pyramid
-        vertexBuffer[j++] = -0.5f;
-        vertexBuffer[j++] = 0;
-        vertexBuffer[j++] = 0.5f + zOffset;
-        vertexBuffer[j++] = 0;
-        vertexBuffer[j++] = 0;
-        vertexBuffer[j++] = -0.5f + zOffset;
-        vertexBuffer[j++] = 0;
-        vertexBuffer[j++] = 1;
-        vertexBuffer[j++] = 0 + zOffset;
-        vertexBuffer[j++] = 0.5;
-        vertexBuffer[j++] = 0;
-        vertexBuffer[j++] = 0.5 + zOffset;
 
         // Define the colors for the vertices
         for (int c = 0; c < 4; ++c) {
@@ -76,7 +62,6 @@ FlatLayerVisualisation::FlatLayerVisualisation(const fmri::LayerData &layer) :
         indexBuffer[v++] = vertexBase + 3;
     }
     assert(v == faceCount * 3);
-    assert(j == faceCount * 3);
 }
 
 void FlatLayerVisualisation::render()
@@ -90,4 +75,23 @@ void FlatLayerVisualisation::render()
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
+}
+
+void FlatLayerVisualisation::setVertexPositions(int vertexNo, float *destination)
+{
+    int j = 0;
+    const float zOffset = -2 * vertexNo;
+    // Create the 4 vertices for the pyramid
+    destination[j++] = -0.5f;
+    destination[j++] = 0;
+    destination[j++] = 0.5f + zOffset;
+    destination[j++] = 0;
+    destination[j++] = 0;
+    destination[j++] = -0.5f + zOffset;
+    destination[j++] = 0;
+    destination[j++] = 1;
+    destination[j++] = 0 + zOffset;
+    destination[j++] = 0.5;
+    destination[j++] = 0;
+    destination[j++] = 0.5 + zOffset;
 }
