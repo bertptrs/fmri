@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "LayerData.hpp"
+#include "LayerInfo.hpp"
 
 namespace fmri {
     using std::string;
@@ -15,6 +16,7 @@ namespace fmri {
         ~Simulator();
 
         vector<LayerData> simulate(const string &input_file);
+		const std::map<std::string, LayerInfo>& layerInfo() const;
 
     private:
 		struct Impl;

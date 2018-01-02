@@ -21,12 +21,18 @@ struct Simulator::Impl
     cv::Size input_geometry;
     optional<cv::Mat> means;
     unsigned int num_channels;
+    map<string, LayerInfo> layerInfo_;
 
     Impl(const string& model_file, const string& weights_file, const string& means_file);
 
     vector<cv::Mat> getWrappedInputLayer();
     cv::Mat preprocess(cv::Mat original) const;
     vector<LayerData> simulate(const string &input_file);
+    const map<string, LayerInfo>& layerInfo() const;
+
+    void computeLayerInfo();
+
+    void loadMeans(const string &means_file);
 };
 
 // Create simple forwarding functions.
@@ -55,27 +61,33 @@ Simulator::Impl::Impl(const string& model_file, const string& weights_file, cons
 	net.Reshape();
 
     if (!means_file.empty()) {
-        // Read in the means file
-        BlobProto proto;
-        ReadProtoFromBinaryFileOrDie(means_file, &proto);
+        loadMeans(means_file);
+    }
 
-        Blob<DType> mean_blob;
-        mean_blob.FromProto(proto);
+    computeLayerInfo();
+}
 
-        CHECK_EQ(mean_blob.channels(), num_channels) << "Number of channels should match!" << endl;
+void Simulator::Impl::loadMeans(const string &means_file)
+{// Read in the means file
+    BlobProto proto;
+    ReadProtoFromBinaryFileOrDie(means_file, &proto);
 
-        vector<cv::Mat> channels;
-        float* data = mean_blob.mutable_cpu_data();
-        for (unsigned int i = 0; i < num_channels; ++i) {
+    Blob<DType> mean_blob;
+    mean_blob.FromProto(proto);
+
+    CHECK_EQ(mean_blob.channels(), num_channels) << "Number of channels should match!" << endl;
+
+    vector<cv::Mat> channels;
+    float* data = mean_blob.mutable_cpu_data();
+    for (unsigned int i = 0; i < this->num_channels; ++i) {
             channels.emplace_back(mean_blob.height(), mean_blob.width(), CV_32FC1, data);
             data += mean_blob.height() * mean_blob.width();
         }
 
-        cv::Mat mean;
-        cv::merge(channels, mean);
+    cv::Mat mean;
+    merge(channels, mean);
 
-        means = cv::Mat(input_geometry, mean.type(), cv::mean(mean));
-    }
+    this->means = cv::Mat(this->input_geometry, mean.type(), cv::mean(mean));
 }
 
 vector<LayerData> Simulator::Impl::simulate(const string& image_file)
@@ -177,7 +189,28 @@ cv::Mat Simulator::Impl::preprocess(cv::Mat original) const
 
 }
 
+const map<string, LayerInfo> &Simulator::Impl::layerInfo() const
+{
+    return layerInfo_;
+}
+
+void Simulator::Impl::computeLayerInfo()
+{
+    const auto& names = net.layer_names();
+    const auto& layers = net.layers();
+
+    for (auto i = 0u; i < names.size() && i < layers.size(); ++i) {
+        auto& layer = layers[i];
+        layerInfo_.emplace(names[i], LayerInfo(names[i], layer->type(), layer->blobs()));
+    }
+}
+
 Simulator::~Simulator()
 {
     // Empty but defined constructor.
+}
+
+const map<string, LayerInfo> & Simulator::layerInfo() const
+{
+    return pImpl->layerInfo();
 }
