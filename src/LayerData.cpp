@@ -10,10 +10,9 @@
 using namespace fmri;
 using namespace std;
 
-LayerData::LayerData(const string& name, const vector<int>& shape, const DType* data, Type type) :
+LayerData::LayerData(const string& name, const vector<int>& shape, const DType* data) :
 	name_(name),
-	shape_(shape),
-	type_(type)
+	shape_(shape)
 {
 	const auto dataSize = numEntries();
 	// Compute the dimension of the data area
@@ -25,17 +24,12 @@ LayerData::LayerData(const string& name, const vector<int>& shape, const DType* 
 
 size_t LayerData::numEntries() const
 {
-	return accumulate(shape_.begin(), shape_.end(), 1, multiplies<>());
+	return static_cast<size_t>(accumulate(shape_.begin(), shape_.end(), 1, multiplies<>()));
 }
 
 const vector<int>& LayerData::shape() const
 {
 	return shape_;
-}
-
-typename LayerData::Type LayerData::type() const
-{
-	return type_;
 }
 
 const string& LayerData::name() const
@@ -46,22 +40,6 @@ const string& LayerData::name() const
 DType const * LayerData::data() const
 {
 	return data_.get();
-}
-
-LayerData::Type LayerData::typeFromString(string_view typeName)
-{
-	if (typeName == "Input") {
-		return Type::Input;
-	} else if (typeName == "Convolution") {
-		return Type::Convolutional;
-	} else if (typeName == "ReLU") {
-		return Type::ReLU;
-	} else if (typeName == "Pooling") {
-		return Type::Pooling;
-	} else {
-		LOG(INFO) << "Received unknown layer type: " << typeName << endl;
-		return Type::Other;
-	}
 }
 
 ostream& operator<< (ostream& o, const LayerData& layer)

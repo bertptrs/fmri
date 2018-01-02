@@ -9,7 +9,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "Simulator.hpp"
-#include "utils.hpp"
 
 using namespace caffe;
 using namespace std;
@@ -92,8 +91,6 @@ void Simulator::Impl::loadMeans(const string &means_file)
 
 vector<LayerData> Simulator::Impl::simulate(const string& image_file)
 {
-	typedef LayerData::Type LType;
-
 	cv::Mat im = cv::imread(image_file, -1);
 
     assert(!im.empty());
@@ -115,7 +112,7 @@ vector<LayerData> Simulator::Impl::simulate(const string& image_file)
 		CHECK_EQ(results[i].size(), 1) << "Multiple outputs per layer are not supported!" << endl;
 		const auto blob = results[i][0];
 
-		result.emplace_back(names[i], blob->shape(), blob->cpu_data(), LayerData::typeFromString(layers[i]->type()));
+		result.emplace_back(names[i], blob->shape(), blob->cpu_data());
 	}
 
     return result;

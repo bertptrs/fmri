@@ -20,6 +20,7 @@ using namespace fmri;
 struct
 {
     optional<vector<string>> labels;
+    map<string, LayerInfo> layerInfo;
     vector<vector<LayerData>> data;
     vector<vector<LayerData>>::iterator currentData;
     vector<unique_ptr<LayerVisualisation>> layerVisualisations;
@@ -30,6 +31,7 @@ static vector<vector<LayerData>> getSimulationData(const Options &options)
     vector<vector<LayerData>> results;
     auto dumper = options.imageDumper();
     Simulator simulator(options.model(), options.weights(), options.means());
+    rendererData.layerInfo = simulator.layerInfo();
 
     for (const auto &image : options.inputs()) {
         results.emplace_back(simulator.simulate(image));

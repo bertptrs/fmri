@@ -31,3 +31,8 @@ const std::string &LayerInfo::name() const
 {
     return name_;
 }
+
+LayerInfo::Type LayerInfo::type() const
+{
+    return type_;
+}
