@@ -26,9 +26,11 @@ struct
     vector<unique_ptr<LayerVisualisation>> layerVisualisations;
 } rendererData;
 
-static vector<vector<LayerData>> getSimulationData(const Options &options)
+static void loadSimulationData(const Options &options)
 {
-    vector<vector<LayerData>> results;
+    vector<vector<LayerData>> &results = rendererData.data;
+    results.clear();
+
     auto dumper = options.imageDumper();
     Simulator simulator(options.model(), options.weights(), options.means());
     rendererData.layerInfo = simulator.layerInfo();
@@ -44,8 +46,6 @@ static vector<vector<LayerData>> getSimulationData(const Options &options)
             dumper->dump(layer);
         }
     }
-
-    return results;
 }
 
 static void renderLayerName(const LayerData &data);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     // Prepare data for simulations
     Options options = Options::parse(argc, argv);
     rendererData.labels = options.labels();
-    rendererData.data = getSimulationData(options);
+    loadSimulationData(options);
 
     // Register callbacks
     glutDisplayFunc(render);
