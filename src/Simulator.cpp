@@ -95,8 +95,6 @@ vector<LayerData> Simulator::Impl::simulate(const string& image_file)
 
 	vector<LayerData> result;
 
-    auto input_layer = net.input_blobs()[0];
-
 	const auto& names = net.layer_names();
 	const auto& results = net.top_vecs();
 	const auto& layers = net.layers();
@@ -161,7 +159,7 @@ static cv::Mat resize(const cv::Size& targetSize, cv::Mat original)
 
 cv::Mat Simulator::Impl::preprocess(cv::Mat original) const
 {
-    auto converted = fix_channels(num_channels, original);
+    auto converted = fix_channels(num_channels, std::move(original));
 
     auto resized = resize(input_geometry, converted);
 
