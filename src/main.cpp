@@ -94,7 +94,7 @@ static void updateVisualisers()
         LayerVisualisation* visualisation = nullptr;
         switch (layer.shape().size()) {
             case 2:
-                visualisation = new FlatLayerVisualisation(layer);
+                visualisation = new FlatLayerVisualisation(layer, FlatLayerVisualisation::Ordering::SQUARE);
                 break;
 
             case 4:

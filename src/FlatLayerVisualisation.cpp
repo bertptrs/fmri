@@ -20,7 +20,8 @@ static inline void computeColor(float intensity, float limit, float* destination
     }
 }
 
-FlatLayerVisualisation::FlatLayerVisualisation(const fmri::LayerData &layer) :
+FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering ordering) :
+        ordering(ordering),
         faceCount(layer.numEntries() * 4),
         vertexBuffer(new float[faceCount * 3]),
         colorBuffer(new float[faceCount * 3]),
@@ -80,18 +81,36 @@ void FlatLayerVisualisation::render()
 void FlatLayerVisualisation::setVertexPositions(int vertexNo, float *destination)
 {
     int j = 0;
-    const float zOffset = -2 * vertexNo;
+    float zOffset;
+    float yOffset;
+
+    switch (ordering) {
+        case Ordering::LINE:
+            zOffset = -2 * vertexNo;
+            yOffset = 0;
+            break;
+
+        case Ordering ::SQUARE:
+            const auto nodes = faceCount / 4;
+            auto columns = static_cast<int>(ceil(sqrt(nodes)));
+            while (nodes % columns) ++columns;
+
+            zOffset = -2 * (vertexNo % columns);
+            yOffset = 2 * (vertexNo / columns);
+            break;
+    }
+
     // Create the 4 vertices for the pyramid
     destination[j++] = -0.5f;
-    destination[j++] = 0;
+    destination[j++] = 0 + yOffset; 
     destination[j++] = 0.5f + zOffset;
     destination[j++] = 0;
-    destination[j++] = 0;
+    destination[j++] = 0 + yOffset;
     destination[j++] = -0.5f + zOffset;
     destination[j++] = 0;
-    destination[j++] = 1;
+    destination[j++] = 1 + yOffset;
     destination[j++] = 0 + zOffset;
     destination[j++] = 0.5;
-    destination[j++] = 0;
+    destination[j++] = 0 + yOffset;
     destination[j++] = 0.5 + zOffset;
 }
