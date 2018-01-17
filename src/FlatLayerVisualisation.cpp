@@ -112,5 +112,5 @@ void FlatLayerVisualisation::setVertexPositions(int vertexNo, float *destination
     destination[j++] = 0 + zOffset;
     destination[j++] = 0.5;
     destination[j++] = 0 + yOffset;
-    destination[j++] = 0.5 + zOffset;
+    destination[j++] = 0.5f + zOffset;
 }
