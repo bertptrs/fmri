@@ -21,6 +21,7 @@ static inline void computeColor(float intensity, float limit, float* destination
 }
 
 FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering ordering) :
+        LayerVisualisation(layer.numEntries()),
         ordering(ordering),
         faceCount(layer.numEntries() * 4),
         vertexBuffer(new float[faceCount * 3]),
@@ -78,7 +79,7 @@ void FlatLayerVisualisation::render()
     glDisableClientState(GL_COLOR_ARRAY);
 }
 
-void FlatLayerVisualisation::setVertexPositions(int vertexNo, float *destination)
+void FlatLayerVisualisation::setVertexPositions(const int vertexNo, float *destination)
 {
     int j = 0;
     float zOffset;
@@ -99,6 +100,12 @@ void FlatLayerVisualisation::setVertexPositions(int vertexNo, float *destination
             yOffset = 2 * (vertexNo / columns);
             break;
     }
+
+    nodePositions_[3 * vertexNo] = 0;
+    nodePositions_[3 * vertexNo + 1] = yOffset;
+    nodePositions_[3 * vertexNo + 2] = zOffset;
+    // TODO: actually compute from this rather than copying to destination.
+    // Side note: should move this out of this function anyway.
 
     // Create the 4 vertices for the pyramid
     destination[j++] = -0.5f;
