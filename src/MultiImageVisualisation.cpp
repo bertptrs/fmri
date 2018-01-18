@@ -65,7 +65,7 @@ MultiImageVisualisation::~MultiImageVisualisation()
 void MultiImageVisualisation::render()
 {
     glEnableClientState(GL_VERTEX_ARRAY);
-    glColor3f(1, 1, 1);
+    glColor3f(0.3, 0.3, 0.3);
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
     glDrawArrays(GL_QUADS, 0, 4 * textureReferences.size());
     glDisableClientState(GL_VERTEX_ARRAY);
