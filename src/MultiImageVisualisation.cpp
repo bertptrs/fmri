@@ -17,8 +17,7 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
     CHECK_EQ(1, images) << "Only single input image is supported" << endl;
 
-    int columns = ceil(sqrt(channels));
-    while (channels % columns) columns++;
+    int columns = numCols(channels);
 
     // Create the quads for the images.
     int r = 0, c = 0;

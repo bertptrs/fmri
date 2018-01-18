@@ -26,6 +26,6 @@ namespace fmri
         std::unique_ptr<float[]> colorBuffer;
         std::unique_ptr<int[]> indexBuffer;
 
-        void setVertexPositions(const int vertexNo, float *destination);
+        void setVertexPositions(int vertexNo, float *destination);
     };
 }

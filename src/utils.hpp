@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <iterator>
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
@@ -126,5 +127,32 @@ namespace fmri
     constexpr inline T deg2rad(T val) {
         return val / 180 * M_PI;
     }
+
+    /**
+     * Compute the ideal number of columns for dividing up a range into a rectangle.
+     *
+     * @tparam T
+     * @param elems number of elements to space out
+     * @return the ideal number of columns
+     */
+    template<class T>
+    inline T numCols(const T elems) {
+        auto cols = static_cast<T>(ceil(sqrt(elems)));
+
+        while (elems % cols) {
+            ++cols;// TODO: this should probably be done analytically
+        }
+
+        return cols;
+    }
+
+    /**
+     * Get a globally initialized random number generator.
+     *
+     * This RNG should always be used as a reference, to make sure the state actually updates.
+     *
+     * @return A reference to the global RNG.
+     */
+    std::default_random_engine& rng();
 
 }

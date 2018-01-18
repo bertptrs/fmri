@@ -91,10 +91,9 @@ void FlatLayerVisualisation::setVertexPositions(const int vertexNo, float *desti
             yOffset = 0;
             break;
 
-        case Ordering ::SQUARE:
+        case Ordering::SQUARE:
             const auto nodes = faceCount / 4;
-            auto columns = static_cast<int>(ceil(sqrt(nodes)));
-            while (nodes % columns) ++columns;
+            auto columns = static_cast<int>(numCols(nodes));
 
             zOffset = -2 * (vertexNo % columns);
             yOffset = 2 * (vertexNo / columns);
