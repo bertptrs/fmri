@@ -2,6 +2,7 @@
 #include <cstring>
 #include <random>
 #include <GL/gl.h>
+#include "Range.hpp"
 #include "ActivityAnimation.hpp"
 #include "utils.hpp"
 
@@ -20,13 +21,13 @@ ActivityAnimation::ActivityAnimation(std::size_t count, const float *aPos, const
         offset(new float[count])
 {
     memcpy(startingPos.get(), aPos, sizeof(aPos[0]) * bufferLength);
-    for (int i = 0; i < bufferLength; ++i) {
+    for (auto i : Range(bufferLength)) {
         delta[i] = bPos[i] - aPos[i];
     }
 
     auto& random = rng();
     std::uniform_real_distribution<float> rd;
-    for (int i = 0; i < count; ++i) {
+    for (auto i : Range(count)) {
         offset[i] = rd(random);
         delta[3 * i] += xDist;
     }
@@ -36,7 +37,7 @@ void ActivityAnimation::draw(float timeScale) const
 {
     std::unique_ptr<float[]> vertexBuffer(new float[bufferLength]);
 
-    for (auto i = 0; i < bufferLength; ++i) {
+    for (auto i : Range(bufferLength)) {
         vertexBuffer[i] = startingPos[i] + correct_timescale(offset[i/3] + timeScale) * delta[i];
     }
 

@@ -106,7 +106,6 @@ vector<LayerData> Simulator::Impl::simulate(const string& image_file)
 
 	const auto& names = net.layer_names();
 	const auto& results = net.top_vecs();
-	const auto& layers = net.layers();
 
 	for (unsigned int i = 0; i < names.size(); ++i) {
 		CHECK_EQ(results[i].size(), 1) << "Multiple outputs per layer are not supported!" << endl;

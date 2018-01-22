@@ -63,7 +63,7 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
         indexBuffer[v++] = vertexBase + 2;
         indexBuffer[v++] = vertexBase + 3;
     }
-    assert(v == faceCount * 3);
+    assert(v == (int) faceCount * 3);
 }
 
 void FlatLayerVisualisation::render()

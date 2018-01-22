@@ -22,7 +22,7 @@ LayerInfo::Type LayerInfo::typeByName(string_view name)
 
 LayerInfo::LayerInfo(string_view name, string_view type,
                      const vector<boost::shared_ptr<caffe::Blob<DType>>> &parameters)
-: parameters_(parameters), name_(name), type_(typeByName(type))
+: parameters_(parameters), type_(typeByName(type)), name_(name)
 {
 
 }
