@@ -17,14 +17,6 @@ namespace fmri {
     GLuint loadTexture(DType const * data, int width, int height);
 
     /**
-     *
-     * @param type
-     * @param source
-     * @return
-     */
-    GLuint compileShader(GLenum type, char const * source);
-
-    /**
      * Callback handler to handle resizing windows.
      *
      * This function resizes the rendering viewport so everything still

@@ -9,27 +9,6 @@
 using namespace fmri;
 using namespace std;
 
-/**
- * Utility function to send OpenGL info dumps to the log
- *
- * @param object The GLObject to get info for
- * @param glGet__iv The function to query log length with
- * @param glGet__InfoLog The function to get the log with
- */
-static void show_info_log(
-        GLuint object,
-        PFNGLGETSHADERIVPROC glGet__iv,
-        PFNGLGETSHADERINFOLOGPROC glGet__InfoLog
-)
-{
-    GLint log_length;
-    glGet__iv(object, GL_INFO_LOG_LENGTH, &log_length);
-    unique_ptr<char[]> log(new char[log_length]);
-    glGet__InfoLog(object, log_length, nullptr, log.get());
-
-    LOG(INFO) << log.get() << endl;
-}
-
 GLuint fmri::loadTexture(DType const *data, int width, int height)
 {
     // Load and scale texture
@@ -83,24 +62,6 @@ void fmri::changeWindowSize(int w, int h)
 
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);
-}
-
-GLuint fmri::compileShader(GLenum type, char const *source)
-{
-    GLuint shader = glCreateShader(type);
-    auto length = static_cast<GLint>(strlen(source));
-    GLint compileOK;
-
-    glShaderSource(shader, 1, &source, &length);
-    glCompileShader(shader);
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileOK);
-    if (!compileOK) {
-        LOG(WARNING) << "Failed to compile " << source << endl;
-        show_info_log(shader, glGetShaderiv, glGetShaderInfoLog);
-        glDeleteShader(shader);
-        abort();
-    }
 }
 
 void fmri::renderText(std::string_view text)
