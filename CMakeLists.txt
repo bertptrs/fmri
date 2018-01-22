@@ -4,7 +4,11 @@ project(FMRI CXX)
 # Allow us to define custom modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
+# Enable modern C++ features
 set(CMAKE_CXX_STANDARD 17)
+
+# More warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 
 # Define executable and dependencies
 file(GLOB fmri_SRC
