@@ -43,7 +43,7 @@ static void move(unsigned char key)
         speed *= -1;
     }
 
-    for (unsigned int i = 0; i < 3; ++i) {
+    for (auto i = 0; i < 3; ++i) {
         camera.pos[i] += speed * dir[i];
     }
 }

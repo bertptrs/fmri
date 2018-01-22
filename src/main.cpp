@@ -13,6 +13,7 @@
 #include "LayerVisualisation.hpp"
 #include "FlatLayerVisualisation.hpp"
 #include "MultiImageVisualisation.hpp"
+#include "Range.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -75,7 +76,7 @@ static void render()
     glPushMatrix();
     glTranslatef(5 * dataSet.size(), 0, 0);
 
-    for (unsigned int i = 0; i < dataSet.size(); ++i) {
+    for (auto i : Range(dataSet.size())) {
         glPushMatrix();
         renderLayerName(dataSet[i]);
         rendererData.layerVisualisations[i]->render();

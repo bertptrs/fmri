@@ -2,6 +2,7 @@
 #include <GL/gl.h>
 
 #include "FlatLayerVisualisation.hpp"
+#include "Range.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -39,7 +40,7 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
     auto scalingMax = max(abs(*minElem), abs(*maxElem));
 
     int v = 0;
-    for (int i = 0; i < limit; ++i) {
+    for (int i : Range(limit)) {
         setVertexPositions(i, vertexBuffer.get() + 12 * i);
         const int vertexBase = i * 4;
 

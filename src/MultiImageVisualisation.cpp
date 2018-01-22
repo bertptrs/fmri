@@ -1,6 +1,7 @@
 #include <glog/logging.h>
 #include "MultiImageVisualisation.hpp"
 #include "glutils.hpp"
+#include "Range.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -28,7 +29,7 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
     auto dataPtr = layer.data();
 
-    for (int i = 0; i < channels; ++i) {
+    for (auto i : Range(channels)) {
         textureReferences[i] = loadTexture(dataPtr, width, height);
         vertexBuffer[v++] = 0;
         vertexBuffer[v++] = 0 + 3 * r;

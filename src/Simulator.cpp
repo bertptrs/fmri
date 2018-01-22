@@ -9,6 +9,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "Simulator.hpp"
+#include "Range.hpp"
 
 using namespace caffe;
 using namespace std;
@@ -77,16 +78,17 @@ void Simulator::Impl::loadMeans(const string &means_file)
     CHECK_EQ(mean_blob.channels(), num_channels) << "Number of channels should match!" << endl;
 
     vector<cv::Mat> channels;
-    float* data = mean_blob.mutable_cpu_data();
-    for (unsigned int i = 0; i < this->num_channels; ++i) {
-            channels.emplace_back(mean_blob.height(), mean_blob.width(), CV_32FC1, data);
-            data += mean_blob.height() * mean_blob.width();
-        }
+    float *data = mean_blob.mutable_cpu_data();
+    for (auto i : Range(num_channels)) {
+        (void)i;// Suppress unused warning
+        channels.emplace_back(mean_blob.height(), mean_blob.width(), CV_32FC1, data);
+        data += mean_blob.height() * mean_blob.width();
+    }
 
     cv::Mat mean;
     merge(channels, mean);
 
-    this->means = cv::Mat(this->input_geometry, mean.type(), cv::mean(mean));
+    this->means = cv::Mat(input_geometry, mean.type(), cv::mean(mean));
 }
 
 vector<LayerData> Simulator::Impl::simulate(const string& image_file)
@@ -107,7 +109,7 @@ vector<LayerData> Simulator::Impl::simulate(const string& image_file)
 	const auto& names = net.layer_names();
 	const auto& results = net.top_vecs();
 
-	for (unsigned int i = 0; i < names.size(); ++i) {
+	for (auto i : Range(names.size())) {
 		CHECK_EQ(results[i].size(), 1) << "Multiple outputs per layer are not supported!" << endl;
 		const auto blob = results[i][0];
 
@@ -126,7 +128,8 @@ vector<cv::Mat> Simulator::Impl::getWrappedInputLayer()
     const int height = input_geometry.height;
 
     DType* input_data = input_layer->mutable_cpu_data();
-    for (unsigned int i = 0; i < num_channels; i++) {
+    for (auto i : Range(num_channels)) {
+        (void)i;// Suppress unused warning
         channels.emplace_back(height, width, CV_32FC1, input_data);
         input_data += width * height;
     }
@@ -195,7 +198,9 @@ void Simulator::Impl::computeLayerInfo()
     const auto& names = net.layer_names();
     const auto& layers = net.layers();
 
-    for (auto i = 0u; i < names.size() && i < layers.size(); ++i) {
+    CHECK_EQ(names.size(), layers.size()) << "Size mismatch";
+
+    for (auto i : Range(names.size())) {
         auto& layer = layers[i];
         layerInfo_.emplace(names[i], LayerInfo(names[i], layer->type(), layer->blobs()));
     }
