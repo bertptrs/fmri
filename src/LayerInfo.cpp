@@ -14,6 +14,8 @@ LayerInfo::Type LayerInfo::typeByName(string_view name)
         return Type::ReLU;
     } else if (name == "Pooling") {
         return Type::Pooling;
+    } else if (name == "InnerProduct") {
+        return Type::InnerProduct;
     } else {
         LOG(INFO) << "Received unknown layer type: " << name << endl;
         return Type::Other;
@@ -24,7 +26,6 @@ LayerInfo::LayerInfo(string_view name, string_view type,
                      const vector<boost::shared_ptr<caffe::Blob<DType>>> &parameters)
 : parameters_(parameters), type_(typeByName(type)), name_(name)
 {
-
 }
 
 const std::string &LayerInfo::name() const

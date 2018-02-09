@@ -14,6 +14,8 @@
 #include "FlatLayerVisualisation.hpp"
 #include "MultiImageVisualisation.hpp"
 #include "Range.hpp"
+#include "ActivityAnimation.hpp"
+#include "DummyLayerVisualisation.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -25,6 +27,7 @@ struct
     vector<vector<LayerData>> data;
     vector<vector<LayerData>>::iterator currentData;
     vector<unique_ptr<LayerVisualisation>> layerVisualisations;
+    vector<unique_ptr<ActivityAnimation>> animations;
 } rendererData;
 
 static void loadSimulationData(const Options &options)
@@ -84,6 +87,8 @@ static void render()
         glPopMatrix();
         glTranslatef(-10, 0, 0);
     }
+
+
     glPopMatrix();
 
     glutSwapBuffers();
@@ -98,29 +103,34 @@ static void renderLayerName(const LayerData &data)
     glTranslatef(0, 0, -10);
 }
 
+static LayerVisualisation *getVisualisationForLayer(const LayerData &layer);
+
 static void updateVisualisers()
 {
     rendererData.layerVisualisations.clear();
+    rendererData.animations.clear();
 
-    for (auto &layer : *rendererData.currentData) {
-        LayerVisualisation* visualisation = nullptr;
-        switch (layer.shape().size()) {
-            case 2:
-                visualisation = new FlatLayerVisualisation(layer, FlatLayerVisualisation::Ordering::SQUARE);
-                break;
-
-            case 4:
-                visualisation = new MultiImageVisualisation(layer);
-                break;
-
-            default:
-                abort();
-        }
+    for (LayerData &layer : *rendererData.currentData) {
+        LayerVisualisation* visualisation = getVisualisationForLayer(layer);
 
         rendererData.layerVisualisations.emplace_back(visualisation);
     }
 
     glutPostRedisplay();
+}
+
+LayerVisualisation *getVisualisationForLayer(const LayerData &layer)
+{
+    switch (layer.shape().size()) {
+        case 2:
+            return new FlatLayerVisualisation(layer, FlatLayerVisualisation::Ordering::SQUARE);
+
+        case 4:
+            return new MultiImageVisualisation(layer);
+
+        default:
+            return new DummyLayerVisualisation();
+    }
 }
 
 static void specialKeyFunc(int key, int, int)

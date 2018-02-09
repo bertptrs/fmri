@@ -16,6 +16,6 @@ namespace fmri
         static Camera& instance();
 
     private:
-        Camera() = default;
+        Camera() noexcept = default;
     };
 }

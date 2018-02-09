@@ -17,6 +17,7 @@ namespace fmri
             ReLU,
             Pooling,
             Output,
+            InnerProduct,
             Other
         };
 

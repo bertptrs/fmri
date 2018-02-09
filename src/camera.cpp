@@ -1,4 +1,4 @@
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <cmath>
 #include <sstream>
 #include <iostream>
@@ -60,7 +60,8 @@ static void handleKeys(unsigned char key, int, int)
 
         case 'q':
             // Utility quit function.
-            exit(0);
+            glutLeaveMainLoop();
+            break;
 
         case 'h':
             camera.reset();
