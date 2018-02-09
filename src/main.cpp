@@ -11,11 +11,9 @@
 #include "glutils.hpp"
 #include "camera.hpp"
 #include "LayerVisualisation.hpp"
-#include "FlatLayerVisualisation.hpp"
-#include "MultiImageVisualisation.hpp"
 #include "Range.hpp"
 #include "ActivityAnimation.hpp"
-#include "DummyLayerVisualisation.hpp"
+#include "visualisations.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -103,8 +101,6 @@ static void renderLayerName(const LayerData &data)
     glTranslatef(0, 0, -10);
 }
 
-static LayerVisualisation *getVisualisationForLayer(const LayerData &layer);
-
 static void updateVisualisers()
 {
     rendererData.layerVisualisations.clear();
@@ -117,20 +113,6 @@ static void updateVisualisers()
     }
 
     glutPostRedisplay();
-}
-
-LayerVisualisation *getVisualisationForLayer(const LayerData &layer)
-{
-    switch (layer.shape().size()) {
-        case 2:
-            return new FlatLayerVisualisation(layer, FlatLayerVisualisation::Ordering::SQUARE);
-
-        case 4:
-            return new MultiImageVisualisation(layer);
-
-        default:
-            return new DummyLayerVisualisation();
-    }
 }
 
 static void specialKeyFunc(int key, int, int)
