@@ -37,3 +37,8 @@ LayerInfo::Type LayerInfo::type() const
 {
     return type_;
 }
+
+const std::vector<boost::shared_ptr<caffe::Blob<DType>>>& LayerInfo::parameters() const
+{
+    return parameters_;
+}

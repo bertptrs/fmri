@@ -105,11 +105,20 @@ static void updateVisualisers()
 {
     rendererData.layerVisualisations.clear();
     rendererData.animations.clear();
+    LayerData* prevState = nullptr;
+    LayerVisualisation* prevVisualisation = nullptr;
 
     for (LayerData &layer : *rendererData.currentData) {
         LayerVisualisation* visualisation = getVisualisationForLayer(layer);
+        if (prevState && prevVisualisation && visualisation) {
+            auto interaction = getActivityAnimation(*prevState, layer, rendererData.layerInfo.at(layer.name()), prevVisualisation->nodePositions(), visualisation->nodePositions());
+            rendererData.animations.emplace_back(interaction);
+        }
 
         rendererData.layerVisualisations.emplace_back(visualisation);
+
+        prevVisualisation = visualisation;
+        prevState = &layer;
     }
 
     glutPostRedisplay();

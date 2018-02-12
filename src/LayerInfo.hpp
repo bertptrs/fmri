@@ -26,6 +26,7 @@ namespace fmri
 
         const std::string& name() const;
         Type type() const;
+        const std::vector<boost::shared_ptr<caffe::Blob<DType>>>& parameters() const;
 
         static Type typeByName(std::string_view name);
 
