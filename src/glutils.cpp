@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include <cstring>
 #include <glog/logging.h>
+#include <chrono>
+#include <thread>
 #include "glutils.hpp"
 
 using namespace fmri;
@@ -85,4 +87,24 @@ void fmri::checkGLErrors()
                 cerr << "OpenGL error: " << (const char*) glewGetErrorString(error) << endl;
         }
     }
+}
+
+void fmri::throttleIdleFunc()
+{
+    using namespace std::chrono;
+
+    constexpr duration<double, ratio<1, 60>> refreshRate(1);
+
+    static auto lastCalled = steady_clock::now();
+
+    const auto now = steady_clock::now();
+
+    const auto diff = now - lastCalled;
+
+    if (diff < refreshRate) {
+        const auto remaining = refreshRate - diff;
+        this_thread::sleep_for(remaining);
+    }
+
+    lastCalled = now;
 }

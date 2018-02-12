@@ -38,4 +38,9 @@ namespace fmri {
      * Check if there are OpenGL errors and report them.
      */
     void checkGLErrors();
+
+    /**
+     * Slow down until the idle func is being called a reasonable amount of times.
+     */
+    void throttleIdleFunc();
 }
