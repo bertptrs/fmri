@@ -72,16 +72,6 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
     }
 
     const auto entries = computeActivityStrengths(prevState, layer);
-    const auto bufferSize = 3 * entries.size();
 
-    unique_ptr<float[]> startingPositions(new float[bufferSize]);
-    unique_ptr<float[]> endingPositions(new float[bufferSize]);
-
-    LOG(INFO) << "Creating position buffers for interaction in " << layer.name() << endl;
-    for (auto i : Range(entries.size())) {
-        memcpy(startingPositions.get() + 3 * i, prevPositions.data() + 3 * entries[i].second.first, 3 * sizeof(float));
-        memcpy(endingPositions.get() + 3 * i, curPositions.data() + 3 * entries[i].second.second, 3 * sizeof(float));
-    }
-
-    return new ActivityAnimation(entries.size(), startingPositions.get(), endingPositions.get(), 2.0);
+    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(), 2);
 }

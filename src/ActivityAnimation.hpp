@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "Animation.hpp"
+#include "utils.hpp"
 
 namespace fmri
 {
@@ -11,13 +12,13 @@ namespace fmri
             : public Animation
     {
     public:
-        ActivityAnimation(std::size_t count, const float* aPos, const float* bPos, const float xDist);
+        ActivityAnimation(const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
+                                  const float *aPositions, const float *bPositions, float xDist);
         void draw(float timeScale) override;
 
     private:
         std::size_t bufferLength;
         std::vector<float> startingPos;
         std::vector<float> delta;
-        std::vector<float> offset;
     };
 }

@@ -4,32 +4,25 @@
 #include <GL/gl.h>
 #include "Range.hpp"
 #include "ActivityAnimation.hpp"
-#include "utils.hpp"
 
+using namespace std;
 using namespace fmri;
 
-static inline float correct_timescale(float original)
+ActivityAnimation::ActivityAnimation(const vector<pair<DType, pair<size_t, size_t>>> &interactions,
+                                     const float *aPositions, const float *bPositions, float xDist) :
+        bufferLength(3 * interactions.size())
 {
-    float ignore;
-    return std::modf(original, &ignore);
-}
+    startingPos.reserve(bufferLength);
+    delta.reserve(bufferLength);
 
-ActivityAnimation::ActivityAnimation(std::size_t count, const float *aPos, const float *bPos, const float xDist) :
-        bufferLength(3 * count),
-        startingPos(bufferLength),
-        delta(bufferLength),
-        offset(bufferLength)
-{
-    memcpy(startingPos.data(), aPos, sizeof(aPos[0]) * bufferLength);
-    for (auto i : Range(bufferLength)) {
-        delta[i] = bPos[i] - aPos[i];
-    }
+    for (auto &entry : interactions) {
+        auto *aPos = &aPositions[entry.second.first];
+        auto *bPos = &bPositions[entry.second.second];
 
-    auto& random = rng();
-    std::uniform_real_distribution<float> rd;
-    for (auto i : Range(count)) {
-        offset[i] = rd(random);
-        delta[3 * i] += xDist;
+        for (auto i : Range(3)) {
+            startingPos.emplace_back(aPos[i]);
+            delta.emplace_back(bPos[i] - aPos[i] + (i % 3 ? 0 : xDist));
+        }
     }
 }
 
