@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 namespace fmri
 {
@@ -13,8 +14,8 @@ namespace fmri
 
     private:
         std::size_t bufferLength;
-        std::unique_ptr<float[]> startingPos;
-        std::unique_ptr<float[]> delta;
-        std::unique_ptr<float[]> offset;
+        std::vector<float> startingPos;
+        std::vector<float> delta;
+        std::vector<float> offset;
     };
 }

@@ -39,8 +39,10 @@ computeActivityStrengths(const LayerData &prevState, const LayerInfo &layer)
 
     const auto shape = layer.parameters()[0]->shape();
     auto weights = layer.parameters()[0]->cpu_data();
+    const auto numEntries = accumulate(shape.begin(), shape.end(), 1u, multiplies<void>());
+    result.reserve(numEntries);
 
-    for (auto i : Range(accumulate(shape.begin(), shape.end(), 1, multiplies<void>()))) {
+    for (auto i : Range(numEntries)) {
         result.emplace_back(weights[i] * data[i % shape[0]], make_pair(i % shape[0], i / shape[0]));
     }
 
@@ -80,6 +82,5 @@ fmri::ActivityAnimation *fmri::getActivityAnimation(const fmri::LayerData &prevS
         memcpy(endingPositions.get() + 3 * i, curPositions.data() + 3 * entries[i].second.second, 3 * sizeof(float));
     }
 
-    // TODO: actually do something
     return new ActivityAnimation(entries.size(), startingPositions.get(), endingPositions.get(), 2.0);
 }

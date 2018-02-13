@@ -82,6 +82,9 @@ static void render()
         glPushMatrix();
         renderLayerName(dataSet[i]);
         rendererData.layerVisualisations[i]->render();
+        if (i < rendererData.animations.size() && rendererData.animations[i]) {
+            rendererData.animations[i]->draw(rendererData.animationStep);
+        }
 
         glPopMatrix();
         glTranslatef(-10, 0, 0);
