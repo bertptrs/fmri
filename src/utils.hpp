@@ -9,6 +9,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <ratio>
+#include <chrono>
 
 namespace fmri
 {
@@ -154,5 +156,23 @@ namespace fmri
      * @return A reference to the global RNG.
      */
     std::default_random_engine& rng();
+
+    /**
+     *
+     * @tparam Duration Duration type of length
+     * @param length
+     * @return
+     */
+    template<class Duration>
+    float getAnimationStep(const Duration &length) {
+        using namespace std::chrono;
+
+        static auto startingPoint = steady_clock::now();
+        const auto modified_length = duration_cast<steady_clock::duration>(length);
+
+        auto step = (steady_clock::now() - startingPoint) % modified_length;
+
+        return static_cast<float>(step.count()) / static_cast<float>(modified_length.count());
+    }
 
 }

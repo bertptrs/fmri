@@ -26,6 +26,7 @@ struct
     vector<vector<LayerData>>::iterator currentData;
     vector<unique_ptr<LayerVisualisation>> layerVisualisations;
     vector<unique_ptr<ActivityAnimation>> animations;
+    float animationStep = 0;
 } rendererData;
 
 static void loadSimulationData(const Options &options)
@@ -153,6 +154,7 @@ static void idleFunc()
     checkGLErrors();
     glutPostRedisplay();
     throttleIdleFunc();
+    rendererData.animationStep = getAnimationStep(std::chrono::seconds(5));
 }
 
 int main(int argc, char *argv[])
