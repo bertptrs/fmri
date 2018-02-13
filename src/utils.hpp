@@ -158,9 +158,10 @@ namespace fmri
     std::default_random_engine& rng();
 
     /**
+     * Get the current animation offset for a particular animation.
      *
-     * @tparam Duration Duration type of length
-     * @param length
+     * @tparam Duration Duration type of length. Should be a specialisation of std::chrono::duration
+     * @param length The length of the animation.
      * @return
      */
     template<class Duration>

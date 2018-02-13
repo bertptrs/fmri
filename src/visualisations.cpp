@@ -4,6 +4,7 @@
 #include "MultiImageVisualisation.hpp"
 #include "FlatLayerVisualisation.hpp"
 #include "Range.hpp"
+#include "ActivityAnimation.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -56,9 +57,9 @@ computeActivityStrengths(const LayerData &prevState, const LayerInfo &layer)
     return result;
 }
 
-fmri::ActivityAnimation *fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
-                                                    const fmri::LayerInfo &layer, const vector<float> &prevPositions,
-                                                    const vector<float> &curPositions)
+Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
+                                       const fmri::LayerInfo &layer, const vector<float> &prevPositions,
+                                       const vector<float> &curPositions)
 {
     if (layer.type() != LayerInfo::Type::InnerProduct) {
         // Only supported type at this time

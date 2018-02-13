@@ -33,7 +33,7 @@ ActivityAnimation::ActivityAnimation(std::size_t count, const float *aPos, const
     }
 }
 
-void ActivityAnimation::draw(float timeScale) const
+void ActivityAnimation::draw(float timeScale)
 {
     std::unique_ptr<float[]> vertexBuffer(new float[bufferLength]);
 

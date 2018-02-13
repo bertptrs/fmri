@@ -12,7 +12,6 @@
 #include "camera.hpp"
 #include "LayerVisualisation.hpp"
 #include "Range.hpp"
-#include "ActivityAnimation.hpp"
 #include "visualisations.hpp"
 
 using namespace std;
@@ -25,7 +24,7 @@ struct
     vector<vector<LayerData>> data;
     vector<vector<LayerData>>::iterator currentData;
     vector<unique_ptr<LayerVisualisation>> layerVisualisations;
-    vector<unique_ptr<ActivityAnimation>> animations;
+    vector<unique_ptr<Animation>> animations;
     float animationStep = 0;
 } rendererData;
 
