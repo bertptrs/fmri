@@ -102,8 +102,7 @@ void fmri::throttleIdleFunc()
     const auto diff = now - lastCalled;
 
     if (diff < refreshRate) {
-        const auto remaining = refreshRate - diff;
-        this_thread::sleep_for(remaining);
+        this_thread::sleep_for(refreshRate - diff);
     }
 
     lastCalled = now;

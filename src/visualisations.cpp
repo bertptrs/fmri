@@ -28,6 +28,8 @@ fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &
 static vector <pair<DType, pair<size_t, size_t>>>
 computeActivityStrengths(const LayerData &prevState, const LayerInfo &layer)
 {
+    LOG(INFO) << "Computing top interactions for " << layer.name() << endl;
+
     typedef pair <DType, pair<size_t, size_t>> Entry;
     vector <Entry> result;
 
@@ -72,6 +74,7 @@ fmri::ActivityAnimation *fmri::getActivityAnimation(const fmri::LayerData &prevS
     unique_ptr<float[]> startingPositions(new float[bufferSize]);
     unique_ptr<float[]> endingPositions(new float[bufferSize]);
 
+    LOG(INFO) << "Creating position buffers for interaction in " << layer.name() << endl;
     for (auto i : Range(entries.size())) {
         memcpy(startingPositions.get() + 3 * i, prevPositions.data() + 3 * entries[i].second.first, 3 * sizeof(float));
         memcpy(endingPositions.get() + 3 * i, curPositions.data() + 3 * entries[i].second.second, 3 * sizeof(float));

@@ -151,6 +151,7 @@ static void specialKeyFunc(int key, int, int)
 static void idleFunc()
 {
     checkGLErrors();
+    glutPostRedisplay();
     throttleIdleFunc();
 }
 
