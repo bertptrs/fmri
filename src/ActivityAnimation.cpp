@@ -16,8 +16,8 @@ ActivityAnimation::ActivityAnimation(const vector<pair<DType, pair<size_t, size_
     delta.reserve(bufferLength);
 
     for (auto &entry : interactions) {
-        auto *aPos = &aPositions[entry.second.first];
-        auto *bPos = &bPositions[entry.second.second];
+        auto *aPos = &aPositions[3 * entry.second.first];
+        auto *bPos = &bPositions[3 * entry.second.second];
 
         for (auto i : Range(3)) {
             startingPos.emplace_back(aPos[i]);

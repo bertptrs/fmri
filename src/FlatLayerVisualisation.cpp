@@ -24,7 +24,7 @@ static inline void computeColor(float intensity, float limit, float* destination
 FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering ordering) :
         LayerVisualisation(layer.numEntries()),
         ordering(ordering),
-        faceCount(layer.numEntries() * 4),
+        faceCount(layer.numEntries() * NODE_FACES.size() / 3),
         vertexBuffer(new float[faceCount * 3]),
         colorBuffer(new float[faceCount * 3]),
         indexBuffer(new int[faceCount * 3])
@@ -32,6 +32,8 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
     auto& shape = layer.shape();
     CHECK_EQ(shape.size(), 2) << "layer should be flat!" << endl;
     CHECK_EQ(shape[0], 1) << "Only single images supported." << endl;
+
+    initializeNodePositions();
 
     const auto limit = (int) layer.numEntries();
     auto data = layer.data();
@@ -41,28 +43,18 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
 
     int v = 0;
     for (int i : Range(limit)) {
-        setVertexPositions(i, vertexBuffer.get() + 12 * i);
-        const int vertexBase = i * 4;
+        setVertexPositions(i, vertexBuffer.get() + NODE_FACES.size() * i);
+        const auto vertexBase = static_cast<int>(i * NODE_FACES.size() / 3);
 
         // Define the colors for the vertices
-        for (int c = 0; c < 4; ++c) {
-            computeColor(data[i], scalingMax, &colorBuffer[12 * i + 3 * c]);
+        for (auto c : Range(NODE_SHAPE.size() / 3)) {
+            computeColor(data[i], scalingMax, &colorBuffer[NODE_FACES.size() * i + 3 * c]);
         }
 
-        // Create the index set for the faces
-        // Simply connect all vertices in ascending order and it works.
-        indexBuffer[v++] = vertexBase;
-        indexBuffer[v++] = vertexBase + 1;
-        indexBuffer[v++] = vertexBase + 2;
-        indexBuffer[v++] = vertexBase;
-        indexBuffer[v++] = vertexBase + 1;
-        indexBuffer[v++] = vertexBase + 3;
-        indexBuffer[v++] = vertexBase;
-        indexBuffer[v++] = vertexBase + 2;
-        indexBuffer[v++] = vertexBase + 3;
-        indexBuffer[v++] = vertexBase + 1;
-        indexBuffer[v++] = vertexBase + 2;
-        indexBuffer[v++] = vertexBase + 3;
+        // Set the face nodes indices
+        for (auto faceNode : NODE_FACES) {
+            indexBuffer[v++] = vertexBase + faceNode;
+        }
     }
     assert(v == (int) faceCount * 3);
 }
@@ -82,42 +74,41 @@ void FlatLayerVisualisation::render()
 
 void FlatLayerVisualisation::setVertexPositions(const int vertexNo, float *destination)
 {
-    int j = 0;
-    float zOffset;
-    float yOffset;
+    for (auto i : Range(NODE_SHAPE.size())) {
+        destination[i] = NODE_SHAPE[i] + nodePositions_[3 * vertexNo + (i % 3)];
+    }
+}
 
+void FlatLayerVisualisation::initializeNodePositions()
+{
     switch (ordering) {
         case Ordering::LINE:
-            zOffset = -2 * vertexNo;
-            yOffset = 0;
+            computeNodePositionsLine();
             break;
 
         case Ordering::SQUARE:
-            const auto nodes = faceCount / 4;
-            auto columns = static_cast<int>(numCols(nodes));
-
-            zOffset = -2 * (vertexNo % columns);
-            yOffset = 2 * (vertexNo / columns);
+            computeNodePositionsSquare();
             break;
     }
+}
 
-    nodePositions_[3 * vertexNo] = 0;
-    nodePositions_[3 * vertexNo + 1] = yOffset;
-    nodePositions_[3 * vertexNo + 2] = zOffset;
-    // TODO: actually compute from this rather than copying to destination.
-    // Side note: should move this out of this function anyway.
+void FlatLayerVisualisation::computeNodePositionsSquare()
+{
+    const auto nodes = static_cast<int>(faceCount / 4);
+    const auto columns = numCols(nodes);
 
-    // Create the 4 vertices for the pyramid
-    destination[j++] = -0.5f;
-    destination[j++] = 0 + yOffset; 
-    destination[j++] = 0.5f + zOffset;
-    destination[j++] = 0;
-    destination[j++] = 0 + yOffset;
-    destination[j++] = -0.5f + zOffset;
-    destination[j++] = 0;
-    destination[j++] = 1 + yOffset;
-    destination[j++] = 0 + zOffset;
-    destination[j++] = 0.5;
-    destination[j++] = 0 + yOffset;
-    destination[j++] = 0.5f + zOffset;
+    for (auto i : Range(nodes)) {
+        nodePositions_[3 * i + 0] = 0;
+        nodePositions_[3 * i + 1] = 2 * (i / columns);
+        nodePositions_[3 * i + 2] = -2 * (i % columns);
+    }
+}
+
+void FlatLayerVisualisation::computeNodePositionsLine()
+{
+    for (auto i : Range(static_cast<int>(faceCount / 4))) {
+        nodePositions_[3 * i + 0] = 0;
+        nodePositions_[3 * i + 1] = 0;
+        nodePositions_[3 * i + 2] = -2.0f * i;
+    }
 }
