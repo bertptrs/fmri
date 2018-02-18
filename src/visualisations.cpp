@@ -81,5 +81,5 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
 
     const auto entries = computeActivityStrengths(prevState, layer);
 
-    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(), 10);
+    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(), -10);
 }
