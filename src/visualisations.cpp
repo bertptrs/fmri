@@ -60,7 +60,7 @@ computeActivityStrengths(const LayerData &prevState, const LayerInfo &layer)
     vector<Entry> result;
     result.reserve(desiredSize);
     for (auto i : Range(desiredSize)) {
-        result.emplace_back(interactions[idx[i]], make_pair(idx[i] % shape[0], idx[i] / shape[0]));
+        result.emplace_back(interactions[idx[i]], make_pair(idx[i] / shape[0], idx[i] % shape[0]));
     }
 
     return result;
