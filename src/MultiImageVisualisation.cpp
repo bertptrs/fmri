@@ -18,40 +18,28 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
     CHECK_EQ(1, images) << "Only single input image is supported" << endl;
 
-    int columns = numCols(channels);
-
-    // Create the quads for the images.
-    int r = 0, c = 0;
-    int v = 0;
-
-    vertexBuffer = std::make_unique<float[]>(channels * 12);
-    textureReferences.resize(channels);
-
+    nodePositions_.resize(channels * 3);
     auto dataPtr = layer.data();
-
+    const int columns = numCols(channels);
+    textureReferences.resize(channels);
     for (auto i : Range(channels)) {
         textureReferences[i] = loadTexture(dataPtr, width, height);
-        vertexBuffer[v++] = 0;
-        vertexBuffer[v++] = 0 + 3 * r;
-        vertexBuffer[v++] = 0 - 3 * c;
-
-        vertexBuffer[v++] = 0;
-        vertexBuffer[v++] = 2 + 3 * r;
-        vertexBuffer[v++] = 0 - 3 * c;
-
-        vertexBuffer[v++] = 0;
-        vertexBuffer[v++] = 2 + 3 * r;
-        vertexBuffer[v++] = 2 - 3 * c;
-
-        vertexBuffer[v++] = 0;
-        vertexBuffer[v++] = 0 + 3 * r;
-        vertexBuffer[v++] = 2 - 3 * c;
-
-        if (++c >= columns) {
-            c = 0;
-            ++r;
-        }
         dataPtr += width * height;
+
+        nodePositions_[3 * i + 0] = 0;
+        nodePositions_[3 * i + 1] = 3 * (i / columns);
+        nodePositions_[3 * i + 2] = -3 * (i % columns);
+    }
+
+    vertexBuffer = std::make_unique<float[]>(channels * BASE_VERTICES.size());
+
+    auto v = 0;
+
+    for (auto i : Range(channels)) {
+        const auto& nodePos = &nodePositions_[3 * i];
+        for (auto j : Range(BASE_VERTICES.size())) {
+            vertexBuffer[v++] = nodePos[j % 3] + BASE_VERTICES[j];
+        }
     }
 }
 

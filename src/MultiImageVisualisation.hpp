@@ -17,6 +17,12 @@ namespace fmri
         void render() override;
 
     private:
+        constexpr const static std::array<float, 12> BASE_VERTICES = {
+                0, -1, -1,
+                0, 1, -1,
+                0, 1, 1,
+                0, -1, 1,
+        };
         std::vector<GLuint> textureReferences;
         std::unique_ptr<float[]> vertexBuffer;
     };
