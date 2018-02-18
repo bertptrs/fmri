@@ -53,7 +53,7 @@ computeActivityStrengths(const LayerData &prevState, const LayerInfo &layer)
     iota(idx.begin(), idx.end(), 0);
 
     const auto desiredSize = min(INTERACTION_LIMIT, numEntries);
-    partial_sort(idx.begin(), idx.begin() + desiredSize, idx.end(), [&interactions](size_t a, size_t b) {
+    nth_element(idx.begin(), idx.begin() + desiredSize, idx.end(), [&interactions](size_t a, size_t b) {
         return abs(interactions[a]) > abs(interactions[b]);
     });
 
