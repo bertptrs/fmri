@@ -14,10 +14,19 @@ ActivityAnimation::ActivityAnimation(const vector<pair<DType, pair<size_t, size_
 {
     startingPos.reserve(bufferLength);
     delta.reserve(bufferLength);
+    colorBuf.reserve(interactions.size());
 
     for (auto &entry : interactions) {
         auto *aPos = &aPositions[3 * entry.second.first];
         auto *bPos = &bPositions[3 * entry.second.second];
+
+        array<float, 3> color;
+        if (entry.first > 0) {
+            color = {0, 1, 0};
+        } else {
+            color = {1, 0, 0};
+        }
+        colorBuf.push_back(color);
 
         for (auto i : Range(3)) {
             startingPos.emplace_back(aPos[i]);
@@ -34,9 +43,11 @@ void ActivityAnimation::draw(float timeScale)
         vertexBuffer[i] = startingPos[i] + timeScale * delta[i];
     }
 
-    glColor3f(1, 1, 1);
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(3, GL_FLOAT, 0, colorBuf.data());
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
     glDrawArrays(GL_POINTS, 0, bufferLength / 3);
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }

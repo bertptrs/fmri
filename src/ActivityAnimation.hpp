@@ -18,6 +18,7 @@ namespace fmri
 
     private:
         std::size_t bufferLength;
+        std::vector<std::array<float, 3>> colorBuf;
         std::vector<float> startingPos;
         std::vector<float> delta;
     };
