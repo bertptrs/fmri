@@ -66,9 +66,8 @@ computeActivityStrengths(const LayerData &prevState, const LayerInfo &layer)
     return result;
 }
 
-Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
-                                       const fmri::LayerInfo &layer, const vector<float> &prevPositions,
-                                       const vector<float> &curPositions)
+Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerInfo &layer,
+                                       const vector<float> &prevPositions, const vector<float> &curPositions)
 {
     if (layer.type() != LayerInfo::Type::InnerProduct) {
         // Only supported type at this time
@@ -82,5 +81,5 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
 
     const auto entries = computeActivityStrengths(prevState, layer);
 
-    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(), 2);
+    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(), 10);
 }

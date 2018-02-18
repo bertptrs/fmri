@@ -114,7 +114,8 @@ static void updateVisualisers()
     for (LayerData &layer : *rendererData.currentData) {
         LayerVisualisation* visualisation = getVisualisationForLayer(layer);
         if (prevState && prevVisualisation && visualisation) {
-            auto interaction = getActivityAnimation(*prevState, layer, rendererData.layerInfo.at(layer.name()), prevVisualisation->nodePositions(), visualisation->nodePositions());
+            auto interaction = getActivityAnimation(*prevState, rendererData.layerInfo.at(layer.name()),
+                                                    prevVisualisation->nodePositions(), visualisation->nodePositions());
             rendererData.animations.emplace_back(interaction);
         }
 

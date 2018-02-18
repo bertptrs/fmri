@@ -14,7 +14,6 @@ namespace fmri {
      */
     LayerVisualisation* getVisualisationForLayer(const LayerData& layer);
 
-    Animation * getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
-                                     const fmri::LayerInfo &layer, const vector<float> &prevPositions,
-                                     const vector<float> &curPositions);
+    Animation *getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerInfo &layer,
+                                        const vector<float> &prevPositions, const vector<float> &curPositions);
 }
