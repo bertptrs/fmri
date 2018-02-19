@@ -13,6 +13,8 @@ using namespace std;
 // Maximum number of interactions shown
 static constexpr size_t INTERACTION_LIMIT = 10000;
 
+typedef vector<pair<float, pair<size_t, size_t>>> EntryList;
+
 fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &layer)
 {
     switch (layer.shape().size()) {
@@ -31,8 +33,6 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
                                              const vector<float> &prevPositions, const vector<float> &curPositions)
 {
     LOG(INFO) << "Computing top interactions for " << layer.name() << endl;
-
-    typedef pair<DType, pair<size_t, size_t>> Entry;
 
     auto data = prevState.data();
 
@@ -53,7 +53,7 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
         return abs(a) > abs(b);
     });
 
-    vector<Entry> result;
+    EntryList result;
     result.reserve(desiredSize);
     for (auto i : idx) {
         result.emplace_back(interactions[i], make_pair(i / shape[0], i % shape[0]));
@@ -62,12 +62,27 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
     return new ActivityAnimation(result, prevPositions.data(), curPositions.data(), -10);
 }
 
+static Animation *getDropOutAnimation(const fmri::LayerData &curState,
+                                      const vector<float> &prevPositions,
+                                      const vector<float> &curPositions) {
+    auto data = curState.data();
+    EntryList results;
+    results.reserve(curState.numEntries());
+    for (auto i : Range(curState.numEntries())) {
+        if (data[i] != 0) {
+            results.emplace_back(data[i], make_pair(i, i));
+        }
+    }
+
+    return new ActivityAnimation(results, prevPositions.data(), curPositions.data(), -10);
+}
+
 Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
                                        const fmri::LayerInfo &layer, const vector<float> &prevPositions,
                                        const vector<float> &curPositions)
 {
     if (prevPositions.empty() || curPositions.empty()) {
-        // Not all positions know, no visualisation possible.
+        // Not all positions known, no visualisation possible.
         return nullptr;
     }
 
@@ -76,6 +91,10 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
         case LayerInfo::Type::InnerProduct:
             return getFullyConnectedAnimation(prevState, layer,
                                               prevPositions, curPositions);
+
+        case LayerInfo::Type::DropOut:
+            return getDropOutAnimation(curState, prevPositions, curPositions);
+
 
         default:
             return nullptr;

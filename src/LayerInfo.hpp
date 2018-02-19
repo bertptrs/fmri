@@ -18,6 +18,7 @@ namespace fmri
             Pooling,
             Output,
             InnerProduct,
+            DropOut,
             Other
         };
 
