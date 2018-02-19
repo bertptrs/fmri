@@ -176,4 +176,35 @@ namespace fmri
         return static_cast<float>(step.count()) / static_cast<float>(modified_length.count());
     }
 
+    /**
+     * Perform an argsort partitioning on the first n elements.
+     *
+     * @tparam Iter
+     * @tparam Compare
+     * @param first First element
+     * @param middle Sorting limit
+     * @param last Past end iterator for range
+     * @param compare Comparison function to use
+     * @return A vector of the indices before the partitioning cut-off.
+     */
+    template<class Iter, class Compare>
+    std::vector<std::size_t> arg_nth_element(Iter first, Iter middle, Iter last, Compare compare)
+    {
+        using namespace std;
+
+        const auto n = static_cast<size_t>(distance(first, middle));
+        const auto total = static_cast<size_t>(distance(first, last));
+
+        vector<size_t> indices(total);
+        iota(indices.begin(), indices.end(), 0u);
+
+        nth_element(indices.begin(), indices.begin() + n, indices.end(), [=](size_t a, size_t b) {
+            return compare(*(first + a), *(first + b));
+        });
+
+        indices.resize(n);
+
+        return indices;
+    }
+
 }
