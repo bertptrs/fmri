@@ -62,8 +62,9 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
     return new ActivityAnimation(result, prevPositions.data(), curPositions.data(), -10);
 }
 
-Animation *fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerInfo &layer,
-                                      const vector<float> &prevPositions, const vector<float> &curPositions)
+Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
+                                       const fmri::LayerInfo &layer, const vector<float> &prevPositions,
+                                       const vector<float> &curPositions)
 {
     if (prevPositions.empty() || curPositions.empty()) {
         // Not all positions know, no visualisation possible.
