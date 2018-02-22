@@ -16,7 +16,6 @@ namespace fmri
             Convolutional,
             ReLU,
             Pooling,
-            Output,
             InnerProduct,
             DropOut,
             Other
