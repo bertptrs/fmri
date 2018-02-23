@@ -23,7 +23,8 @@ namespace fmri
                 0, 1, 1,
                 0, -1, 1,
         };
-        std::vector<GLuint> textureReferences;
+        GLuint texture;
         std::unique_ptr<float[]> vertexBuffer;
+        std::unique_ptr<float[]> texCoordBuffer;
     };
 }

@@ -19,19 +19,16 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
     CHECK_EQ(1, images) << "Only single input image is supported" << endl;
 
     nodePositions_.resize(channels * 3);
-    auto dataPtr = layer.data();
     const int columns = numCols(channels);
-    textureReferences.resize(channels);
+    texture = loadTexture(layer.data(), width, channels * height, channels);
     for (auto i : Range(channels)) {
-        textureReferences[i] = loadTexture(dataPtr, width, height);
-        dataPtr += width * height;
-
         nodePositions_[3 * i + 0] = 0;
         nodePositions_[3 * i + 1] = 3 * (i / columns);
         nodePositions_[3 * i + 2] = -3 * (i % columns);
     }
 
     vertexBuffer = std::make_unique<float[]>(channels * BASE_VERTICES.size());
+    texCoordBuffer = std::make_unique<float[]>(channels * 2u * BASE_VERTICES.size() / 3);
 
     auto v = 0;
 
@@ -40,35 +37,33 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
         for (auto j : Range(BASE_VERTICES.size())) {
             vertexBuffer[v++] = nodePos[j % 3] + BASE_VERTICES[j];
         }
+
+        const float textureCoords[] = {
+                1, (i + 1) / (float) channels,
+                1, i / (float) channels,
+                0, i / (float) channels,
+                0, (i + 1) / (float) channels,
+        };
+
+        memcpy(texCoordBuffer.get() + 8 * i, textureCoords, sizeof(textureCoords));
     }
 }
 
 MultiImageVisualisation::~MultiImageVisualisation()
 {
-    for (auto entry : textureReferences) {
-        glDeleteTextures(0, &entry);
-    }
+    glDeleteTextures(0, &texture);
 }
 
 void MultiImageVisualisation::render()
 {
-    static const float textureCoords[] = {
-            1, 1,
-            1, 0,
-            0, 0,
-            0, 1,
-    };
-
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    for (auto i : Range(textureReferences.size())) {
-        glBindTexture(GL_TEXTURE_2D, textureReferences[i]);
-        glTexCoordPointer(2, GL_FLOAT, 0, textureCoords);
-        glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get() + i * BASE_VERTICES.size());
-        glDrawArrays(GL_QUADS, 0, 4);
-    }
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoordBuffer.get());
+    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
+    glDrawArrays(GL_QUADS, 0, nodePositions_.size() / 3 * 4);
     glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);

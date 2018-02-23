@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include "glutils.hpp"
+#include "Range.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -21,11 +22,21 @@ static void handleGLError(GLenum error) {
     }
 }
 
-GLuint fmri::loadTexture(DType const *data, int width, int height)
+static void rescaleSubImages(vector<float>& textureBuffer, int subImages) {
+    auto cur = textureBuffer.begin();
+    const auto increment = textureBuffer.size() / subImages;
+
+    while (cur != textureBuffer.end()) {
+        rescale(cur, cur + increment, 0, 1);
+        advance(cur, increment);
+    }
+}
+
+GLuint fmri::loadTexture(DType const *data, int width, int height, int subImages)
 {
     // Load and scale texture
     vector<float> textureBuffer(data, data + (width * height));
-    rescale(textureBuffer.begin(), textureBuffer.end(), 0, 1);
+    rescaleSubImages(textureBuffer, subImages);
 
     const float color[] = {1, 1, 1}; // Background color for textures.
     GLuint texture;
