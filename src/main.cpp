@@ -156,7 +156,7 @@ static void idleFunc()
     checkGLErrors();
     glutPostRedisplay();
     throttleIdleFunc();
-    rendererData.animationStep = getAnimationStep(std::chrono::seconds(5));
+    rendererData.animationStep = (1 - cos(M_PI * getAnimationStep(std::chrono::seconds(5)))) / 2;
 }
 
 int main(int argc, char *argv[])
