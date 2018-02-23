@@ -2,6 +2,7 @@
 #include <cstring>
 #include <random>
 #include <GL/gl.h>
+#include <caffe/util/math_functions.hpp>
 #include "Range.hpp"
 #include "ActivityAnimation.hpp"
 
@@ -38,10 +39,9 @@ ActivityAnimation::ActivityAnimation(const vector<pair<DType, pair<size_t, size_
 void ActivityAnimation::draw(float timeScale)
 {
     std::unique_ptr<float[]> vertexBuffer(new float[bufferLength]);
-
-    for (auto i : Range(bufferLength)) {
-        vertexBuffer[i] = startingPos[i] + timeScale * delta[i];
-    }
+    caffe::caffe_copy(bufferLength, delta.data(), vertexBuffer.get());
+    caffe::caffe_scal(bufferLength, timeScale, vertexBuffer.get());
+    caffe::caffe_add(bufferLength, startingPos.data(), vertexBuffer.get(), vertexBuffer.get());
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
