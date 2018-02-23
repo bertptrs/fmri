@@ -11,13 +11,23 @@
 using namespace fmri;
 using namespace std;
 
+static void handleGLError(GLenum error) {
+    switch (error) {
+        case GL_NO_ERROR:
+            return;
+
+        default:
+            cerr << "OpenGL error: " << (const char*) glewGetErrorString(error) << endl;
+    }
+}
+
 GLuint fmri::loadTexture(DType const *data, int width, int height)
 {
     // Load and scale texture
-    vector<DType> textureBuffer(data, data + (width * height));
+    vector<float> textureBuffer(data, data + (width * height));
     rescale(textureBuffer.begin(), textureBuffer.end(), 0, 1);
 
-    const float color[] = {0, 0, 0}; // Background color for textures.
+    const float color[] = {1, 1, 1}; // Background color for textures.
     GLuint texture;
     glGenTextures(1, &texture);
 
@@ -28,15 +38,12 @@ GLuint fmri::loadTexture(DType const *data, int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
-    static_assert(sizeof(DType) == 4); // verify data type for texture.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 2, 2, 0, GL_R32F, GL_FLOAT, textureBuffer.data());
-
     // Set up texture scaling
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Use mipmapping for scaling down
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST); // Use mipmapping for scaling down
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest pixel when scaling up.
+    checkGLErrors();
 
-    glGenerateMipmap(GL_TEXTURE_2D);
-
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_FLOAT, textureBuffer.data());
 
     return texture;
 }
@@ -78,14 +85,7 @@ void fmri::renderText(std::string_view text)
 void fmri::checkGLErrors()
 {
     while (auto error = glGetError()) {
-        switch (glGetError()) {
-            case GL_NO_ERROR:
-                // Should not get here, but whatever.
-                return;
-
-            default:
-                cerr << "OpenGL error: " << (const char*) glewGetErrorString(error) << endl;
-        }
+        handleGLError(error);
     }
 }
 

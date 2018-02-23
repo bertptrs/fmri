@@ -52,9 +52,24 @@ MultiImageVisualisation::~MultiImageVisualisation()
 
 void MultiImageVisualisation::render()
 {
+    static const float textureCoords[] = {
+            1, 1,
+            1, 0,
+            0, 0,
+            0, 1,
+    };
+
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
-    glColor3f(0.3, 0.3, 0.3);
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
-    glDrawArrays(GL_QUADS, 0, 4 * textureReferences.size());
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    for (auto i : Range(textureReferences.size())) {
+        glBindTexture(GL_TEXTURE_2D, textureReferences[i]);
+        glTexCoordPointer(2, GL_FLOAT, 0, textureCoords);
+        glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get() + i * BASE_VERTICES.size());
+        glDrawArrays(GL_QUADS, 0, 4);
+    }
+    glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
