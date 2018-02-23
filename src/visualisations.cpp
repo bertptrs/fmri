@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <numeric>
+#include <util/math_functions.hpp>
 #include "visualisations.hpp"
 #include "DummyLayerVisualisation.hpp"
 #include "MultiImageVisualisation.hpp"
@@ -92,9 +93,10 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
     const auto numEntries = accumulate(shape.begin(), shape.end(), static_cast<size_t>(1), multiplies<void>());
 
     vector<float> interactions(numEntries);
+    const auto stepSize = shape[0];
 
-    for (auto i : Range(numEntries)) {
-        interactions[i] = weights[i] * data[i % shape[0]];
+    for (auto i : Range(numEntries / stepSize)) {
+        caffe::caffe_mul(shape[0], &weights[i * stepSize], data, &interactions[i * stepSize]);
     }
 
     const auto desiredSize = min(INTERACTION_LIMIT, numEntries);
