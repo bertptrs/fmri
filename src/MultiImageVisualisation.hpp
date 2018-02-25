@@ -5,6 +5,7 @@
 #include <memory>
 #include "LayerVisualisation.hpp"
 #include "LayerData.hpp"
+#include "Texture.hpp"
 
 namespace fmri
 {
@@ -12,7 +13,6 @@ namespace fmri
     {
     public:
         explicit MultiImageVisualisation(const LayerData&);
-        ~MultiImageVisualisation() override;
 
         void render() override;
 
@@ -23,7 +23,7 @@ namespace fmri
                 0, 1, 1,
                 0, -1, 1,
         };
-        GLuint texture;
+        Texture texture;
         std::unique_ptr<float[]> vertexBuffer;
         std::unique_ptr<float[]> texCoordBuffer;
     };

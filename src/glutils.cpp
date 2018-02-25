@@ -8,6 +8,7 @@
 #include <thread>
 #include "glutils.hpp"
 #include "Range.hpp"
+#include "Texture.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -32,17 +33,16 @@ static void rescaleSubImages(vector<float>& textureBuffer, int subImages) {
     }
 }
 
-GLuint fmri::loadTexture(DType const *data, int width, int height, int subImages)
+fmri::Texture fmri::loadTexture(DType const *data, int width, int height, int subImages)
 {
     // Load and scale texture
     vector<float> textureBuffer(data, data + (width * height));
     rescaleSubImages(textureBuffer, subImages);
 
     const float color[] = {1, 1, 1}; // Background color for textures.
-    GLuint texture;
-    glGenTextures(1, &texture);
 
-    glBindTexture(GL_TEXTURE_2D, texture);
+    Texture texture;
+    texture.bind(GL_TEXTURE_2D);
 
     // Set up (lack of) repetition
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
