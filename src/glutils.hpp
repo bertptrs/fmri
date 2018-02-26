@@ -34,7 +34,7 @@ namespace fmri {
      *
      * @param text The text to draw.
      */
-    void renderText(std::string_view text);
+    void renderText(std::string_view text, int x = 0, int y = 0);
 
     /**
      * Check if there are OpenGL errors and report them.
@@ -45,4 +45,8 @@ namespace fmri {
      * Slow down until the idle func is being called a reasonable amount of times.
      */
     void throttleIdleFunc();
+
+    void setOrthographicProjection();
+
+    void restorePerspectiveProjection();
 }

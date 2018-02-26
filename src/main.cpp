@@ -63,6 +63,15 @@ static void loadSimulationData(const Options &options)
 
 static void renderLayerName(const LayerData &data);
 
+static void renderDebugInfo()
+{
+    glLoadIdentity();
+    setOrthographicProjection();
+    glColor3f(1, 1, 0);
+    renderText(Camera::instance().infoLine(), 2, 10);
+    restorePerspectiveProjection();
+}
+
 static void render()
 {
     // Clear Color and Depth Buffers
@@ -91,6 +100,8 @@ static void render()
 
 
     glPopMatrix();
+
+    renderDebugInfo();
 
     glutSwapBuffers();
 }

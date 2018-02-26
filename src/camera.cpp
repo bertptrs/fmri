@@ -21,6 +21,24 @@ static void handleMouseMove(int x, int y)
     glutPostRedisplay();
 }
 
+static float getFPS()
+{
+    static int frames = 0;
+    static float fps = 0;
+    static auto timeBase = glutGet(GLUT_ELAPSED_TIME);
+
+    ++frames;
+    const auto time = glutGet(GLUT_ELAPSED_TIME);
+    if (time - timeBase > 2000) {
+        fps = frames * 1000.0f / (time - timeBase);
+        frames = 0;
+        timeBase = time;
+    }
+
+
+    return fps;
+}
+
 static void move(unsigned char key)
 {
     float speed = 0.5;
@@ -80,6 +98,7 @@ std::string Camera::infoLine()
     stringstream buffer;
     buffer << "Pos(x,y,z) = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ")\n";
     buffer << "Angle(p,y) = (" << angle[0] << ", " << angle[1] << ")\n";
+    buffer << "FPS = " << getFPS() << "\n";
     return buffer.str();
 }
 

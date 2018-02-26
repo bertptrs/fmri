@@ -83,12 +83,17 @@ void fmri::changeWindowSize(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 }
 
-void fmri::renderText(std::string_view text)
+void fmri::renderText(std::string_view text, int x, int y)
 {
     constexpr auto font = GLUT_BITMAP_HELVETICA_10;
-    glRasterPos2i(0, 0);
+    glRasterPos2i(x, y);
     for (char c : text) {
-        glutBitmapCharacter(font, c);
+        if (c == '\n') {
+            y += 12;
+            glRasterPos2i(x, y);
+        } else {
+            glutBitmapCharacter(font, c);
+        }
     }
 }
 
@@ -116,4 +121,33 @@ void fmri::throttleIdleFunc()
     }
 
     lastCalled = now;
+}
+
+void fmri::restorePerspectiveProjection() {
+
+    glMatrixMode(GL_PROJECTION);
+    // restore previous projection matrix
+    glPopMatrix();
+
+    // get back to modelview mode
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void fmri::setOrthographicProjection() {
+
+    // switch to projection mode
+    glMatrixMode(GL_PROJECTION);
+
+    // save previous matrix which contains the
+    //settings for the perspective projection
+    glPushMatrix();
+
+    // reset matrix
+    glLoadIdentity();
+
+    // set a 2D orthographic projection
+    gluOrtho2D(0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT), 0);
+
+    // switch back to modelview mode
+    glMatrixMode(GL_MODELVIEW);
 }
