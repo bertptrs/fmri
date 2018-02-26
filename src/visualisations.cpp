@@ -7,6 +7,7 @@
 #include "FlatLayerVisualisation.hpp"
 #include "Range.hpp"
 #include "ActivityAnimation.hpp"
+#include "InputLayerVisualisation.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -65,17 +66,27 @@ static EntryList deduplicate(const EntryList& entries)
     return result;
 }
 
-fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &layer)
+fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &data, const fmri::LayerInfo &info)
 {
-    switch (layer.shape().size()) {
-        case 2:
-            return new FlatLayerVisualisation(layer, FlatLayerVisualisation::Ordering::SQUARE);
-
-        case 4:
-            return new MultiImageVisualisation(layer);
+    switch (info.type()) {
+        case LayerInfo::Type::Input:
+            if (data.shape().size() == 4) {
+                return new InputLayerVisualisation(data);
+            } else {
+                return new FlatLayerVisualisation(data, FlatLayerVisualisation::Ordering::SQUARE);
+            }
 
         default:
-            return new DummyLayerVisualisation();
+            switch (data.shape().size()) {
+                case 2:
+                    return new FlatLayerVisualisation(data, FlatLayerVisualisation::Ordering::SQUARE);
+
+                case 4:
+                    return new MultiImageVisualisation(data);
+
+                default:
+                    return new DummyLayerVisualisation();
+            }
     }
 }
 

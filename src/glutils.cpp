@@ -8,7 +8,6 @@
 #include <thread>
 #include "glutils.hpp"
 #include "Range.hpp"
-#include "Texture.hpp"
 
 using namespace fmri;
 using namespace std;

@@ -9,10 +9,10 @@ namespace fmri {
     /**
      * Generate a static visualisation of a layer state.
      *
-     * @param layer
+     * @param data
      * @return A (possibly empty) visualisation. The caller is responsible for deallocating.
      */
-    LayerVisualisation* getVisualisationForLayer(const LayerData& layer);
+    fmri::LayerVisualisation *getVisualisationForLayer(const fmri::LayerData &data, const fmri::LayerInfo &info);
 
     Animation * getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
                                      const fmri::LayerInfo &layer, const vector<float> &prevPositions,
