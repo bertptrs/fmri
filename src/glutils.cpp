@@ -38,21 +38,8 @@ fmri::Texture fmri::loadTexture(DType const *data, int width, int height, int su
     vector<float> textureBuffer(data, data + (width * height));
     rescaleSubImages(textureBuffer, subImages);
 
-    const float color[] = {1, 1, 1}; // Background color for textures.
-
     Texture texture;
-    texture.bind(GL_TEXTURE_2D);
-
-    // Set up (lack of) repetition
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-
-    // Set up texture scaling
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST); // Use mipmapping for scaling down
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest pixel when scaling up.
-    checkGLErrors();
-
+    texture.configure(GL_TEXTURE_2D);
     gluBuild2DMipmaps(GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_FLOAT, textureBuffer.data());
 
     return texture;

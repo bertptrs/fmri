@@ -61,14 +61,7 @@ InputLayerVisualisation::InputLayerVisualisation(const LayerData &data)
         nodePositions_.push_back(nodePositions_[i % 3]);
     }
 
-    texture.bind(GL_TEXTURE_2D);
-    // Set up (lack of) repetition
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-
-    // Set up texture scaling
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST); // Use mipmapping for scaling down
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use nearest pixel when scaling up.
+    texture.configure(GL_TEXTURE_2D);
     gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_FLOAT, imageData.data());
 }
 

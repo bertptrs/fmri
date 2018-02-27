@@ -36,6 +36,7 @@ namespace fmri
          * @param target valid target for glBindTexture.
          */
         void bind(GLenum target) const;
+        void configure(GLenum target) const;
 
     private:
         GLuint id;
