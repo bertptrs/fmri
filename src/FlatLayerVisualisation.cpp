@@ -83,32 +83,11 @@ void FlatLayerVisualisation::initializeNodePositions()
 {
     switch (ordering) {
         case Ordering::LINE:
-            computeNodePositionsLine();
+            initNodePositions<Ordering::LINE>(faceCount / 4, 2);
             break;
 
         case Ordering::SQUARE:
-            computeNodePositionsSquare();
+            initNodePositions<Ordering::SQUARE>(faceCount / 4, 2);
             break;
-    }
-}
-
-void FlatLayerVisualisation::computeNodePositionsSquare()
-{
-    const auto nodes = static_cast<int>(faceCount / 4);
-    const auto columns = numCols(nodes);
-
-    for (auto i : Range(nodes)) {
-        nodePositions_[3 * i + 0] = 0;
-        nodePositions_[3 * i + 1] = 2 * (i / columns);
-        nodePositions_[3 * i + 2] = -2 * (i % columns);
-    }
-}
-
-void FlatLayerVisualisation::computeNodePositionsLine()
-{
-    for (auto i : Range(static_cast<int>(faceCount / 4))) {
-        nodePositions_[3 * i + 0] = 0;
-        nodePositions_[3 * i + 1] = 0;
-        nodePositions_[3 * i + 2] = -2.0f * i;
     }
 }

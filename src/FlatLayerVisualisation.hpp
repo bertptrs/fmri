@@ -10,11 +10,6 @@ namespace fmri
     class FlatLayerVisualisation : public LayerVisualisation
     {
     public:
-        enum class Ordering {
-            LINE,
-            SQUARE,
-        };
-
         explicit FlatLayerVisualisation(const LayerData &layer, Ordering ordering);
 
         void render() override;
@@ -43,7 +38,5 @@ namespace fmri
 
         // Various functions defining the way the nodes will be aligned.
         void initializeNodePositions();
-        void computeNodePositionsLine();
-        void computeNodePositionsSquare();
     };
 }

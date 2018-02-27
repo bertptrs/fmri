@@ -7,8 +7,13 @@ namespace fmri
     class LayerVisualisation
     {
     public:
+        enum class Ordering {
+            LINE,
+            SQUARE,
+        };
+
         LayerVisualisation() = default;
-        LayerVisualisation(size_t numNodes);
+        explicit LayerVisualisation(size_t numNodes);
         virtual ~LayerVisualisation() = default;
 
         virtual void render() = 0;
@@ -16,5 +21,8 @@ namespace fmri
 
     protected:
         std::vector<float> nodePositions_;
+
+        template<Ordering Order>
+        void initNodePositions(size_t n, float spacing);
     };
 }

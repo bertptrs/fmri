@@ -18,14 +18,8 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
     CHECK_EQ(1, images) << "Only single input image is supported" << endl;
 
-    nodePositions_.resize(channels * 3);
-    const int columns = numCols(channels);
     texture = loadTexture(layer.data(), width, channels * height, channels);
-    for (auto i : Range(channels)) {
-        nodePositions_[3 * i + 0] = 0;
-        nodePositions_[3 * i + 1] = 3 * (i / columns);
-        nodePositions_[3 * i + 2] = -3 * (i % columns);
-    }
+    initNodePositions<Ordering::SQUARE>(channels, 3);
 
     vertexBuffer = std::make_unique<float[]>(channels * BASE_VERTICES.size());
     texCoordBuffer = std::make_unique<float[]>(channels * 2u * BASE_VERTICES.size() / 3);
