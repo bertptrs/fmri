@@ -8,6 +8,7 @@
 #include "Range.hpp"
 #include "ActivityAnimation.hpp"
 #include "InputLayerVisualisation.hpp"
+#include "PoolingLayerAnimation.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -187,6 +188,9 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
 
         case LayerInfo::Type::ReLU:
             return getReLUAnimation(prevState, curState, prevPositions, curPositions);
+
+        case LayerInfo::Type::Pooling:
+            return new PoolingLayerAnimation(prevState, curState, prevPositions, curPositions, -10);
 
         default:
             return nullptr;

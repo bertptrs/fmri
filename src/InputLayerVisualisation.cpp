@@ -68,7 +68,6 @@ InputLayerVisualisation::InputLayerVisualisation(const LayerData &data)
 void InputLayerVisualisation::render()
 {
     const float vertices[] = {
-            // Position, texture coordinates
             0, 0, 0,
             0, 0, -targetWidth,
             0, targetHeight, -targetWidth,
