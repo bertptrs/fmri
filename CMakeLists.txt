@@ -68,3 +68,7 @@ target_link_libraries(fmri ${OPENGL_LIBRARIES})
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIRS})
 target_link_libraries(fmri ${GLEW_LIBRARIES})
+
+
+# Allow the package to be installed
+install(TARGETS fmri DESTINATION bin)
