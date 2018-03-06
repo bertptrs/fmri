@@ -31,6 +31,7 @@ ActivityAnimation::ActivityAnimation(
         :
         bufferLength(3 * interactions.size())
 {
+    CHECK(coloring) << "Invalid coloring function passed.";
     startingPos.reserve(bufferLength);
     delta.reserve(bufferLength);
     colorBuf.reserve(interactions.size());

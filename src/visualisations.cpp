@@ -165,7 +165,15 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
 
     results = deduplicate(results);
 
-    return new ActivityAnimation(results, prevPositions.data(), curPositions.data(), -10);
+    const auto maxValue = max_element(results.begin(), results.end())->first;
+
+    return new ActivityAnimation(results, prevPositions.data(), curPositions.data(), -10, [=](float i) -> ActivityAnimation::Color {
+        if (maxValue == 0) {
+            return {1, 1, 1};
+        } else {
+            return {1 - i / maxValue, 1 - i / maxValue, 1};
+        }
+    });
 }
 
 Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
