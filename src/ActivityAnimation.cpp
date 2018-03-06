@@ -9,8 +9,26 @@
 using namespace std;
 using namespace fmri;
 
-ActivityAnimation::ActivityAnimation(const vector<pair<DType, pair<size_t, size_t>>> &interactions,
-                                     const float *aPositions, const float *bPositions, float xDist) :
+ActivityAnimation::Color ActivityAnimation::colorBySign(float intensity)
+{
+    if (intensity > 0) {
+        return {0, 1, 0};
+    } else {
+        return {1, 0, 0};
+    }
+};
+
+ActivityAnimation::ActivityAnimation(
+        const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions, const float *aPositions,
+        const float *bPositions, float xDist) :
+        ActivityAnimation(interactions, aPositions, bPositions, xDist, ActivityAnimation::colorBySign)
+{
+}
+
+ActivityAnimation::ActivityAnimation(
+        const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
+        const float *aPositions, const float *bPositions, float xDist, ColoringFunction coloring)
+        :
         bufferLength(3 * interactions.size())
 {
     startingPos.reserve(bufferLength);
@@ -21,13 +39,7 @@ ActivityAnimation::ActivityAnimation(const vector<pair<DType, pair<size_t, size_
         auto *aPos = &aPositions[3 * entry.second.first];
         auto *bPos = &bPositions[3 * entry.second.second];
 
-        array<float, 3> color;
-        if (entry.first > 0) {
-            color = {0, 1, 0};
-        } else {
-            color = {1, 0, 0};
-        }
-        colorBuf.push_back(color);
+        colorBuf.push_back(coloring(entry.first));
 
         for (auto i : Range(3)) {
             startingPos.emplace_back(aPos[i]);
