@@ -176,6 +176,44 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
     });
 }
 
+static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, const LayerData &curState,
+                                          const vector<float> &prevPositions,
+                                          const vector<float> &curPositions) {
+    CHECK(prevState.shape() == curState.shape()) << "Shapes should be of equal size" << endl;
+    vector<DType> scaling(std::accumulate(prevState.shape().begin(), prevState.shape().end(), 1u, multiplies<void>()));
+    caffe::caffe_div(scaling.size(), prevState.data(), curState.data(), scaling.data());
+
+    // Fix divisions by zero. For those cases, pick 1 since it doesn't matter anyway.
+    for (auto &s : scaling) {
+        if (!isnormal(s)) {
+            s = 1;
+        }
+    }
+
+    if (prevState.shape().size() == 2) {
+        EntryList entries;
+        entries.reserve(scaling.size());
+        for (auto i : Range(scaling.size())) {
+            entries.emplace_back(scaling[i], make_pair(i, i));
+        }
+
+        auto max_val = *max_element(scaling.begin(), scaling.end());
+
+        return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(),-10,  [=](float i) -> ActivityAnimation::Color {
+            auto intensity = clamp((i - 1) / (max_val - 1), 0.f, 1.f);
+            return {
+                    1 - intensity,
+                    1,
+                    1
+            };
+        });
+    } else {
+        // TODO: do something for image-like layers.
+    }
+
+    return nullptr;
+}
+
 Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
                                        const fmri::LayerInfo &layer, const vector<float> &prevPositions,
                                        const vector<float> &curPositions)
@@ -199,6 +237,9 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
 
         case LayerInfo::Type::Pooling:
             return new PoolingLayerAnimation(prevState, curState, prevPositions, curPositions, -10);
+
+        case LayerInfo::Type::LRN:
+            return getNormalizingAnimation(prevState, curState, prevPositions, curPositions);
 
         default:
             return nullptr;

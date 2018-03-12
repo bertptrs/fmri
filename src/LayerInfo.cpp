@@ -18,6 +18,8 @@ LayerInfo::Type LayerInfo::typeByName(string_view name)
         return Type::InnerProduct;
     } else if (name == "Dropout") {
         return Type::DropOut;
+    } else if (name == "LRN") {
+        return Type::LRN;
     } else {
         LOG(INFO) << "Received unknown layer type: " << name << endl;
         return Type::Other;
