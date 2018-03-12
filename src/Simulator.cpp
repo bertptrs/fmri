@@ -33,6 +33,8 @@ struct Simulator::Impl
     void computeLayerInfo();
 
     void loadMeans(const string &means_file);
+
+    void ensureNoInPlaceLayers();
 };
 
 // Create simple forwarding functions.
@@ -50,6 +52,7 @@ Simulator::Impl::Impl(const string& model_file, const string& weights_file, cons
 	net(model_file, TEST)
 {
 	net.CopyTrainedLayersFrom(weights_file);
+    ensureNoInPlaceLayers();
 
 	auto input_layer = net.input_blobs()[0];
 	input_geometry = cv::Size(input_layer->width(), input_layer->height());
@@ -204,6 +207,17 @@ void Simulator::Impl::computeLayerInfo()
         auto& layer = layers[i];
         layerInfo_.emplace(names[i], LayerInfo(names[i], layer->type(), layer->blobs()));
     }
+}
+
+void Simulator::Impl::ensureNoInPlaceLayers()
+{
+    auto blobList = net.top_vecs();
+    typeof(blobList) uniqueVecs;
+    unique_copy(blobList.begin(), blobList.end(), back_inserter(uniqueVecs));
+
+    LOG_IF(ERROR, blobList.size() != uniqueVecs.size())
+        << "Network file contains in-place layers, layer-state will not be accurate\n"
+        << "If accurate results are desired, see the deinplace script in tools." << endl;
 }
 
 Simulator::~Simulator()
