@@ -9,6 +9,7 @@
 #include "ActivityAnimation.hpp"
 #include "InputLayerVisualisation.hpp"
 #include "PoolingLayerAnimation.hpp"
+#include "ImageInteractionAnimation.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -204,10 +205,9 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
             };
         });
     } else {
-        // TODO: do something for image-like layers.
+        transform(scaling.begin(), scaling.end(), scaling.begin(), [](float x) { return log(x); });
+        return new ImageInteractionAnimation(scaling.data(), prevState.shape(), prevPositions, curPositions, -10);
     }
-
-    return nullptr;
 }
 
 Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,
