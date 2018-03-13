@@ -21,6 +21,5 @@ namespace fmri
         std::vector<float> textureCoordinates;
 
         static Texture loadTextureForData(const LayerData& data);
-        static std::vector<float> computePositions(const std::vector<float> &nodePositions, float scaling = 1);
     };
 }

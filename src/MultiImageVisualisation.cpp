@@ -20,27 +20,8 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
     texture = loadTexture(layer.data(), width, channels * height, channels);
     initNodePositions<Ordering::SQUARE>(channels, 3);
-
-    vertexBuffer = std::make_unique<float[]>(channels * BASE_VERTICES.size());
-    texCoordBuffer = std::make_unique<float[]>(channels * 2u * BASE_VERTICES.size() / 3);
-
-    auto v = 0;
-
-    for (auto i : Range(channels)) {
-        const auto& nodePos = &nodePositions_[3 * i];
-        for (auto j : Range(BASE_VERTICES.size())) {
-            vertexBuffer[v++] = nodePos[j % 3] + BASE_VERTICES[j];
-        }
-
-        const float textureCoords[] = {
-                1, (i + 1) / (float) channels,
-                1, i / (float) channels,
-                0, i / (float) channels,
-                0, (i + 1) / (float) channels,
-        };
-
-        memcpy(texCoordBuffer.get() + 8 * i, textureCoords, sizeof(textureCoords));
-    }
+    vertexBuffer = getVertices(nodePositions_);
+    texCoordBuffer = getTexCoords(channels);
 }
 
 void MultiImageVisualisation::render()
@@ -50,10 +31,47 @@ void MultiImageVisualisation::render()
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     texture.bind(GL_TEXTURE_2D);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoordBuffer.get());
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
-    glDrawArrays(GL_QUADS, 0, nodePositions_.size() / 3 * 4);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoordBuffer.data());
+    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
+    glDrawArrays(GL_QUADS, 0, vertexBuffer.size() / 3);
     glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+vector<float> MultiImageVisualisation::getVertices(const std::vector<float> &nodePositions, float scaling)
+{
+    std::vector<float> vertices;
+    vertices.reserve(nodePositions.size() * BASE_VERTICES.size() / 3);
+    for (auto i = 0u; i < nodePositions.size(); i += 3) {
+        auto pos = &nodePositions[i];
+        for (auto j = 0u; j < BASE_VERTICES.size(); ++j) {
+            vertices.push_back(BASE_VERTICES[j] * scaling + pos[j % 3]);
+        }
+    }
+
+    return vertices;
+}
+
+std::vector<float> MultiImageVisualisation::getTexCoords(int n)
+{
+    std::vector<float> coords;
+    coords.reserve(8 * n);
+
+    const float channels = n;
+
+    for (int i = 0; i < n; ++i) {
+        std::array<float, 8> textureCoords = {
+                1, (i + 1) / channels,
+                1, i / channels,
+                0, i / channels,
+                0, (i + 1) / channels,
+        };
+
+        for (auto coord : textureCoords) {
+            coords.push_back(coord);
+        }
+    }
+
+    return coords;
 }

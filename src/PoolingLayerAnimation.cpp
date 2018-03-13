@@ -14,31 +14,14 @@ PoolingLayerAnimation::PoolingLayerAnimation(const LayerData &prevData, const La
                                              const std::vector<float> &curPositions, float xDist) :
         original(loadTextureForData(prevData)),
         downSampled(loadTextureForData(curData)),
-        startingPositions(computePositions(prevPositions)),
-        deltas(startingPositions.size())
+        startingPositions(MultiImageVisualisation::getVertices(prevPositions)),
+        deltas(startingPositions.size()),
+        textureCoordinates(MultiImageVisualisation::getTexCoords(prevPositions.size() / 3))
 {
     CHECK_EQ(prevPositions.size(), curPositions.size()) << "Layers should be same size. Caffe error?";
-
-    const float channels = curData.shape()[1];
-    textureCoordinates.reserve(curPositions.size() / 3 * 4);
-
     const auto downScaling = sqrt(
             static_cast<float>(curData.shape()[2] * curData.shape()[3]) / (prevData.shape()[2] * prevData.shape()[3]));
-
-    for (auto i : Range(prevPositions.size() / 3)) {
-        const array<float, 8> nodeTexCoords = {
-                1, (i + 1) / channels,
-                1, i / channels,
-                0, i / channels,
-                0, (i + 1) / channels,
-        };
-
-        for (auto coord : nodeTexCoords) {
-            textureCoordinates.push_back(coord);
-        }
-    }
-
-    const auto targetPositions = computePositions(curPositions, downScaling);
+    const auto targetPositions = MultiImageVisualisation::getVertices(curPositions, downScaling);
     caffe::caffe_sub(targetPositions.size(), targetPositions.data(), startingPositions.data(), deltas.data());
 
     for (auto i = 0u; i < deltas.size(); i+=3) {
@@ -72,19 +55,4 @@ Texture PoolingLayerAnimation::loadTextureForData(const LayerData &data)
 
     auto channels = data.shape()[1], width = data.shape()[2], height = data.shape()[3];
     return loadTexture(data.data(), width, height * channels, channels);
-}
-
-vector<float> PoolingLayerAnimation::computePositions(const vector<float> &nodePositions, float scaling)
-{
-    vector<float> positions;
-    positions.reserve(4 * nodePositions.size());
-
-    for (auto i : Range(nodePositions.size() / 3)) {
-        const float *pos = &nodePositions[3 * i];
-        for (auto j : Range(MultiImageVisualisation::BASE_VERTICES.size())) {
-            positions.push_back(pos[j % 3] + MultiImageVisualisation::BASE_VERTICES[j] * scaling);
-        }
-    }
-
-    return positions;
 }

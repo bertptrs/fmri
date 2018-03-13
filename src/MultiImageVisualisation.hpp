@@ -22,9 +22,12 @@ namespace fmri
 
         void render() override;
 
+        static vector<float> getVertices(const std::vector<float> &nodePositions, float scaling = 1);
+        static std::vector<float> getTexCoords(int n);
+
     private:
         Texture texture;
-        std::unique_ptr<float[]> vertexBuffer;
-        std::unique_ptr<float[]> texCoordBuffer;
+        std::vector<float> vertexBuffer;
+        std::vector<float> texCoordBuffer;
     };
 }

@@ -207,4 +207,21 @@ namespace fmri
         return indices;
     }
 
+    /**
+     * Fix non-normal floating point values in a range.
+     *
+     * @tparam It
+     * @param first Start of range iterator
+     * @param last Past the end of range iterator
+     * @param normalValue Value to assign to non-normal values. Default 1.
+     */
+    template<class It>
+    inline void normalize(It first, It last, typename std::iterator_traits<It>::value_type normalValue = 1)
+    {
+        for (; first != last; ++first) {
+            if (!std::isnormal(*first)) {
+                *first = normalValue;
+            }
+        }
+    }
 }

@@ -184,11 +184,7 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
     caffe::caffe_div(scaling.size(), prevState.data(), curState.data(), scaling.data());
 
     // Fix divisions by zero. For those cases, pick 1 since it doesn't matter anyway.
-    for (auto &s : scaling) {
-        if (!isnormal(s)) {
-            s = 1;
-        }
-    }
+    normalize(scaling.begin(), scaling.end());
 
     if (prevState.shape().size() == 2) {
         EntryList entries;
