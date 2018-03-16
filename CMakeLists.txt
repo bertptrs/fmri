@@ -7,9 +7,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 # Enable modern C++ features
 set(CMAKE_CXX_STANDARD 17)
 
-# Enable better warnings
-set(COMPILE_OPTIONS "-Wall -Wextra -pedantic")
-
 # Define executable and dependencies
 file(GLOB fmri_SRC
 	"src/*.cpp"
@@ -18,14 +15,17 @@ file(GLOB fmri_SRC
 
 add_executable(fmri ${fmri_SRC})
 
+# Enable better warnings
+target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
+
 # Enable CUDA if available
 find_package(CUDA)
 if (CUDA_FOUND)
 	include_directories(${CUDA_INCLUDE_DIRS})
 	target_link_libraries(fmri ${CUDA_LIBS})
-else(CUDA_FOUND)
+else()
 	add_definitions(-DCPU_ONLY)
-endif(CUDA_FOUND)
+endif()
 
 
 # Library dependencies

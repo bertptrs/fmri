@@ -16,7 +16,7 @@ ActivityAnimation::Color ActivityAnimation::colorBySign(float intensity)
     } else {
         return {1, 0, 0};
     }
-};
+}
 
 ActivityAnimation::ActivityAnimation(
         const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions, const float *aPositions,
