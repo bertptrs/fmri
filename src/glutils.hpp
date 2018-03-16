@@ -49,4 +49,16 @@ namespace fmri {
     void setOrthographicProjection();
 
     void restorePerspectiveProjection();
+
+    /**
+     * Draw a series of textured tiles to the screen.
+     *
+     * This function ends up drawing GL_QUADS.
+     *
+     * @param n Number of vertices
+     * @param vertexBuffer
+     * @param textureCoords
+     * @param texture
+     */
+    void drawImageTiles(int n, const float* vertexBuffer, const float* textureCoords, const Texture& texture);
 }

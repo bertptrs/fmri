@@ -12,17 +12,7 @@ void ImageInteractionAnimation::draw(float step)
     caffe::caffe_scal(deltas.size(), step, vertexBuffer.data());
     caffe::caffe_add(vertexBuffer.size(), vertexBuffer.data(), startingPositions.data(), vertexBuffer.data());
 
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    texture.bind(GL_TEXTURE_2D);
-    glTexCoordPointer(2, GL_FLOAT, 0, textureCoordinates.data());
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
-    glDrawArrays(GL_QUADS, 0, vertexBuffer.size() / 3);
-    glDisable(GL_TEXTURE_2D);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), texture);
 }
 
 ImageInteractionAnimation::ImageInteractionAnimation(const DType *data, const std::vector<int> &shape,

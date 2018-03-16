@@ -26,17 +26,7 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
 
 void MultiImageVisualisation::render()
 {
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    texture.bind(GL_TEXTURE_2D);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoordBuffer.data());
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
-    glDrawArrays(GL_QUADS, 0, vertexBuffer.size() / 3);
-    glDisable(GL_TEXTURE_2D);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), texCoordBuffer.data(), texture);
 }
 
 vector<float> MultiImageVisualisation::getVertices(const std::vector<float> &nodePositions, float scaling)

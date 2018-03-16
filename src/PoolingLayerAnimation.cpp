@@ -35,17 +35,7 @@ void PoolingLayerAnimation::draw(float timeStep)
     caffe::caffe_scal(vertexBuffer.size(), timeStep, vertexBuffer.data());
     caffe::caffe_add(startingPositions.size(), startingPositions.data(), vertexBuffer.data(), vertexBuffer.data());
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    original.bind(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureCoordinates.data());
-    glDrawArrays(GL_QUADS, 0, vertexBuffer.size() / 3);
-    glDisable(GL_TEXTURE_2D);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), original);
 }
 
 Texture PoolingLayerAnimation::loadTextureForData(const LayerData &data)
