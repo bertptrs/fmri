@@ -1,7 +1,6 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include <GL/glew.h>
 #include <cstring>
 #include <glog/logging.h>
 #include <chrono>
@@ -18,7 +17,7 @@ static void handleGLError(GLenum error) {
             return;
 
         default:
-            cerr << "OpenGL error: " << (const char*) glewGetErrorString(error) << endl;
+            cerr << "OpenGL error: " << (const char*) gluGetString(error) << endl;
     }
 }
 

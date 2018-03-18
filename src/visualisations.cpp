@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <numeric>
-#include <util/math_functions.hpp>
+#include <caffe/util/math_functions.hpp>
 #include "visualisations.hpp"
 #include "DummyLayerVisualisation.hpp"
 #include "MultiImageVisualisation.hpp"

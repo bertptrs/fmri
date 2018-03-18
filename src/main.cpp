@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <iostream>
 #include <glog/logging.h>
-#include <GL/glew.h>
 #include <GL/glut.h>
 #include <map>
 
@@ -191,12 +190,6 @@ int main(int argc, char *argv[])
     glutSpecialFunc(specialKeyFunc);
 
     Camera::instance().registerControls();
-
-    glewInit();
-    if (!GLEW_VERSION_2_0) {
-        cerr << "OpenGL 2.0 not available" << endl;
-        return 2;
-    }
 
     rendererData.currentData = rendererData.data.begin();
     updateVisualisers();
