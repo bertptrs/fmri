@@ -7,10 +7,10 @@ networks.
 
 The following programs/libraries need to be installed on your system:
 
-- CMake (at least 3.1)
+- CMake (at least 3.8)
 - Caffe
 - Google log (glog)
-- OpenCV
+- OpenCV (at least 2.6, 3.x works fine.)
 - Boost System
 - PNG++
 
