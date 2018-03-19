@@ -45,4 +45,10 @@ find_package_handle_standard_args(GLOG DEFAULT_MSG
 if(GLOG_FOUND)
     set(GLOG_INCLUDE_DIRS ${GLOG_INCLUDE_DIR})
     set(GLOG_LIBRARIES ${GLOG_LIBRARY})
+
+    add_library(Glog::Glog UNKNOWN IMPORTED)
+    set_target_properties(Glog::Glog PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${GLOG_INCLUDE_DIR}
+        IMPORTED_LOCATION ${GLOG_LIBRARY}
+        )
 endif()

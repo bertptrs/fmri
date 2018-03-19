@@ -40,7 +40,7 @@ find_package(png++ REQUIRED)
 target_link_libraries(fmri PUBLIC
 	${OpenCV_LIBS}
 	${Caffe_LIBRARIES}
-	${GLOG_LIBRARIES}
+	Glog::Glog
 	Boost::system
 	GLUT::GLUT
 	OpenGL::GLU
