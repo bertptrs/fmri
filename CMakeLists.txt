@@ -19,11 +19,12 @@ add_executable(fmri ${fmri_SRC})
 target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
 
 # Enable CUDA if available
-find_package(CUDA)
+find_package(CUDA QUIET)
 if (CUDA_FOUND)
-	target_include_directories(fmri PUBLIC ${CUDA_INCLUDE_DIRS})
-	target_link_libraries(fmri PUBLIC ${CUDA_LIBS})
+	message("CUDA found, enabling support")
+	target_link_libraries(fmri PUBLIC CUDA::CUDA)
 else()
+	message("No CUDA, compiling CPU-only mode")
 	add_definitions(-DCPU_ONLY)
 endif()
 
@@ -36,20 +37,19 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(png++ REQUIRED)
 
-target_include_directories(fmri PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(fmri PUBLIC
 	${OpenCV_LIBS}
 	${Caffe_LIBRARIES}
-	${png++_LIBRARIES}
 	${GLOG_LIBRARIES}
 	Boost::system
 	GLUT::GLUT
 	OpenGL::GLU
+	png++::png++
 	)
 
 target_include_directories(fmri PUBLIC
 	${Caffe_INCLUDE_DIRS}
-	)
+	${OpenCV_INCLUDE_DIRS})
 
 # Allow the package to be installed
 install(TARGETS fmri DESTINATION bin)

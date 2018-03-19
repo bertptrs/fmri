@@ -58,4 +58,9 @@ find_package_handle_standard_args(png++ DEFAULT_MSG
 if(png++_FOUND)
     set(png++_INCLUDE_DIRS ${png++_INCLUDE_DIR})
     set(png++_LIBRARIES ${png++_LIBRARY})
+
+    add_library(png++::png++ INTERFACE IMPORTED)
+    set_target_properties(png++::png++ PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${png++_INCLUDE_DIR}
+        INTERFACE_LINK_LIBRARIES PNG::PNG)
 endif()
