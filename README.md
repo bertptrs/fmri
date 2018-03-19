@@ -34,7 +34,9 @@ Caffe is available from the Ubuntu repositories from version 17.10
 process. The commands required are as follows:
 
     # Install dependencies
-    sudo apt install caffe-cpu-dev freeglut3-dev libpng++-dev build-essential cmake
+    sudo apt install libcaffe-cpu-dev freeglut3-dev libpng++-dev \
+        build-essential cmake libopencv-dev libboost-system-dev \
+        libgoogle-glog-dev libblas-dev libprotobuf-dev
 
     # Do the build normally
 
