@@ -61,3 +61,30 @@ build as follows. Starting from the project root:
     make
 
 Compilation is a little slow due to the inclusion of Boost.
+
+## Usage
+
+This program can operate on most Caffe models, provided they don't
+split/merge the input, since the visualisers cannot handle more than
+one input.
+
+There is one valid model provided, Caffenet. It can be downloaded by
+running `./download-models.sh` from the data folder.
+
+After that, you can, for example, run the program as follows
+(assuming you are in the build directory)
+
+    ./fmri -n ../data/models/caffenet/model-dedup.prototxt \
+        -w ../data/models/caffenet/bvlc_reference_caffenet.caffemodel \
+        -l ../data/ilsvrc12/synset_words.txt \
+        ../data/samples/*.jpg
+
+This will run the network on the deduplicated caffenet (see: limitations)
+with the correct weights file and the labels file supplied, on all jpegs
+located in the samples folder. More advanced usage can be discovered using
+the `-h` option of the executable.
+
+### Controls
+
+You can move around with the WASD keys, and look around using the mouse.
+Arrow keys change the currently loaded input.
