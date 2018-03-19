@@ -18,30 +18,14 @@ add_executable(fmri ${fmri_SRC})
 # Enable better warnings
 target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
 
-# Enable CUDA if available
-find_package(CUDA QUIET)
-if (CUDA_FOUND)
-	message("CUDA found, enabling support")
-	target_link_libraries(fmri PUBLIC CUDA::CUDA)
-else()
-	message("No CUDA, compiling CPU-only mode")
-	add_definitions(-DCPU_ONLY)
-endif()
-
 # Find dependencies
-find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
 find_package(Caffe REQUIRED)
-find_package(Glog REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(png++ REQUIRED)
 
 target_link_libraries(fmri PUBLIC
-	${OpenCV_LIBS}
-	${Caffe_LIBRARIES}
-	Glog::Glog
-	Boost::system
+	Caffe::Caffe
 	GLUT::GLUT
 	OpenGL::GLU
 	png++::png++
