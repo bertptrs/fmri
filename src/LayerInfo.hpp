@@ -19,6 +19,8 @@ namespace fmri
             InnerProduct,
             DropOut,
             LRN,
+            Split,
+            Softmax,
             Other
         };
 
@@ -31,9 +33,15 @@ namespace fmri
 
         static Type typeByName(std::string_view name);
 
+        friend std::ostream& operator<<(std::ostream& out, Type type);
+
     private:
         std::vector<boost::shared_ptr<caffe::Blob<DType>>> parameters_;
         Type type_;
         std::string name_;
+
+        const static std::unordered_map<std::string_view, Type> NAME_TYPE_MAP;
     };
+
+    std::ostream& operator<<(std::ostream& out, LayerInfo::Type type);
 }

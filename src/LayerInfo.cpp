@@ -3,24 +3,24 @@
 using namespace std;
 using namespace fmri;
 
+const unordered_map<string_view, LayerInfo::Type> LayerInfo::NAME_TYPE_MAP = {
+        {"Input", Type::Input},
+        {"Convolution", Type::Convolutional},
+        {"ReLU", Type::ReLU},
+        {"Pooling", Type::Pooling},
+        {"InnerProduct", Type::InnerProduct},
+        {"DropOut", Type::DropOut},
+        {"LRN", Type::LRN},
+        {"Split", Type::Split},
+        {"Softmax", Type::Softmax}
+};
+
 
 LayerInfo::Type LayerInfo::typeByName(string_view name)
 {
-    if (name == "Input") {
-        return Type::Input;
-    } else if (name == "Convolution") {
-        return Type::Convolutional;
-    } else if (name == "ReLU") {
-        return Type::ReLU;
-    } else if (name == "Pooling") {
-        return Type::Pooling;
-    } else if (name == "InnerProduct") {
-        return Type::InnerProduct;
-    } else if (name == "Dropout") {
-        return Type::DropOut;
-    } else if (name == "LRN") {
-        return Type::LRN;
-    } else {
+    try {
+        return NAME_TYPE_MAP.at(name);
+    } catch (std::out_of_range &e) {
         LOG(INFO) << "Received unknown layer type: " << name << endl;
         return Type::Other;
     }
@@ -46,3 +46,17 @@ const std::vector<boost::shared_ptr<caffe::Blob<DType>>>& LayerInfo::parameters(
 {
     return parameters_;
 }
+
+std::ostream &fmri::operator<<(std::ostream &out, LayerInfo::Type type)
+{
+    for (auto i : LayerInfo::NAME_TYPE_MAP) {
+        if (i.second == type) {
+            out << i.first;
+            return out;
+        }
+    }
+
+    out << "ERROR! UNSUPPORTED TYPE";
+    return out;
+}
+

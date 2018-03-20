@@ -205,7 +205,9 @@ void Simulator::Impl::computeLayerInfo()
 
     for (auto i : Range(names.size())) {
         auto& layer = layers[i];
-        layerInfo_.emplace(names[i], LayerInfo(names[i], layer->type(), layer->blobs()));
+        LayerInfo layerInfo(names[i], layer->type(), layer->blobs());
+        CHECK_NE(layerInfo.type(), LayerInfo::Type::Split) << "Split layers are not supported!";
+        layerInfo_.emplace(names[i], std::move(layerInfo));
     }
 }
 
