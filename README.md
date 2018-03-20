@@ -79,7 +79,7 @@ After that, you can, for example, run the program as follows
         -l ../data/ilsvrc12/synset_words.txt \
         ../data/samples/*.jpg
 
-This will run the network on the deduplicated caffenet (see: limitations)
+This will run the network on the deduplicated caffenet (see: [limitations](#lmitations))
 with the correct weights file and the labels file supplied, on all jpegs
 located in the samples folder. More advanced usage can be discovered using
 the `-h` option of the executable.
@@ -88,3 +88,32 @@ the `-h` option of the executable.
 
 You can move around with the WASD keys, and look around using the mouse.
 Arrow keys change the currently loaded input.
+
+## Limitations
+
+The following documents the limitations currently present in the program,
+including possible workarounds. Note that these may change at any time.
+
+### No in-place layers
+
+Due to the way Caffe works, this program cannot properly extract state
+data from networks that use in-place computation, since it cannot observe
+the input- and output state of each layer.
+
+To work around this, a simple script `deinplace.py` is included in the tools
+folder. To use it, first run make (requires `protoc` to be on your PATH) and
+then run it on your program. To see what options it supports, use its `-h`
+option.
+
+### Single input/output
+
+The visualisation structuree only supports linear networks. That is: network
+where each layer only ever reads from one input layer and only produces one
+output. This is not a fundamental limitation, and could be reworked in future
+versions.
+
+### Data input layer only
+
+The program only supports reading input from image files, rather than using
+LLDB or LevelDB sources. Render your inputs to an image format of choice to
+use the program.
