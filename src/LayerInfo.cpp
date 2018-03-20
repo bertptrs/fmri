@@ -9,7 +9,7 @@ const unordered_map<string_view, LayerInfo::Type> LayerInfo::NAME_TYPE_MAP = {
         {"ReLU", Type::ReLU},
         {"Pooling", Type::Pooling},
         {"InnerProduct", Type::InnerProduct},
-        {"DropOut", Type::DropOut},
+        {"Dropout", Type::DropOut},
         {"LRN", Type::LRN},
         {"Split", Type::Split},
         {"Softmax", Type::Softmax}
