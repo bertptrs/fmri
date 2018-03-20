@@ -33,7 +33,8 @@ def load_net(args):
 
 def deinplace(args, net):
     outputs = {}
-    for layer in net.layer:
+    layers = net.layer if net.layer else net.layers
+    for layer in layers:
         for idx, bottom in enumerate(layer.bottom):
             if bottom in outputs and bottom != outputs[bottom]:
                 if args.verbose:

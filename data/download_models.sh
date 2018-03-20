@@ -5,8 +5,11 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || (echo "Could not change dir" && exit 1)
 pwd
 
 for modeldir in models/*; do
-	pushd "$modeldir"
+	if ! pushd "$modeldir" &>/dev/null; then
+		continue
+	fi
+
 	wget --continue -i weights_url -N
-	popd
+	popd || exit 1
 done
 
