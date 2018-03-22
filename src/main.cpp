@@ -201,12 +201,10 @@ int main(int argc, char *argv[])
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POLYGON_SMOOTH);
-    glHint(GL_POINT_SMOOTH, GL_NICEST);
-    glHint(GL_LINE_SMOOTH, GL_NICEST);
-    glHint(GL_POLYGON_SMOOTH, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_DST_ALPHA,GL_ONE_MINUS_DST_ALPHA);
 
     // Start visualisation
