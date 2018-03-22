@@ -166,7 +166,7 @@ static void idleFunc()
     checkGLErrors();
     glutPostRedisplay();
     throttleIdleFunc();
-    rendererData.animationStep = 0.025f + 0.95f * (1 - cos(M_PI * getAnimationStep(std::chrono::seconds(5)))) / 2;
+    rendererData.animationStep = (1 - cos(M_PI * getAnimationStep(std::chrono::seconds(5)))) / 2;
 }
 
 int main(int argc, char *argv[])
@@ -196,6 +196,18 @@ int main(int argc, char *argv[])
 
     // Enable depth test to fix objects behind you
     glEnable(GL_DEPTH_TEST);
+
+    // Nicer rendering
+    glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_POINT_SMOOTH, GL_NICEST);
+    glHint(GL_LINE_SMOOTH, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH, GL_NICEST);
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glBlendFunc(GL_DST_ALPHA,GL_ONE_MINUS_DST_ALPHA);
 
     // Start visualisation
     glutMainLoop();

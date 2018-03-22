@@ -56,6 +56,8 @@ void ActivityAnimation::draw(float timeScale)
     caffe::caffe_scal(bufferLength, timeScale, vertexBuffer.get());
     caffe::caffe_add(bufferLength, startingPos.data(), vertexBuffer.get(), vertexBuffer.get());
 
+    glPointSize(5);
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
     glColorPointer(3, GL_FLOAT, 0, colorBuf.data());
