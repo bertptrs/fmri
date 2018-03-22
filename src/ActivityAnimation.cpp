@@ -19,15 +19,15 @@ ActivityAnimation::Color ActivityAnimation::colorBySign(float intensity)
 }
 
 ActivityAnimation::ActivityAnimation(
-        const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions, const float *aPositions,
-        const float *bPositions, float xDist) :
-        ActivityAnimation(interactions, aPositions, bPositions, xDist, ActivityAnimation::colorBySign)
+            const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
+            const float *aPositions, const float *bPositions) :
+        ActivityAnimation(interactions, aPositions, bPositions, ActivityAnimation::colorBySign)
 {
 }
 
 ActivityAnimation::ActivityAnimation(
-        const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
-        const float *aPositions, const float *bPositions, float xDist, ColoringFunction coloring)
+            const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
+            const float *aPositions, const float *bPositions, ColoringFunction coloring)
         :
         bufferLength(3 * interactions.size())
 {
@@ -44,7 +44,7 @@ ActivityAnimation::ActivityAnimation(
 
         for (auto i : Range(3)) {
             startingPos.emplace_back(aPos[i]);
-            delta.emplace_back(bPos[i] - aPos[i] + (i % 3 ? 0 : xDist));
+            delta.emplace_back(bPos[i] - aPos[i] + (i % 3 ? 0 : LAYER_X_OFFSET));
         }
     }
 }

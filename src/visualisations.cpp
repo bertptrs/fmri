@@ -124,7 +124,7 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
         result.emplace_back(interactions[i], make_pair(i / shape[0] / normalizer, i % shape[0]));
     }
 
-    return new ActivityAnimation(result, prevPositions.data(), curPositions.data(), -10);
+    return new ActivityAnimation(result, prevPositions.data(), curPositions.data());
 }
 
 static Animation *getDropOutAnimation(const fmri::LayerData &prevState,
@@ -145,7 +145,7 @@ static Animation *getDropOutAnimation(const fmri::LayerData &prevState,
 
     results = deduplicate(results);
 
-    return new ActivityAnimation(results, prevPositions.data(), curPositions.data(), -10);
+    return new ActivityAnimation(results, prevPositions.data(), curPositions.data());
 }
 
 static Animation *getReLUAnimation(const fmri::LayerData &prevState,
@@ -165,16 +165,16 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
 
         const auto maxValue = max_element(results.begin(), results.end())->first;
 
-        return new ActivityAnimation(results, prevPositions.data(), curPositions.data(), -10,
+        return new ActivityAnimation(results, prevPositions.data(), curPositions.data(),
                                      [=](float i) -> ActivityAnimation::Color {
-                                         if (maxValue == 0) {
-                                             return {1, 1, 1};
-                                         } else {
-                                             return {1 - i / maxValue, 1 - i / maxValue, 1};
-                                         }
-                                     });
+                                                 if (maxValue == 0) {
+                                                     return {1, 1, 1};
+                                                 } else {
+                                                     return {1 - i / maxValue, 1 - i / maxValue, 1};
+                                                 }
+                                             });
     } else {
-        return new ImageInteractionAnimation(changes.data(), prevState.shape(), prevPositions, curPositions, -10);
+        return new ImageInteractionAnimation(changes.data(), prevState.shape(), prevPositions, curPositions);
     }
 }
 
@@ -197,17 +197,18 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
 
         auto max_val = *max_element(scaling.begin(), scaling.end());
 
-        return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(),-10,  [=](float i) -> ActivityAnimation::Color {
-            auto intensity = clamp((i - 1) / (max_val - 1), 0.f, 1.f);
-            return {
-                    1 - intensity,
-                    1,
-                    1
-            };
-        });
+        return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(),
+                                     [=](float i) -> ActivityAnimation::Color {
+                                         auto intensity = clamp((i - 1) / (max_val - 1), 0.f, 1.f);
+                                         return {
+                                                 1 - intensity,
+                                                 1,
+                                                 1
+                                         };
+                                     });
     } else {
         transform(scaling.begin(), scaling.end(), scaling.begin(), [](float x) { return log(x); });
-        return new ImageInteractionAnimation(scaling.data(), prevState.shape(), prevPositions, curPositions, -10);
+        return new ImageInteractionAnimation(scaling.data(), prevState.shape(), prevPositions, curPositions);
     }
 }
 
@@ -233,7 +234,7 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
             return getReLUAnimation(prevState, curState, prevPositions, curPositions);
 
         case LayerInfo::Type::Pooling:
-            return new PoolingLayerAnimation(prevState, curState, prevPositions, curPositions, -10);
+            return new PoolingLayerAnimation(prevState, curState, prevPositions, curPositions);
 
         case LayerInfo::Type::LRN:
             return getNormalizingAnimation(prevState, curState, prevPositions, curPositions);

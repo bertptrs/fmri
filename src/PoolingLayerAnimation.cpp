@@ -3,7 +3,6 @@
 #include <caffe/util/math_functions.hpp>
 #include "PoolingLayerAnimation.hpp"
 #include "glutils.hpp"
-#include "Range.hpp"
 #include "MultiImageVisualisation.hpp"
 
 using namespace std;
@@ -11,7 +10,7 @@ using namespace fmri;
 
 PoolingLayerAnimation::PoolingLayerAnimation(const LayerData &prevData, const LayerData &curData,
                                              const std::vector<float> &prevPositions,
-                                             const std::vector<float> &curPositions, float xDist) :
+                                             const std::vector<float> &curPositions) :
         original(loadTextureForData(prevData)),
         downSampled(loadTextureForData(curData)),
         startingPositions(MultiImageVisualisation::getVertices(prevPositions)),
@@ -25,7 +24,7 @@ PoolingLayerAnimation::PoolingLayerAnimation(const LayerData &prevData, const La
     caffe::caffe_sub(targetPositions.size(), targetPositions.data(), startingPositions.data(), deltas.data());
 
     for (auto i = 0u; i < deltas.size(); i+=3) {
-        deltas[i] = xDist;
+        deltas[i] = LAYER_X_OFFSET;
     }
 }
 

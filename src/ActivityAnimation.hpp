@@ -15,10 +15,12 @@ namespace fmri
         typedef std::array<float, 3> Color;
         typedef std::function<Color(float)> ColoringFunction;
 
-        ActivityAnimation(const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
-                          const float *aPositions, const float *bPositions, float xDist);
-        ActivityAnimation(const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
-                                  const float *aPositions, const float *bPositions, float xDist, ColoringFunction coloring);
+        ActivityAnimation(
+                    const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
+                    const float *aPositions, const float *bPositions);
+        ActivityAnimation(
+                    const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
+                    const float *aPositions, const float *bPositions, ColoringFunction coloring);
         void draw(float timeScale) override;
 
         static Color colorBySign(float intensity);

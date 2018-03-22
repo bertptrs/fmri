@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+const float fmri::LAYER_X_OFFSET = -10;
+
 std::default_random_engine &fmri::rng()
 {
     static std::default_random_engine rng;

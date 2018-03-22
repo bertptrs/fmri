@@ -9,7 +9,8 @@ namespace fmri
     class ImageInteractionAnimation : public Animation
     {
     public:
-        ImageInteractionAnimation(const DType* data, const std::vector<int>& shape, const std::vector<float>& prevPositions, const std::vector<float>& curPositions, float xDist);
+        ImageInteractionAnimation(const DType *data, const std::vector<int> &shape, const std::vector<float> &prevPositions,
+                                          const std::vector<float> &curPositions);
         virtual void draw(float step);
 
     private:

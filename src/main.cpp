@@ -94,7 +94,7 @@ static void render()
         }
 
         glPopMatrix();
-        glTranslatef(-10, 0, 0);
+        glTranslatef(LAYER_X_OFFSET, 0, 0);
     }
 
 

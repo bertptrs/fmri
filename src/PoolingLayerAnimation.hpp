@@ -9,7 +9,9 @@ namespace fmri
     class PoolingLayerAnimation : public Animation
     {
     public:
-        PoolingLayerAnimation(const LayerData& prevData, const LayerData& curData, const std::vector<float>& prevPositions, const std::vector<float>& curPositions, float xDist);
+        PoolingLayerAnimation(const LayerData &prevData, const LayerData &curData,
+                                      const std::vector<float> &prevPositions,
+                                      const std::vector<float> &curPositions);
 
         void draw(float timeStep) override;
 

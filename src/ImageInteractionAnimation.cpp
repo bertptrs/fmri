@@ -15,9 +15,8 @@ void ImageInteractionAnimation::draw(float step)
     drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), texture);
 }
 
-ImageInteractionAnimation::ImageInteractionAnimation(const DType *data, const std::vector<int> &shape,
-                                                     const std::vector<float> &prevPositions,
-                                                     const std::vector<float> &curPositions, float xDist) :
+ImageInteractionAnimation::ImageInteractionAnimation(const DType *data, const std::vector<int> &shape, const std::vector<float> &prevPositions,
+                                                     const std::vector<float> &curPositions) :
         texture(loadTexture(data, shape[2], shape[1] * shape[3], shape[1])),
         startingPositions(MultiImageVisualisation::getVertices(prevPositions)),
         deltas(MultiImageVisualisation::getVertices(curPositions)),
@@ -26,6 +25,6 @@ ImageInteractionAnimation::ImageInteractionAnimation(const DType *data, const st
     caffe::caffe_sub(deltas.size(), deltas.data(), startingPositions.data(), deltas.data());
 
     for (auto i = 0u; i < deltas.size(); i += 3) {
-        deltas[i] = xDist;
+        deltas[i] = LAYER_X_OFFSET;
     }
 }

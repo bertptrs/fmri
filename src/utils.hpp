@@ -17,6 +17,11 @@ namespace fmri
 	typedef float DType;
 
     /**
+     * The distance between layers in the visualisation.
+     */
+	extern const float LAYER_X_OFFSET;
+
+    /**
      * Identity function that simply returns whatever is put in.
      *
      * @tparam T The type of the function
