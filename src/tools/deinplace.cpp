@@ -38,7 +38,7 @@ int get_file_descriptor(std::string_view file_name, int mode)
 {
     int fd = open(file_name.data(), mode);
     if (fd < 0) {
-        perror("Failed to open file");
+        perror("get_file_descriptor");
         exit(1);
     }
 
