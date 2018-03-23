@@ -18,12 +18,12 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   convolution_param {
     num_output: 96
@@ -65,12 +65,12 @@ layer {
   bottom: "pool1"
   top: "conv2"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   convolution_param {
     num_output: 256
@@ -113,12 +113,12 @@ layer {
   bottom: "pool2"
   top: "conv3"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   convolution_param {
     num_output: 384
@@ -138,12 +138,12 @@ layer {
   bottom: "relu3"
   top: "conv4"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   convolution_param {
     num_output: 384
@@ -164,12 +164,12 @@ layer {
   bottom: "relu4"
   top: "conv5"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   convolution_param {
     num_output: 256
@@ -201,12 +201,12 @@ layer {
   bottom: "pool5"
   top: "fc6"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 4096
@@ -233,12 +233,12 @@ layer {
   bottom: "drop6"
   top: "fc7"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 4096
@@ -265,12 +265,12 @@ layer {
   bottom: "drop7"
   top: "fc8"
   param {
-    lr_mult: 1.0
-    decay_mult: 1.0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 2.0
-    decay_mult: 0.0
+    lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1000
