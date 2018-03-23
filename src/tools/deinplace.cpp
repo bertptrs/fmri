@@ -20,7 +20,7 @@ void verbose_print(Args &&... args)
 
     (std::cerr << ... << args) << '\n';
 }
-stdin
+
 void show_help(std::string_view name, int exit_code)
 {
     std::cerr << "Usage: " << name << "[OPTIONS] [FILENAME]\n"
