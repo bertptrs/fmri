@@ -47,6 +47,6 @@ target_link_libraries(deinplace Caffe::Caffe protobuf::libprotobuf)
 # Build isntructions for the launcher tool
 find_package(GTK3 REQUIRED COMPONENTS gtk gtkmm)
 find_package(Boost REQUIRED COMPONENTS filesystem)
-add_executable(fmri-launcher src/tools/launcher.cpp)
+add_executable(fmri-launcher src/tools/launcher.cpp src/tools/launcher.hpp)
 target_compile_options(fmri-launcher PRIVATE "-Wall" "-Wextra" "-pedantic")
 target_link_libraries(fmri-launcher GTK3::gtkmm Boost::filesystem)

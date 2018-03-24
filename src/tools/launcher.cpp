@@ -2,6 +2,7 @@
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include "launcher.hpp"
 
 class Launcher {
 public:
@@ -27,7 +28,9 @@ Launcher::Launcher(int argc, char** argv)
         :
         app(Gtk::Application::create(argc, argv))
 {
-    auto builder = Gtk::Builder::create_from_file("../launcher/launcher.glade");
+    std::string gladeData(launcher_glade, launcher_glade + launcher_glade_len);
+
+    auto builder = Gtk::Builder::create_from_string(gladeData);
     builder->get_widget("window", window);
     builder->get_widget("fmriChooser", fmriChooser);
     builder->get_widget("modelChooser", modelChooser);
