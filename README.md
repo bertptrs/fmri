@@ -25,6 +25,7 @@ below.
     - `png++`
     - `cmake`
     - `freeglut`
+    - `gtkmm3`
 3. Do the build as normal
 
 ### Ubuntu
@@ -36,7 +37,8 @@ process. The commands required are as follows:
     # Install dependencies
     sudo apt install libcaffe-cpu-dev freeglut3-dev libpng++-dev \
         build-essential cmake libopencv-dev libboost-system-dev \
-        libgoogle-glog-dev libblas-dev libprotobuf-dev
+        libgoogle-glog-dev libblas-dev libprotobuf-dev \
+        libgtkmm-3.0-dev
 
     # Do the build normally
 
