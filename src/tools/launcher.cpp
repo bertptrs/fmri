@@ -2,63 +2,60 @@
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "launcher.hpp"
 
-class Launcher {
+class Launcher : public Gtk::Window {
 public:
-    Launcher(int argc, char** argv);
-    ~Launcher();
-    void run();
+    Launcher();
+    ~Launcher() override = default;
 
 private:
-    Glib::RefPtr<Gtk::Application> app;
-    Gtk::Window* window = nullptr;
-    Gtk::FileChooserButton* fmriChooser = nullptr;
-    Gtk::FileChooserButton* modelChooser = nullptr;
-    Gtk::FileChooserButton* weightsChooser = nullptr;
-    Gtk::FileChooserButton* inputChooser = nullptr;
-    Gtk::Button* startButton = nullptr;
+    Gtk::Box box;
+    Gtk::FileChooserButton fmriChooser;
+    Gtk::FileChooserButton modelChooser;
+    Gtk::FileChooserButton weightsChooser;
+    Gtk::FileChooserButton inputChooser;
+    Gtk::Button startButton;
 
     void start();
-    bool hasFile(const Gtk::FileChooserButton* fileChooser, const std::string& error);
+    bool hasFile(const Gtk::FileChooserButton& fileChooser, const std::string& error);
     std::vector<std::string> getInputFiles();
+    Gtk::Label* getManagedLabel(const std::string& contents);
 };
 
-Launcher::Launcher(int argc, char** argv)
+Launcher::Launcher()
         :
-        app(Gtk::Application::create(argc, argv))
+        Gtk::Window(),
+        box(Gtk::Orientation::ORIENTATION_VERTICAL, 5),
+        startButton("Start FMRI")
 {
-    std::string gladeData(launcher_glade, launcher_glade + launcher_glade_len);
+    set_size_request(400, -1);
+    add(box);
+    auto grid = new Gtk::Grid();
+    Gtk::manage(grid);
 
-    auto builder = Gtk::Builder::create_from_string(gladeData);
-    builder->get_widget("window", window);
-    builder->get_widget("fmriChooser", fmriChooser);
-    builder->get_widget("modelChooser", modelChooser);
-    builder->get_widget("weightsChooser", weightsChooser);
-    builder->get_widget("inputChooser", inputChooser);
-    builder->get_widget("startButton", startButton);
+    grid->set_row_spacing(2);
+    grid->set_column_spacing(2);
 
+    box.pack_start(*grid, true, true);
+    box.pack_start(startButton);
     if (access("fmri", F_OK | X_OK)==0) {
         // Set default path to FMRI.
-        fmriChooser->set_file(Gio::File::create_for_path("fmri"));
+        fmriChooser.set_file(Gio::File::create_for_path("fmri"));
     }
-    startButton->signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
-}
+    fmriChooser.set_hexpand(true);
+    grid->attach(fmriChooser, 1, 0, 1, 1);
+    grid->attach_next_to(*getManagedLabel("FMRI executable"), fmriChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid->attach(modelChooser, 1, 1, 1, 1);
+    grid->attach_next_to(*getManagedLabel("Model"), modelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid->attach(weightsChooser, 1, 2, 1, 1);
+    grid->attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
-void Launcher::run()
-{
-    if (window) {
-        app->run(*window);
-    }
-    else {
-        std::cerr << "Failed to load window" << std::endl;
-        exit(2);
-    }
-}
+    inputChooser.set_action(Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+    grid->attach(inputChooser, 1, 3, 1, 1);
+    grid->attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
-Launcher::~Launcher()
-{
-    delete window;
+    startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
+    show_all_children(true);
 }
 
 void Launcher::start()
@@ -70,13 +67,13 @@ void Launcher::start()
         return;
     }
 
-    auto executable = fmriChooser->get_file()->get_path();
-    auto network = modelChooser->get_file()->get_path();
-    auto weights = weightsChooser->get_file()->get_path();
+    auto executable = fmriChooser.get_file()->get_path();
+    auto network = modelChooser.get_file()->get_path();
+    auto weights = weightsChooser.get_file()->get_path();
     auto inputs = getInputFiles();
 
     if (inputs.empty()) {
-        Gtk::MessageDialog dialog(*window, "No inputs in folder!");
+        Gtk::MessageDialog dialog(*this, "No inputs in folder!");
         dialog.run();
         return;
     }
@@ -97,10 +94,10 @@ void Launcher::start()
     execv(executable.data(), argv.data());
 }
 
-bool Launcher::hasFile(const Gtk::FileChooserButton* fileChooser, const std::string& error)
+bool Launcher::hasFile(const Gtk::FileChooserButton& fileChooser, const std::string& error)
 {
-    if (!fileChooser->get_file()) {
-        Gtk::MessageDialog dialog(*window, error);
+    if (!fileChooser.get_file()) {
+        Gtk::MessageDialog dialog(*this, error);
         dialog.run();
         return false;
     }
@@ -114,7 +111,7 @@ std::vector<std::string> Launcher::getInputFiles()
 
     std::vector<std::string> result;
 
-    auto folder = path(inputChooser->get_file()->get_path());
+    auto folder = path(inputChooser.get_file()->get_path());
 
     directory_iterator end_itr;
     for (directory_iterator itr(folder); itr!=end_itr; ++itr) {
@@ -129,11 +126,17 @@ std::vector<std::string> Launcher::getInputFiles()
 
 }
 
+Gtk::Label* Launcher::getManagedLabel(const std::string& contents)
+{
+    auto label = new Gtk::Label(contents);
+    Gtk::manage(label);
+
+    return label;
+}
+
 int main(int argc, char** argv)
 {
-    Launcher launcher(argc, argv);
-    launcher.run();
-
-    // Should never be reached.
-    return 0;
+    auto app = Gtk::Application::create(argc, argv);
+    Launcher launcher;
+    return app->run(launcher);
 }
