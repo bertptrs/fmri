@@ -40,12 +40,6 @@ install(TARGETS fmri DESTINATION bin)
 
 # Build instructions for the deinplace tool
 find_package(Protobuf REQUIRED)
-protobuf_generate_cpp(CAFFE_PROTO_CPP CAFFE_PROTO_HEADERS "src/proto/caffe.proto")
-add_executable(deinplace
-	"src/tools/deinplace.cpp"
-	${CAFFE_PROTO_CPP}
-	${CAFFE_PROTO_HEADERS}
-	)
+add_executable(deinplace "src/tools/deinplace.cpp")
 target_compile_options(deinplace PRIVATE "-Wall" "-Wextra" "-pedantic")
-target_link_libraries(deinplace protobuf::libprotobuf)
-target_include_directories(deinplace PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(deinplace Caffe::Caffe protobuf::libprotobuf)

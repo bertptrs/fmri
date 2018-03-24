@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
-#include "caffe.pb.h"
+#include <caffe/proto/caffe.pb.h>
 
 static struct
 {
