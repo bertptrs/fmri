@@ -122,6 +122,8 @@ std::vector<std::string> Launcher::getInputFiles()
         result.push_back(itr->path().string());
     }
 
+    std::sort(result.begin(), result.end());
+
     return result;
 
 }
