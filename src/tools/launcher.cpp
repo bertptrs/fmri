@@ -3,6 +3,15 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
+bool executable_exists(std::string_view dir, std::string_view executable)
+{
+    std::string executable_path(dir);
+    executable_path += '/';
+    executable_path += executable;
+
+    return access(executable_path.c_str(), F_OK | X_OK) == 0;
+}
+
 class Launcher : public Gtk::Window {
 public:
     Launcher();
@@ -20,6 +29,7 @@ private:
     bool hasFile(const Gtk::FileChooserButton& fileChooser, const std::string& error);
     std::vector<std::string> getInputFiles();
     Gtk::Label* getManagedLabel(const std::string& contents);
+    void findExecutable();
 };
 
 Launcher::Launcher()
@@ -38,10 +48,7 @@ Launcher::Launcher()
 
     box.pack_start(*grid, true, true);
     box.pack_start(startButton);
-    if (access("fmri", F_OK | X_OK)==0) {
-        // Set default path to FMRI.
-        fmriChooser.set_file(Gio::File::create_for_path("fmri"));
-    }
+    findExecutable();
     fmriChooser.set_hexpand(true);
     grid->attach(fmriChooser, 1, 0, 1, 1);
     grid->attach_next_to(*getManagedLabel("FMRI executable"), fmriChooser, Gtk::PositionType::POS_LEFT, 1, 1);
@@ -87,7 +94,7 @@ void Launcher::start()
     };
 
     std::transform(inputs.begin(), inputs.end(), std::back_inserter(argv),
-            [](const auto& x) -> auto { return (char*) x.c_str(); });
+            [](const auto& x) { return (char*) x.c_str(); });
 
     argv.push_back(nullptr);
 
@@ -125,7 +132,6 @@ std::vector<std::string> Launcher::getInputFiles()
     std::sort(result.begin(), result.end());
 
     return result;
-
 }
 
 Gtk::Label* Launcher::getManagedLabel(const std::string& contents)
@@ -134,6 +140,29 @@ Gtk::Label* Launcher::getManagedLabel(const std::string& contents)
     Gtk::manage(label);
 
     return label;
+}
+
+void Launcher::findExecutable()
+{
+    if (executable_exists(".", "fmri")) {
+        fmriChooser.set_filename("fmri");
+        return;
+    }
+
+    const char* env_path = std::getenv("PATH");
+    if (env_path == nullptr || env_path[0] == '\0') {
+        return;
+    }
+
+    std::unique_ptr<char[]> buffer(new char[std::strlen(env_path) + 1]);
+    std::strcpy(buffer.get(), env_path);
+
+    for (auto component = std::strtok(buffer.get(), ":"); component; component = std::strtok(nullptr, ":")) {
+        if (executable_exists(component, "fmri")) {
+            fmriChooser.set_filename(std::string(component) + "/fmri");
+            return;
+        }
+    }
 }
 
 int main(int argc, char** argv)
