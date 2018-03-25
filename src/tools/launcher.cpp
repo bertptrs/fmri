@@ -18,7 +18,7 @@ public:
     ~Launcher() override = default;
 
 private:
-    Gtk::Box box;
+    Gtk::Grid grid;
     Gtk::FileChooserButton fmriChooser;
     Gtk::FileChooserButton modelChooser;
     Gtk::FileChooserButton weightsChooser;
@@ -35,33 +35,28 @@ private:
 Launcher::Launcher()
         :
         Gtk::Window(),
-        box(Gtk::Orientation::ORIENTATION_VERTICAL, 5),
         startButton("Start FMRI")
 {
     set_size_request(400, -1);
-    add(box);
-    auto grid = new Gtk::Grid();
-    Gtk::manage(grid);
+    add(grid);
 
-    grid->set_row_spacing(2);
-    grid->set_column_spacing(2);
-
-    box.pack_start(*grid, true, true);
-    box.pack_start(startButton);
+    grid.set_row_spacing(2);
+    grid.set_column_spacing(2);
     findExecutable();
     fmriChooser.set_hexpand(true);
-    grid->attach(fmriChooser, 1, 0, 1, 1);
-    grid->attach_next_to(*getManagedLabel("FMRI executable"), fmriChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid->attach(modelChooser, 1, 1, 1, 1);
-    grid->attach_next_to(*getManagedLabel("Model"), modelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid->attach(weightsChooser, 1, 2, 1, 1);
-    grid->attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid.attach(fmriChooser, 1, 0, 1, 1);
+    grid.attach_next_to(*getManagedLabel("FMRI executable"), fmriChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid.attach(modelChooser, 1, 1, 1, 1);
+    grid.attach_next_to(*getManagedLabel("Model"), modelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid.attach(weightsChooser, 1, 2, 1, 1);
+    grid.attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
     inputChooser.set_action(Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    grid->attach(inputChooser, 1, 3, 1, 1);
-    grid->attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid.attach(inputChooser, 1, 3, 1, 1);
+    grid.attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
+    grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
     show_all_children(true);
 }
 
