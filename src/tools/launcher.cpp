@@ -5,11 +5,16 @@
 
 bool executable_exists(std::string_view dir, std::string_view executable)
 {
-    std::string executable_path(dir);
-    executable_path += '/';
-    executable_path += executable;
+    if (dir.size() + executable.size() + 1 >= PATH_MAX) {
+        std::cerr << "Error: requested path longer than PATH_MAX" << std::endl;
+        return false;
+    }
+    char path_buf[PATH_MAX] = {'\0'};
+    std::copy(dir.begin(), dir.end(), path_buf);
+    path_buf[dir.size()] = '/';
+    std::copy(executable.begin(), executable.end(), &path_buf[dir.size() + 1]);
 
-    return access(executable_path.c_str(), F_OK | X_OK) == 0;
+    return access(path_buf, F_OK | X_OK) == 0;
 }
 
 class Launcher : public Gtk::Window {
@@ -144,16 +149,17 @@ void Launcher::findExecutable()
         return;
     }
 
-    const char* env_path = std::getenv("PATH");
-    if (env_path == nullptr || env_path[0] == '\0') {
-        return;
-    }
-
-    std::unique_ptr<char[]> buffer(new char[std::strlen(env_path) + 1]);
-    std::strcpy(buffer.get(), env_path);
-
-    for (auto component = std::strtok(buffer.get(), ":"); component; component = std::strtok(nullptr, ":")) {
-        if (executable_exists(component, "fmri")) {
+    std::string_view env_path = std::getenv("PATH");
+    std::string_view::size_type offset = 0;
+    while (offset != std::string_view::npos) {
+        auto limit = env_path.find(":");
+        auto component = env_path.substr(offset, limit);
+        if (limit != std::string_view::npos) {
+            offset = limit + 1;
+        } else {
+            offset = limit;
+        }
+        if (!component.empty() && executable_exists(component, "fmri")) {
             fmriChooser.set_filename(std::string(component) + "/fmri");
             return;
         }
