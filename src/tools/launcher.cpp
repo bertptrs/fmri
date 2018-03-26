@@ -47,6 +47,7 @@ private:
     Gtk::FileChooserButton modelChooser;
     Gtk::FileChooserButton weightsChooser;
     Gtk::FileChooserButton labelChooser;
+    Gtk::FileChooserButton meansChooser;
     Gtk::FileChooserButton inputChooser;
     Gtk::Button startButton;
 
@@ -81,6 +82,8 @@ Launcher::Launcher()
     inputChooser.set_action(Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER);
     grid.attach(inputChooser, 1, 4, 1, 1);
     grid.attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid.attach(meansChooser, 1, 5, 1, 1);
+    grid.attach_next_to(*getManagedLabel("Means (optional)"), meansChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
     grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
@@ -118,6 +121,11 @@ void Launcher::start()
     if (labelChooser.get_file()) {
         argv.push_back(wrap_string("-l"));
         argv.push_back(wrap_string(labelChooser.get_file()->get_path()));
+    }
+
+    if (meansChooser.get_file()) {
+        argv.push_back(wrap_string("-m"));
+        argv.push_back(wrap_string(meansChooser.get_file()->get_path()));
     }
 
     std::transform(inputs.begin(), inputs.end(), std::back_inserter(argv),
