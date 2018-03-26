@@ -3,6 +3,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
+using namespace std::string_literals;
+
 bool executable_exists(std::string_view dir, std::string_view executable)
 {
     if (dir.size() + executable.size() + 1 >= PATH_MAX) {
@@ -16,6 +18,19 @@ bool executable_exists(std::string_view dir, std::string_view executable)
     *ptr = '\0';
 
     return access(path_buf, F_OK | X_OK) == 0;
+}
+
+auto file_filter_for_extension(std::string_view extension)
+{
+    auto filter = Gtk::FileFilter::create();
+    auto pattern = "*."s;
+    pattern += extension;
+    filter->set_name(std::string(extension));
+    filter->add_pattern(pattern);
+
+    std::cerr << pattern << std::endl;
+
+    return filter;
 }
 
 /**
@@ -79,14 +94,18 @@ Launcher::Launcher()
     grid.attach(fmriChooser, 1, 0, 1, 1);
     grid.attach_next_to(*getManagedLabel("FMRI executable"), fmriChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(modelChooser, 1, 1, 1, 1);
+    modelChooser.add_filter(file_filter_for_extension("prototxt"));
     grid.attach_next_to(*getManagedLabel("Model"), modelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(weightsChooser, 1, 2, 1, 1);
+    weightsChooser.add_filter(file_filter_for_extension("caffemodel"));
     grid.attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(labelChooser, 1, 3, 1, 1);
+    labelChooser.add_filter(file_filter_for_extension("txt"));
     grid.attach_next_to(*getManagedLabel("Labels (optional)"), labelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(inputChooser, 1, 4, 1, 1);
     grid.attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(meansChooser, 1, 5, 1, 1);
+    meansChooser.add_filter(file_filter_for_extension("binaryproto"));
     grid.attach_next_to(*getManagedLabel("Means (optional)"), meansChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
