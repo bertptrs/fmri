@@ -99,9 +99,9 @@ void Launcher::start()
         return;
     }
 
-    auto executable = wrap_string(fmriChooser.get_file()->get_path());
-    auto network = wrap_string(modelChooser.get_file()->get_path());
-    auto weights = wrap_string(weightsChooser.get_file()->get_path());
+    auto executable = fmriChooser.get_file()->get_path();
+    auto network = modelChooser.get_file()->get_path();
+    auto weights = weightsChooser.get_file()->get_path();
     auto inputs = getInputFiles();
 
     if (inputs.empty()) {
@@ -111,11 +111,11 @@ void Launcher::start()
     }
 
     std::vector<char*> argv = {
-            executable,
+            wrap_string(executable),
             wrap_string("-n"),
-            network,
+            wrap_string(network),
             wrap_string("-w"),
-            weights,
+            wrap_string(weights),
     };
 
     if (labelChooser.get_file()) {
@@ -133,7 +133,7 @@ void Launcher::start()
 
     argv.push_back(nullptr);
 
-    execv(executable, argv.data());
+    execv(executable.c_str(), argv.data());
 }
 
 bool Launcher::hasFile(const Gtk::FileChooserButton& fileChooser, const std::string& error)
