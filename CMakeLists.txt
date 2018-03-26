@@ -9,8 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Define executable and dependencies
 file(GLOB fmri_SRC
-	"src/*.cpp"
-	"src/*.hpp"
+	"src/fmri/*.cpp"
+	"src/fmri/*.hpp"
 )
 
 add_executable(fmri ${fmri_SRC})
