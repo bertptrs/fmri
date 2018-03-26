@@ -28,8 +28,6 @@ auto file_filter_for_extension(std::string_view extension)
     filter->set_name(std::string(extension));
     filter->add_pattern(pattern);
 
-    std::cerr << pattern << std::endl;
-
     return filter;
 }
 
