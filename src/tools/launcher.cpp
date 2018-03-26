@@ -61,6 +61,12 @@ private:
 Launcher::Launcher()
         :
         Gtk::Window(),
+        fmriChooser("Select FMRI executable"),
+        modelChooser("Select caffe model prototxt"),
+        weightsChooser("Select caffe model weights"),
+        labelChooser("Select label text file"),
+        meansChooser("Select means file"),
+        inputChooser("Select input directory", Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER),
         startButton("Start FMRI")
 {
     set_size_request(400, -1);
@@ -78,8 +84,6 @@ Launcher::Launcher()
     grid.attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(labelChooser, 1, 3, 1, 1);
     grid.attach_next_to(*getManagedLabel("Labels (optional)"), labelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-
-    inputChooser.set_action(Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER);
     grid.attach(inputChooser, 1, 4, 1, 1);
     grid.attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(meansChooser, 1, 5, 1, 1);
