@@ -121,7 +121,7 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
     result.reserve(desiredSize);
     const auto normalizer = getNodeNormalizer(prevState);
     for (auto i : idx) {
-        result.emplace_back(interactions[i], make_pair(i / shape[0] / normalizer, i % shape[0]));
+        result.emplace_back(interactions[i], make_pair((i % shape[1]) / normalizer, i / shape[1]));
     }
 
     return new ActivityAnimation(result, prevPositions.data(), curPositions.data());
