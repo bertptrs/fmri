@@ -109,7 +109,10 @@ static void renderLayerName(const LayerData &data)
 {
     // Draw the name of the layer for reference.
     glColor3f(0.5, 0.5, 0.5);
-    renderText(data.name());
+    auto layerName = data.name();
+    layerName += ": ";
+    layerName += LayerInfo::nameByType(rendererData.layerInfo.at(data.name()).type());
+    renderText(layerName);
 
     glTranslatef(0, 0, -10);
 }

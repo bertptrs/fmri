@@ -32,8 +32,7 @@ namespace fmri
         const std::vector<boost::shared_ptr<caffe::Blob<DType>>>& parameters() const;
 
         static Type typeByName(std::string_view name);
-
-        friend std::ostream& operator<<(std::ostream& out, Type type);
+        static std::string_view nameByType(Type type);
 
     private:
         std::vector<boost::shared_ptr<caffe::Blob<DType>>> parameters_;

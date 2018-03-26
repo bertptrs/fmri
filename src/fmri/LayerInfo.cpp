@@ -49,14 +49,22 @@ const std::vector<boost::shared_ptr<caffe::Blob<DType>>>& LayerInfo::parameters(
 
 std::ostream &fmri::operator<<(std::ostream &out, LayerInfo::Type type)
 {
-    for (auto i : LayerInfo::NAME_TYPE_MAP) {
-        if (i.second == type) {
-            out << i.first;
-            return out;
+    return out << LayerInfo::nameByType(type);
+}
+
+std::string_view LayerInfo::nameByType(LayerInfo::Type type)
+{
+    static std::unordered_map<Type, std::string_view> typeMap;
+    if (typeMap.empty()) {
+        for (auto item : LayerInfo::NAME_TYPE_MAP) {
+            typeMap[item.second] = item.first;
         }
     }
 
-    out << "ERROR! UNSUPPORTED TYPE";
-    return out;
+    try {
+        return typeMap.at(type);
+    } catch (std::out_of_range&) {
+        return "ERROR! UNSUPPORTED TYPE";
+    }
 }
 
