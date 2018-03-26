@@ -9,12 +9,31 @@ bool executable_exists(std::string_view dir, std::string_view executable)
         std::cerr << "Error: requested path longer than PATH_MAX" << std::endl;
         return false;
     }
-    char path_buf[PATH_MAX] = {'\0'};
-    std::copy(dir.begin(), dir.end(), path_buf);
-    path_buf[dir.size()] = '/';
-    std::copy(executable.begin(), executable.end(), &path_buf[dir.size() + 1]);
+    char path_buf[PATH_MAX];
+    auto ptr = std::copy(dir.begin(), dir.end(), path_buf);
+    *ptr = '/';
+    ptr = std::copy(executable.begin(), executable.end(), ptr + 1);
+    *ptr = '\0';
 
     return access(path_buf, F_OK | X_OK) == 0;
+}
+
+/**
+ * Wrap string into a dynamically allocated c-string.
+ *
+ * @param str
+ * @return
+ */
+char* wrap_string(std::string_view str) {
+    if (str.empty()) {
+        return nullptr;
+    }
+
+    auto wrapper = new char[str.size() + 1];
+    auto ptr = std::copy(str.begin(), str.end(), wrapper);
+    *ptr = '\0';
+
+    return wrapper;
 }
 
 class Launcher : public Gtk::Window {
@@ -27,6 +46,7 @@ private:
     Gtk::FileChooserButton fmriChooser;
     Gtk::FileChooserButton modelChooser;
     Gtk::FileChooserButton weightsChooser;
+    Gtk::FileChooserButton labelChooser;
     Gtk::FileChooserButton inputChooser;
     Gtk::Button startButton;
 
@@ -55,9 +75,11 @@ Launcher::Launcher()
     grid.attach_next_to(*getManagedLabel("Model"), modelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
     grid.attach(weightsChooser, 1, 2, 1, 1);
     grid.attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+    grid.attach(labelChooser, 1, 3, 1, 1);
+    grid.attach_next_to(*getManagedLabel("Labels (optional)"), labelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
     inputChooser.set_action(Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    grid.attach(inputChooser, 1, 3, 1, 1);
+    grid.attach(inputChooser, 1, 4, 1, 1);
     grid.attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
@@ -74,9 +96,9 @@ void Launcher::start()
         return;
     }
 
-    auto executable = fmriChooser.get_file()->get_path();
-    auto network = modelChooser.get_file()->get_path();
-    auto weights = weightsChooser.get_file()->get_path();
+    auto executable = wrap_string(fmriChooser.get_file()->get_path());
+    auto network = wrap_string(modelChooser.get_file()->get_path());
+    auto weights = wrap_string(weightsChooser.get_file()->get_path());
     auto inputs = getInputFiles();
 
     if (inputs.empty()) {
@@ -86,19 +108,24 @@ void Launcher::start()
     }
 
     std::vector<char*> argv = {
-            (char*) executable.c_str(),
-            (char*) "-n",
-            (char*) network.c_str(),
-            (char*) "-w",
-            (char*) weights.c_str(),
+            executable,
+            wrap_string("-n"),
+            network,
+            wrap_string("-w"),
+            weights,
     };
 
+    if (labelChooser.get_file()) {
+        argv.push_back(wrap_string("-l"));
+        argv.push_back(wrap_string(labelChooser.get_file()->get_path()));
+    }
+
     std::transform(inputs.begin(), inputs.end(), std::back_inserter(argv),
-            [](const auto& x) { return (char*) x.c_str(); });
+            [](const auto& x) { return wrap_string(x); });
 
     argv.push_back(nullptr);
 
-    execv(executable.data(), argv.data());
+    execv(executable, argv.data());
 }
 
 bool Launcher::hasFile(const Gtk::FileChooserButton& fileChooser, const std::string& error)
