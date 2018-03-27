@@ -21,6 +21,8 @@ namespace fmri
      */
 	extern const float LAYER_X_OFFSET;
 
+    constexpr const float EPSILON = 1e-10f;
+
     /**
      * Identity function that simply returns whatever is put in.
      *
@@ -193,7 +195,7 @@ namespace fmri
      * @return A vector of the indices before the partitioning cut-off.
      */
     template<class Iter, class Compare>
-    std::vector<std::size_t> arg_nth_element(Iter first, Iter middle, Iter last, Compare compare)
+    std::vector<std::size_t> arg_partial_sort(Iter first, Iter middle, Iter last, Compare compare)
     {
         using namespace std;
 
@@ -203,7 +205,7 @@ namespace fmri
         vector<size_t> indices(total);
         iota(indices.begin(), indices.end(), 0u);
 
-        nth_element(indices.begin(), indices.begin() + n, indices.end(), [=](size_t a, size_t b) {
+        partial_sort(indices.begin(), indices.begin() + n, indices.end(), [=](size_t a, size_t b) {
             return compare(*(first + a), *(first + b));
         });
 

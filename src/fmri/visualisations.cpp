@@ -113,14 +113,18 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
     }
 
     const auto desiredSize = min(INTERACTION_LIMIT, numEntries);
-    auto idx = arg_nth_element(interactions.begin(), interactions.begin() + desiredSize, interactions.end(), [](auto a, auto b) {
-        return abs(a) > abs(b);
-    });
+    auto idx = arg_partial_sort(interactions.begin(), interactions.begin() + desiredSize, interactions.end(),
+                                [](auto a, auto b) {
+                                    return abs(a) > abs(b);
+                                });
 
     EntryList result;
     result.reserve(desiredSize);
     const auto normalizer = getNodeNormalizer(prevState);
     for (auto i : idx) {
+        if (abs(interactions[i]) < EPSILON){
+            break;
+        }
         result.emplace_back(interactions[i], make_pair((i % shape[1]) / normalizer, i / shape[1]));
     }
 
