@@ -238,5 +238,5 @@ namespace fmri
      * @param time 0..1 where in the animation are we?
      * @return Resulting list of floats.
      */
-    std::vector<float> animate(const std::vector<float>& start, const std::vector<float>& delta, float time);
+    const std::vector<float> & animate(const std::vector<float> &start, const std::vector<float> &delta, float time);
 }

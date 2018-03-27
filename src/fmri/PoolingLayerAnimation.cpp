@@ -30,7 +30,7 @@ PoolingLayerAnimation::PoolingLayerAnimation(const LayerData &prevData, const La
 
 void PoolingLayerAnimation::draw(float timeStep)
 {
-    auto vertexBuffer = animate(startingPositions, deltas, timeStep);
+    auto& vertexBuffer = animate(startingPositions, deltas, timeStep);
 
     drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), original);
 }

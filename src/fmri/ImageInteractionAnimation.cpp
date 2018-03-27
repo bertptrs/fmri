@@ -8,7 +8,7 @@ using namespace fmri;
 
 void ImageInteractionAnimation::draw(float step)
 {
-    auto vertexBuffer = animate(startingPositions, deltas, step);
+    auto &vertexBuffer = animate(startingPositions, deltas, step);
 
     drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), texture);
 }
