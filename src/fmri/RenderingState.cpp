@@ -1,24 +1,33 @@
-#include <GL/freeglut.h>
+#include <GL/glut.h>
 #include <cmath>
 #include <sstream>
 #include <iostream>
-#include "camera.hpp"
+#include "RenderingState.hpp"
 #include "utils.hpp"
 
 using namespace fmri;
-using namespace std;
 
-static Camera& camera = Camera::instance();
+static RenderingState& state = RenderingState::instance();
 
+/**
+ * Static utility function to bind to GLUT.
+ *
+ * @param x
+ * @param y
+ */
 static void handleMouseMove(int x, int y)
 {
-    const float width = glutGet(GLUT_WINDOW_WIDTH) / 2;
-    const float height = glutGet(GLUT_WINDOW_HEIGHT) / 2;
+    state.handleMouseAt(x, y);
+}
 
-    camera.angle[0] = (x - width) / width * 180;
-    camera.angle[1] = (y - height) / height * 90;
-
-    glutPostRedisplay();
+/**
+ * Static utility function to bind to GLUT.
+ *
+ * @param key
+ */
+static void handleKeys(unsigned char key, int, int)
+{
+    state.handleKey(key);
 }
 
 static float getFPS()
@@ -39,22 +48,22 @@ static float getFPS()
     return fps;
 }
 
-static void move(unsigned char key)
+void RenderingState::move(unsigned char key)
 {
     float speed = 0.5;
     float dir[3];
 
-    const auto yaw = deg2rad(camera.angle[0]);
-    const auto pitch = deg2rad(camera.angle[1]);
+    const auto yaw = deg2rad(state.angle[0]);
+    const auto pitch = deg2rad(state.angle[1]);
 
     if (key == 'w' || key == 's') {
-        dir[0] = sin(yaw) * cos(pitch);
-        dir[1] = -sin(pitch);
-        dir[2] = -cos(yaw) * cos(pitch);
+        dir[0] = std::sin(yaw) * std::cos(pitch);
+        dir[1] = -std::sin(pitch);
+        dir[2] = -std::cos(yaw) * std::cos(pitch);
     } else {
-        dir[0] = -cos(yaw);
+        dir[0] = -std::cos(yaw);
         dir[1] = 0;
-        dir[2] = -sin(yaw);
+        dir[2] = -std::sin(yaw);
     }
 
     if (key == 's' || key == 'd') {
@@ -62,27 +71,25 @@ static void move(unsigned char key)
     }
 
     for (auto i = 0; i < 3; ++i) {
-        camera.pos[i] += speed * dir[i];
+        pos[i] += speed * dir[i];
     }
 }
 
-static void handleKeys(unsigned char key, int, int)
+void RenderingState::handleKey(unsigned char x)
 {
-    switch (key) {
+    switch (x) {
         case 'w':
         case 'a':
         case 's':
         case 'd':
-            move(key);
+            move(x);
             break;
 
         case 'q':
-            // Utility quit function.
-            glutLeaveMainLoop();
-            break;
+            exit(0);
 
         case 'h':
-            camera.reset();
+            state.reset();
             break;
 
         default:
@@ -93,16 +100,16 @@ static void handleKeys(unsigned char key, int, int)
     glutPostRedisplay();
 }
 
-std::string Camera::infoLine()
+std::string RenderingState::infoLine()
 {
-    stringstream buffer;
+    std::stringstream buffer;
     buffer << "Pos(x,y,z) = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ")\n";
     buffer << "Angle(p,y) = (" << angle[0] << ", " << angle[1] << ")\n";
     buffer << "FPS = " << getFPS() << "\n";
     return buffer.str();
 }
 
-void Camera::reset()
+void RenderingState::reset()
 {
     pos[0] = 0;
     pos[1] = 0;
@@ -112,7 +119,7 @@ void Camera::reset()
     angle[1] = 0;
 }
 
-void Camera::configureRenderingContext()
+void RenderingState::configureRenderingContext()
 {
     glLoadIdentity();
     glRotatef(angle[1], 1, 0, 0);
@@ -120,15 +127,26 @@ void Camera::configureRenderingContext()
     glTranslatef(-pos[0], -pos[1], -pos[2]);
 }
 
-Camera &Camera::instance()
+RenderingState &RenderingState::instance()
 {
-    static Camera camera;
-    return camera;
+    static RenderingState state;
+    return state;
 }
 
-void Camera::registerControls()
+void RenderingState::registerControls()
 {
     reset();
     glutPassiveMotionFunc(handleMouseMove);
     glutKeyboardFunc(handleKeys);
+}
+
+void RenderingState::handleMouseAt(int x, int y)
+{
+    const float width = glutGet(GLUT_WINDOW_WIDTH) / 2.f;
+    const float height = glutGet(GLUT_WINDOW_HEIGHT) / 2.f;
+
+    angle[0] = (x - width) / width * 180;
+    angle[1] = (y - height) / height * 90;
+
+    glutPostRedisplay();
 }

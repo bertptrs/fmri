@@ -125,25 +125,8 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
         if (abs(interactions[i]) < EPSILON){
             break;
         }
-        result.emplace_back(interactions[i], make_pair((i % shape[1]), i / shape[1]));
+        result.emplace_back(interactions[i], make_pair((i % shape[1]) / normalizer, i / shape[1]));
     }
-
-    for (auto entry : result) {
-        if (prevState.data()[entry.second.first] < EPSILON) {
-            std::cerr << "Error in data!" << entry.first << " "
-                      << entry.second.first << " " << entry.second.second
-                      << " " << prevState.data()[entry.second.first] << " "
-                      << "\n";
-        }
-    }
-
-    if (normalizer != 1) {
-        for (auto& entry : result) {
-            entry.second.first /= normalizer;
-        }
-    }
-
-    cerr.flush();
 
     return new ActivityAnimation(result, prevPositions.data(), curPositions.data());
 }

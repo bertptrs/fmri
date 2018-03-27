@@ -8,7 +8,7 @@
 #include "Options.hpp"
 #include "Simulator.hpp"
 #include "glutils.hpp"
-#include "camera.hpp"
+#include "RenderingState.hpp"
 #include "LayerVisualisation.hpp"
 #include "Range.hpp"
 #include "visualisations.hpp"
@@ -67,7 +67,7 @@ static void renderDebugInfo()
     glLoadIdentity();
     setOrthographicProjection();
     glColor3f(1, 1, 0);
-    renderText(Camera::instance().infoLine(), 2, 10);
+    renderText(RenderingState::instance().infoLine(), 2, 10);
     restorePerspectiveProjection();
 }
 
@@ -76,7 +76,7 @@ static void render()
     // Clear Color and Depth Buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto& camera = Camera::instance();
+    auto& camera = RenderingState::instance();
 
     camera.configureRenderingContext();
 
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     glutReshapeFunc(changeWindowSize);
     glutSpecialFunc(specialKeyFunc);
 
-    Camera::instance().registerControls();
+    RenderingState::instance().registerControls();
 
     rendererData.currentData = rendererData.data.begin();
     updateVisualisers();
