@@ -229,4 +229,14 @@ namespace fmri
             }
         }
     }
+
+    /**
+     * Animate a list of floats.
+     *
+     * @param start Starting values for all floats
+     * @param delta Value to be added at the end of the animation
+     * @param time 0..1 where in the animation are we?
+     * @return Resulting list of floats.
+     */
+    std::vector<float> animate(const std::vector<float>& start, const std::vector<float>& delta, float time);
 }

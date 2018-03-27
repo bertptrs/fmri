@@ -51,17 +51,13 @@ ActivityAnimation::ActivityAnimation(
 
 void ActivityAnimation::draw(float timeScale)
 {
-    std::unique_ptr<float[]> vertexBuffer(new float[bufferLength]);
-    caffe::caffe_copy(bufferLength, delta.data(), vertexBuffer.get());
-    caffe::caffe_scal(bufferLength, timeScale, vertexBuffer.get());
-    caffe::caffe_add(bufferLength, startingPos.data(), vertexBuffer.get(), vertexBuffer.get());
-
+    const auto vertexBuffer = animate(startingPos, delta, timeScale);
     glPointSize(5);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
     glColorPointer(3, GL_FLOAT, 0, colorBuf.data());
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
+    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
     glDrawArrays(GL_POINTS, 0, bufferLength / 3);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);

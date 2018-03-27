@@ -8,9 +8,7 @@ using namespace fmri;
 
 void ImageInteractionAnimation::draw(float step)
 {
-    auto vertexBuffer = deltas;
-    caffe::caffe_scal(deltas.size(), step, vertexBuffer.data());
-    caffe::caffe_add(vertexBuffer.size(), vertexBuffer.data(), startingPositions.data(), vertexBuffer.data());
+    auto vertexBuffer = animate(startingPositions, deltas, step);
 
     drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), texture);
 }

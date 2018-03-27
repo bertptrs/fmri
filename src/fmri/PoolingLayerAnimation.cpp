@@ -30,9 +30,7 @@ PoolingLayerAnimation::PoolingLayerAnimation(const LayerData &prevData, const La
 
 void PoolingLayerAnimation::draw(float timeStep)
 {
-    vector<float> vertexBuffer(deltas);
-    caffe::caffe_scal(vertexBuffer.size(), timeStep, vertexBuffer.data());
-    caffe::caffe_add(startingPositions.size(), startingPositions.data(), vertexBuffer.data(), vertexBuffer.data());
+    auto vertexBuffer = animate(startingPositions, deltas, timeStep);
 
     drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), original);
 }
