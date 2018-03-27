@@ -102,10 +102,9 @@ Due to the way Caffe works, this program cannot properly extract state
 data from networks that use in-place computation, since it cannot observe
 the input- and output state of each layer.
 
-To work around this, a simple script `deinplace.py` is included in the tools
-folder. To use it, first run make (requires `protoc` to be on your PATH) and
-then run it on your program. To see what options it supports, use its `-h`
-option.
+To work around this, a simple program `deinplace` is included as a tool,
+which will rewrite an existing network to not use in-place computation.
+Its options are documented with its `-h` flag.
 
 ### Single input/output
 
