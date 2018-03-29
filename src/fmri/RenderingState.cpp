@@ -3,32 +3,13 @@
 #include <sstream>
 #include <iostream>
 #include "RenderingState.hpp"
-#include "utils.hpp"
+#include "visualisations.hpp"
+#include "Range.hpp"
+#include "glutils.hpp"
 
 using namespace fmri;
 
-static RenderingState& state = RenderingState::instance();
-
-/**
- * Static utility function to bind to GLUT.
- *
- * @param x
- * @param y
- */
-static void handleMouseMove(int x, int y)
-{
-    state.handleMouseAt(x, y);
-}
-
-/**
- * Static utility function to bind to GLUT.
- *
- * @param key
- */
-static void handleKeys(unsigned char key, int, int)
-{
-    state.handleKey(key);
-}
+static RenderingState &state = RenderingState::instance();
 
 static float getFPS()
 {
@@ -100,7 +81,7 @@ void RenderingState::handleKey(unsigned char x)
     glutPostRedisplay();
 }
 
-std::string RenderingState::infoLine()
+std::string RenderingState::infoLine()const
 {
     std::stringstream buffer;
     buffer << "Pos(x,y,z) = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ")\n";
@@ -119,7 +100,7 @@ void RenderingState::reset()
     angle[1] = 0;
 }
 
-void RenderingState::configureRenderingContext()
+void RenderingState::configureRenderingContext()const
 {
     glLoadIdentity();
     glRotatef(angle[1], 1, 0, 0);
@@ -136,8 +117,24 @@ RenderingState &RenderingState::instance()
 void RenderingState::registerControls()
 {
     reset();
-    glutPassiveMotionFunc(handleMouseMove);
-    glutKeyboardFunc(handleKeys);
+    glutPassiveMotionFunc([](int x, int y) {
+        RenderingState::instance().handleMouseAt(x, y);
+    });
+    glutKeyboardFunc([](auto key, auto, auto) {
+        RenderingState::instance().handleKey(key);
+    });
+    glutDisplayFunc([]() {
+        float time = getAnimationStep(std::chrono::seconds(5));
+        RenderingState::instance().render(time);
+    });
+    glutIdleFunc([]() {
+        checkGLErrors();
+        throttleIdleFunc();
+        glutPostRedisplay();
+    });
+    glutSpecialFunc([](int key, int, int) {
+        RenderingState::instance().handleSpecialKey(key);
+    });
 }
 
 void RenderingState::handleMouseAt(int x, int y)
@@ -149,4 +146,111 @@ void RenderingState::handleMouseAt(int x, int y)
     angle[1] = (y - height) / height * 90;
 
     glutPostRedisplay();
+}
+
+void RenderingState::loadSimulationData(const std::map<string, LayerInfo> &info, vector<vector<LayerData>> &&data)
+{
+    layerInfo = std::move(info);
+    layerData = std::move(data);
+    currentData = layerData.begin();
+
+    updateVisualisers();
+}
+
+void RenderingState::updateVisualisers()
+{
+    layerVisualisations.clear();
+    interactionAnimations.clear();
+    LayerData *prevState = nullptr;
+    LayerVisualisation *prevVisualisation = nullptr;
+
+    for (LayerData &layer : *currentData) {
+        LayerVisualisation *visualisation = getVisualisationForLayer(layer, layerInfo.at(layer.name()));
+        if (prevState && prevVisualisation && visualisation) {
+            auto interaction = getActivityAnimation(*prevState, layer, layerInfo.at(layer.name()),
+                                                    prevVisualisation->nodePositions(), visualisation->nodePositions());
+            interactionAnimations.emplace_back(interaction);
+        }
+
+        layerVisualisations.emplace_back(visualisation);
+
+        prevVisualisation = visualisation;
+        prevState = &layer;
+    }
+
+    glutPostRedisplay();
+}
+
+void RenderingState::render(float time) const
+{
+    // Clear Color and Depth Buffers
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    configureRenderingContext();
+
+
+    glPushMatrix();
+    glTranslatef(5 * currentData->size(), 0, 0);
+
+    for (auto i : Range(currentData->size())) {
+        glPushMatrix();
+        renderLayerName(currentData->at(i).name());
+        layerVisualisations[i]->render();
+        if (i < interactionAnimations.size() && interactionAnimations[i]) {
+            interactionAnimations[i]->draw(time);
+        }
+
+        glPopMatrix();
+        glTranslatef(LAYER_X_OFFSET, 0, 0);
+    }
+
+    glPopMatrix();
+
+    renderDebugInfo();
+
+    glutSwapBuffers();
+}
+
+void RenderingState::renderDebugInfo() const
+{
+    glLoadIdentity();
+    setOrthographicProjection();
+    glColor3f(1, 1, 0);
+    renderText(infoLine(), 2, 10);
+    restorePerspectiveProjection();
+}
+
+void RenderingState::renderLayerName(const std::string &name) const
+{
+    glColor3f(0.5, 0.5, 0.5);
+    auto layerName = name;
+    layerName += ": ";
+    layerName += LayerInfo::nameByType(layerInfo.at(name).type());
+    renderText(layerName);
+
+    glTranslatef(0, 0, -10);
+}
+
+void RenderingState::handleSpecialKey(int key)
+{
+    switch (key) {
+        case GLUT_KEY_LEFT:
+            if (currentData == layerData.begin()) {
+                currentData = layerData.end();
+            }
+            --currentData;
+            updateVisualisers();
+            break;
+
+        case GLUT_KEY_RIGHT:
+            ++currentData;
+            if (currentData == layerData.end()) {
+                currentData = layerData.begin();
+            }
+            updateVisualisers();
+            break;
+
+        default:
+            LOG(INFO) << "Received keystroke " << key;
+    }
 }

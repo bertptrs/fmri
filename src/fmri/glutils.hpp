@@ -32,6 +32,9 @@ namespace fmri {
     /**
      * Draw a bitmap string at the current location.
      *
+     * This function wraps glutBitmapCharacter, because its nicer version
+     * (glutBitmapString) is an extension that is possibly unavailable.
+     *
      * @param text The text to draw.
      */
     void renderText(std::string_view text, int x = 0, int y = 0);
