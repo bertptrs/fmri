@@ -9,8 +9,6 @@
 
 using namespace fmri;
 
-static RenderingState &state = RenderingState::instance();
-
 static float getFPS()
 {
     static int frames = 0;
@@ -34,8 +32,8 @@ void RenderingState::move(unsigned char key)
     float speed = 0.5f;
     std::array<float, 3> dir;
 
-    const auto yaw = deg2rad(state.angle[0]);
-    const auto pitch = deg2rad(state.angle[1]);
+    const auto yaw = deg2rad(angle[0]);
+    const auto pitch = deg2rad(angle[1]);
 
     if (key == 'w' || key == 's') {
         dir[0] = std::sin(yaw) * std::cos(pitch);
@@ -55,7 +53,7 @@ void RenderingState::move(unsigned char key)
         speed *= 2;
     }
 
-    for (auto i = 0; i < dir.size(); ++i) {
+    for (auto i = 0u; i < dir.size(); ++i) {
         pos[i] += speed * dir[i];
     }
 }
@@ -81,7 +79,7 @@ void RenderingState::handleKey(unsigned char x)
             exit(0);
 
         case 'h':
-            state.reset();
+            RenderingState::instance().reset();
             break;
 
         default:
