@@ -31,8 +31,8 @@ static float getFPS()
 
 void RenderingState::move(unsigned char key)
 {
-    float speed = 0.5;
-    float dir[3];
+    float speed = 0.5f;
+    std::array<float, 3> dir;
 
     const auto yaw = deg2rad(state.angle[0]);
     const auto pitch = deg2rad(state.angle[1]);
@@ -51,7 +51,11 @@ void RenderingState::move(unsigned char key)
         speed *= -1;
     }
 
-    for (auto i = 0; i < 3; ++i) {
+    if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
+        speed *= 2;
+    }
+
+    for (auto i = 0; i < dir.size(); ++i) {
         pos[i] += speed * dir[i];
     }
 }
@@ -64,6 +68,13 @@ void RenderingState::handleKey(unsigned char x)
         case 's':
         case 'd':
             move(x);
+            break;
+
+        case 'W':
+        case 'A':
+        case 'S':
+        case 'D':
+            move(static_cast<unsigned char>(std::tolower(x)));
             break;
 
         case 'q':
