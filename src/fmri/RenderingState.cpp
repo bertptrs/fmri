@@ -92,7 +92,7 @@ void RenderingState::handleKey(unsigned char x)
     glutPostRedisplay();
 }
 
-std::string RenderingState::infoLine()const
+std::string RenderingState::debugInfo()const
 {
     std::stringstream buffer;
     buffer << "Pos(x,y,z) = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ")\n";
@@ -217,17 +217,30 @@ void RenderingState::render(float time) const
 
     glPopMatrix();
 
-    renderDebugInfo();
+    renderOverlayText();
 
     glutSwapBuffers();
 }
 
-void RenderingState::renderDebugInfo() const
+void RenderingState::renderOverlayText() const
 {
+    std::stringstream overlayText;
+    if (options.showDebug) {
+        overlayText << debugInfo() << "\n";
+    }
+
+    if (options.showHelp) {
+        overlayText << "Controls:\n"
+                       "WASD: move\n"
+                       "shift: move faster\n"
+                       "F1: toggle this help message\n"
+                       "F2: toggle debug info\n";
+    }
+
     glLoadIdentity();
     setOrthographicProjection();
     glColor3f(1, 1, 0);
-    renderText(infoLine(), 2, 10);
+    renderText(overlayText.str(), 2, 10);
     restorePerspectiveProjection();
 }
 
@@ -259,6 +272,15 @@ void RenderingState::handleSpecialKey(int key)
                 currentData = layerData.begin();
             }
             updateVisualisers();
+            break;
+
+        case GLUT_KEY_F1:
+            options.showHelp = !options.showHelp;
+            glutPostRedisplay();
+            break;
+
+        case GLUT_KEY_F2:
+            options.showDebug = !options.showDebug;
             break;
 
         default:

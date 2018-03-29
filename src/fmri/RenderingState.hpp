@@ -43,6 +43,10 @@ namespace fmri
         static RenderingState& instance();
 
     private:
+        struct {
+            bool showDebug = false;
+            bool showHelp = true;
+        } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;
         std::map<std::string, LayerInfo> layerInfo;
@@ -58,8 +62,8 @@ namespace fmri
         void move(unsigned char key);
         void updateVisualisers();
 
-        std::string infoLine()const;
-        void renderDebugInfo() const;
+        std::string debugInfo() const;
+        void renderOverlayText() const;
         void renderLayerName(const std::string& name) const;
     };
 }
