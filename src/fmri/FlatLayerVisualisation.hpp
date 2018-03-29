@@ -16,10 +16,10 @@ namespace fmri
 
     private:
         Ordering ordering;
-        std::size_t faceCount;
-        std::unique_ptr<float[]> vertexBuffer;
-        std::unique_ptr<float[]> colorBuffer;
-        std::unique_ptr<int[]> indexBuffer;
+        std::vector<float> vertexBuffer;
+        std::vector<float> colorBuffer;
+        std::vector<int> indexBuffer;
+        std::vector<int> activeIndexBuffer;
 
         static constexpr const std::array<float, 12> NODE_SHAPE = {
                 -0.5f, 0, 0.5f,
@@ -37,6 +37,6 @@ namespace fmri
         void setVertexPositions(int vertexNo, float *destination);
 
         // Various functions defining the way the nodes will be aligned.
-        void initializeNodePositions();
+        void initializeNodePositions(std::size_t entries);
     };
 }

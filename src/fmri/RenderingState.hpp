@@ -39,6 +39,10 @@ namespace fmri
         void render(float time) const;
 
         void loadSimulationData(const std::map<string, LayerInfo> &info, std::vector<std::vector<LayerData>> &&data);
+        /**
+         * @return Whether the network should only render activated nodes, rather than all of them.
+         */
+        bool renderActivatedOnly() const;
 
         static RenderingState& instance();
 
@@ -48,6 +52,7 @@ namespace fmri
             bool showHelp = true;
             bool renderLayers = true;
             bool renderInteractions = true;
+            bool activatedOnly = false;
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;

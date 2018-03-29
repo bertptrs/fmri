@@ -3,13 +3,13 @@
 
 #include "FlatLayerVisualisation.hpp"
 #include "Range.hpp"
+#include "RenderingState.hpp"
 
-using namespace std;
 using namespace fmri;
 
 static inline void computeColor(float intensity, float limit, float *destination)
 {
-    const float saturation = min(-log(abs(intensity) / limit) / 10.0f, 1.0f);
+    const float saturation = std::min(-std::log(std::abs(intensity) / limit) / 10.0f, 1.0f);
     if (intensity > 0) {
         destination[0] = saturation;
         destination[1] = saturation;
@@ -24,27 +24,26 @@ static inline void computeColor(float intensity, float limit, float *destination
 FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering ordering) :
         LayerVisualisation(layer.numEntries()),
         ordering(ordering),
-        faceCount(layer.numEntries() * NODE_FACES.size() / 3),
-        vertexBuffer(new float[faceCount * 3]),
-        colorBuffer(new float[faceCount * 3]),
-        indexBuffer(new int[faceCount * 3])
+        vertexBuffer(layer.numEntries() * NODE_FACES.size()),
+        colorBuffer(layer.numEntries() * NODE_FACES.size()),
+        indexBuffer(layer.numEntries() * NODE_FACES.size())
 {
     auto &shape = layer.shape();
-    CHECK_EQ(shape.size(), 2) << "layer should be flat!" << endl;
-    CHECK_EQ(shape[0], 1) << "Only single images supported." << endl;
+    CHECK_EQ(shape.size(), 2) << "layer should be flat!\n";
+    CHECK_EQ(shape[0], 1) << "Only single images supported.\n";
 
-    initializeNodePositions();
+    initializeNodePositions(layer.numEntries());
 
     const auto limit = (int) layer.numEntries();
     auto data = layer.data();
     const auto
-    [minElem, maxElem] = minmax_element(data, data + limit);
+    [minElem, maxElem] = std::minmax_element(data, data + limit);
 
-    auto scalingMax = max(abs(*minElem), abs(*maxElem));
+    auto scalingMax = std::max(abs(*minElem), abs(*maxElem));
 
     int v = 0;
     for (int i : Range(limit)) {
-        setVertexPositions(i, vertexBuffer.get() + NODE_FACES.size() * i);
+        setVertexPositions(i, vertexBuffer.data() + NODE_FACES.size() * i);
         const auto vertexBase = static_cast<int>(i * NODE_FACES.size() / 3);
 
         // Define the colors for the vertices
@@ -57,7 +56,13 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
             indexBuffer[v++] = vertexBase + faceNode;
         }
     }
-    assert(v == (int) faceCount * 3);
+
+    // Compute which nodes are active, add those to the active indices
+    for (auto i : Range(limit)) {
+        if (abs(data[i]) > EPSILON) {
+            std::copy_n(&indexBuffer[NODE_FACES.size() * i], NODE_FACES.size(), std::back_inserter(activeIndexBuffer));
+        }
+    }
 }
 
 void FlatLayerVisualisation::render()
@@ -65,15 +70,17 @@ void FlatLayerVisualisation::render()
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
 
-    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.get());
-    glColorPointer(3, GL_FLOAT, 0, colorBuffer.get());
-    glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_INT, indexBuffer.get());
+    const auto& indices = RenderingState::instance().renderActivatedOnly() ? activeIndexBuffer : indexBuffer;
+
+    glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
+    glColorPointer(3, GL_FLOAT, 0, colorBuffer.data());
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
     glDisableClientState(GL_COLOR_ARRAY);
 
     // Now draw wireframe
     glColor4f(0, 0, 0, 1);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_INT, indexBuffer.get());
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
@@ -87,15 +94,15 @@ void FlatLayerVisualisation::setVertexPositions(const int vertexNo, float *desti
     }
 }
 
-void FlatLayerVisualisation::initializeNodePositions()
+void FlatLayerVisualisation::initializeNodePositions(std::size_t entries)
 {
     switch (ordering) {
         case Ordering::LINE:
-            initNodePositions<Ordering::LINE>(faceCount / 4, 2);
+            initNodePositions<Ordering::LINE>(entries, 2);
             break;
 
         case Ordering::SQUARE:
-            initNodePositions<Ordering::SQUARE>(faceCount / 4, 2);
+            initNodePositions<Ordering::SQUARE>(entries, 2);
             break;
     }
 }

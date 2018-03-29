@@ -91,7 +91,11 @@ void RenderingState::handleKey(unsigned char x)
             exit(0);
 
         case 'h':
-            RenderingState::instance().reset();
+            reset();
+            break;
+
+        case 'o':
+            toggle(options.activatedOnly);
             break;
 
         default:
@@ -249,6 +253,7 @@ void RenderingState::renderOverlayText() const
                        "F2: toggle debug info\n"
                        "l: toggle layers visible\n"
                        "i: toggle interactions visible\n"
+                       "o: toggle activated nodes only\n"
                        "q: quit\n";
     }
 
@@ -301,4 +306,9 @@ void RenderingState::handleSpecialKey(int key)
         default:
             LOG(INFO) << "Received keystroke " << key;
     }
+}
+
+bool RenderingState::renderActivatedOnly() const
+{
+    return options.activatedOnly;
 }
