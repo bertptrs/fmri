@@ -9,6 +9,11 @@
 
 using namespace fmri;
 
+static inline void toggle(bool& b)
+{
+    b = !b;
+}
+
 static float getFPS()
 {
     static int frames = 0;
@@ -27,7 +32,7 @@ static float getFPS()
     return fps;
 }
 
-void RenderingState::move(unsigned char key)
+void RenderingState::move(unsigned char key, bool sprint)
 {
     float speed = 0.5f;
     std::array<float, 3> dir;
@@ -49,7 +54,7 @@ void RenderingState::move(unsigned char key)
         speed *= -1;
     }
 
-    if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
+    if (sprint) {
         speed *= 2;
     }
 
@@ -65,14 +70,21 @@ void RenderingState::handleKey(unsigned char x)
         case 'a':
         case 's':
         case 'd':
-            move(x);
+            move(x, false);
             break;
-
         case 'W':
         case 'A':
         case 'S':
         case 'D':
-            move(static_cast<unsigned char>(std::tolower(x)));
+            move(static_cast<unsigned char>(std::tolower(x)), true);
+            break;
+
+        case 'l':
+            toggle(options.renderLayers);
+            break;
+
+        case 'i':
+            toggle(options.renderInteractions);
             break;
 
         case 'q':
@@ -204,8 +216,10 @@ void RenderingState::render(float time) const
     for (auto i : Range(currentData->size())) {
         glPushMatrix();
         renderLayerName(currentData->at(i).name());
-        layerVisualisations[i]->render();
-        if (i < interactionAnimations.size() && interactionAnimations[i]) {
+        if (options.renderLayers) {
+            layerVisualisations[i]->render();
+        }
+        if (options.renderInteractions && i < interactionAnimations.size() && interactionAnimations[i]) {
             interactionAnimations[i]->draw(time);
         }
 
@@ -229,10 +243,13 @@ void RenderingState::renderOverlayText() const
 
     if (options.showHelp) {
         overlayText << "Controls:\n"
-                       "WASD: move\n"
+                       "wasd: move\n"
                        "shift: move faster\n"
                        "F1: toggle this help message\n"
-                       "F2: toggle debug info\n";
+                       "F2: toggle debug info\n"
+                       "l: toggle layers visible\n"
+                       "i: toggle interactions visible\n"
+                       "q: quit\n";
     }
 
     glLoadIdentity();
@@ -273,12 +290,12 @@ void RenderingState::handleSpecialKey(int key)
             break;
 
         case GLUT_KEY_F1:
-            options.showHelp = !options.showHelp;
+            toggle(options.showHelp);
             glutPostRedisplay();
             break;
 
         case GLUT_KEY_F2:
-            options.showDebug = !options.showDebug;
+            toggle(options.showDebug);
             break;
 
         default:

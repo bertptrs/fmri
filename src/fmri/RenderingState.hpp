@@ -46,6 +46,8 @@ namespace fmri
         struct {
             bool showDebug = false;
             bool showHelp = true;
+            bool renderLayers = true;
+            bool renderInteractions = true;
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;
@@ -59,7 +61,7 @@ namespace fmri
 
         void configureRenderingContext() const;
 
-        void move(unsigned char key);
+        void move(unsigned char key, bool sprint);
         void updateVisualisers();
 
         std::string debugInfo() const;
