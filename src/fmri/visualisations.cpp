@@ -170,11 +170,11 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
         const auto maxValue = max_element(results.begin(), results.end())->first;
 
         return new ActivityAnimation(results, prevPositions.data(), curPositions.data(),
-                                     [=](float i) -> ActivityAnimation::Color {
+                                     [=](float i) -> Color {
                                                  if (maxValue == 0) {
-                                                     return {1, 1, 1};
+                                                     return {1, 1, 1, 1};
                                                  } else {
-                                                     return {1 - i / maxValue, 1 - i / maxValue, 1};
+                                                     return {1 - i / maxValue, 1 - i / maxValue, 1, 1};
                                                  }
                                              });
     } else {
@@ -202,10 +202,11 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
         auto max_val = *max_element(scaling.begin(), scaling.end());
 
         return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(),
-                                     [=](float i) -> ActivityAnimation::Color {
+                                     [=](float i) -> Color {
                                          auto intensity = clamp((i - 1) / (max_val - 1), 0.f, 1.f);
                                          return {
                                                  1 - intensity,
+                                                 1,
                                                  1,
                                                  1
                                          };

@@ -13,7 +13,6 @@ namespace fmri
             : public Animation
     {
     public:
-        typedef std::array<float, 3> Color;
         typedef std::function<Color(float)> ColoringFunction;
 
         ActivityAnimation(
@@ -28,7 +27,7 @@ namespace fmri
 
     private:
         std::size_t bufferLength;
-        std::vector<std::array<float, 3>> colorBuf;
+        std::vector<Color> colorBuf;
         std::vector<float> startingPos;
         std::vector<float> delta;
         std::vector<int> lineIndices;

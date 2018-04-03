@@ -17,7 +17,7 @@ namespace fmri
     private:
         Ordering ordering;
         std::vector<float> vertexBuffer;
-        std::vector<float> colorBuffer;
+        std::vector<Color> colorBuffer;
         std::vector<int> indexBuffer;
         std::vector<int> activeIndexBuffer;
 
@@ -33,6 +33,8 @@ namespace fmri
                 0, 2, 3,
                 1, 2, 3
         };
+        constexpr const auto VERTICES_PER_NODE = NODE_SHAPE.size() / 3;
+        constexpr const auto FACES_PER_NODE = NODE_FACES.size() / 3;
 
         void setVertexPositions(int vertexNo, float *destination);
 

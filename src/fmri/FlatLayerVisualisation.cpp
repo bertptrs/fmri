@@ -7,7 +7,7 @@
 
 using namespace fmri;
 
-static inline void computeColor(float intensity, float limit, float *destination)
+static inline void computeColor(float intensity, float limit, Color& destination)
 {
     const float saturation = std::min(-std::log(std::abs(intensity) / limit) / 10.0f, 1.0f);
     if (intensity > 0) {
@@ -19,13 +19,17 @@ static inline void computeColor(float intensity, float limit, float *destination
         destination[1] = saturation;
         destination[2] = saturation;
     }
+    if constexpr (std::tuple_size<Color>::value >= 4) {
+        // We have an alpha channel, set it to 1.
+        destination[3] = 1;
+    }
 }
 
 FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering ordering) :
         LayerVisualisation(layer.numEntries()),
         ordering(ordering),
         vertexBuffer(layer.numEntries() * NODE_FACES.size()),
-        colorBuffer(layer.numEntries() * NODE_FACES.size()),
+        colorBuffer(layer.numEntries() * VERTICES_PER_NODE),
         indexBuffer(layer.numEntries() * NODE_FACES.size())
 {
     auto &shape = layer.shape();
@@ -41,20 +45,18 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
 
     auto scalingMax = std::max(abs(*minElem), abs(*maxElem));
 
-    int v = 0;
+    auto colorPos = colorBuffer.begin();
+    auto indexPos = indexBuffer.begin();
+
     for (int i : Range(limit)) {
         setVertexPositions(i, vertexBuffer.data() + NODE_FACES.size() * i);
-        const auto vertexBase = static_cast<int>(i * NODE_FACES.size() / 3);
+        Color nodeColor;
+        computeColor(data[i], scalingMax, nodeColor);
+        colorPos = std::fill_n(colorPos, NODE_FACES.size() / 3, nodeColor);
 
-        // Define the colors for the vertices
-        for (auto c : Range(NODE_SHAPE.size() / 3)) {
-            computeColor(data[i], scalingMax, &colorBuffer[NODE_FACES.size() * i + 3 * c]);
-        }
-
-        // Set the face nodes indices
-        for (auto faceNode : NODE_FACES) {
-            indexBuffer[v++] = vertexBase + faceNode;
-        }
+        auto newIndexPos = std::copy(std::begin(NODE_FACES), std::end(NODE_FACES), indexPos);
+        std::transform(indexPos, newIndexPos, indexPos, [i](auto x) { return x + i * VERTICES_PER_NODE;});
+        indexPos = newIndexPos;
     }
 
     // Compute which nodes are active, add those to the active indices
@@ -63,6 +65,9 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
             std::copy_n(&indexBuffer[NODE_FACES.size() * i], NODE_FACES.size(), std::back_inserter(activeIndexBuffer));
         }
     }
+
+    assert(indexPos == indexBuffer.end());
+    assert(colorPos == colorBuffer.end());
 }
 
 void FlatLayerVisualisation::render()
@@ -73,7 +78,7 @@ void FlatLayerVisualisation::render()
     const auto& indices = RenderingState::instance().renderActivatedOnly() ? activeIndexBuffer : indexBuffer;
 
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
-    glColorPointer(3, GL_FLOAT, 0, colorBuffer.data());
+    glColorPointer(std::tuple_size<Color>::value, GL_FLOAT, 0, colorBuffer.data());
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
     glDisableClientState(GL_COLOR_ARRAY);
 

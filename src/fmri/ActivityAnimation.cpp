@@ -11,12 +11,12 @@
 using namespace std;
 using namespace fmri;
 
-ActivityAnimation::Color ActivityAnimation::colorBySign(float intensity)
+Color ActivityAnimation::colorBySign(float intensity)
 {
     if (intensity > 0) {
-        return {0, 1, 0};
+        return {0, 1, 0, 1};
     } else {
-        return {1, 0, 0};
+        return {1, 0, 0, 1};
     }
 }
 
@@ -67,7 +67,7 @@ void ActivityAnimation::draw(float timeScale)
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-    glColorPointer(3, GL_FLOAT, 0, colorBuf.data());
+    glColorPointer(std::tuple_size<Color>::value, GL_FLOAT, 0, colorBuf.data());
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
     glDrawArrays(GL_POINTS, 0, bufferLength / 3);
     glDisableClientState(GL_COLOR_ARRAY);
