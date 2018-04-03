@@ -32,6 +32,15 @@ static float getFPS()
     return fps;
 }
 
+static void updatePointSize(float dir) {
+    float size, granularity;
+    glGetFloatv(GL_POINT_SIZE, &size);
+    glGetFloatv(GL_POINT_SIZE_GRANULARITY, &granularity);
+    granularity = std::max(0.5f, granularity);
+    size += dir * granularity;
+    glPointSize(std::max(1.f, size));
+}
+
 void RenderingState::move(unsigned char key, bool sprint)
 {
     float speed = 0.5f;
@@ -100,6 +109,14 @@ void RenderingState::handleKey(unsigned char x)
 
         case 'o':
             toggle(options.activatedOnly);
+            break;
+
+        case '+':
+            updatePointSize(1);
+            break;
+
+        case '-':
+            updatePointSize(-1);
             break;
 
         default:
@@ -259,6 +276,7 @@ void RenderingState::renderOverlayText() const
                        "i: toggle interactions visible\n"
                        "o: toggle activated nodes only\n"
                        "p: toggle interaction paths visible\n"
+                       "+/-: increase/decrease particle size\n"
                        "q: quit\n";
     }
 
@@ -331,4 +349,23 @@ void RenderingState::loadOptions(const Options &options)
 const Color &RenderingState::pathColor() const
 {
     return options.pathColor;
+}
+
+RenderingState::RenderingState() noexcept
+{
+    // Enable depth test to fix objects behind you
+    glEnable(GL_DEPTH_TEST);
+
+    // Nicer rendering
+    glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Set initial point size
+    glPointSize(3);
 }

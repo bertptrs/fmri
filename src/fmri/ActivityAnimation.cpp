@@ -63,7 +63,6 @@ ActivityAnimation::ActivityAnimation(
 void ActivityAnimation::draw(float timeScale)
 {
     const auto &vertexBuffer = animate(startingPos, delta, timeScale);
-    glPointSize(5);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);

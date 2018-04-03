@@ -73,7 +73,7 @@ namespace fmri
         std::vector<std::unique_ptr<LayerVisualisation>> layerVisualisations;
         std::vector<std::unique_ptr<Animation>> interactionAnimations;
 
-        RenderingState() noexcept = default;
+        RenderingState() noexcept;
 
         void configureRenderingContext() const;
 

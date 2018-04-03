@@ -33,8 +33,8 @@ namespace fmri
                 0, 2, 3,
                 1, 2, 3
         };
-        constexpr const auto VERTICES_PER_NODE = NODE_SHAPE.size() / 3;
-        constexpr const auto FACES_PER_NODE = NODE_FACES.size() / 3;
+        static constexpr auto VERTICES_PER_NODE = std::tuple_size<typeof(NODE_SHAPE)>::value / 3;
+        static constexpr auto FACES_PER_NODE = std::tuple_size<typeof(NODE_FACES)>::value / 3;
 
         void setVertexPositions(int vertexNo, float *destination);
 
