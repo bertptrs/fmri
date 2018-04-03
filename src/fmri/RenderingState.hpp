@@ -43,6 +43,7 @@ namespace fmri
          * @return Whether the network should only render activated nodes, rather than all of them.
          */
         bool renderActivatedOnly() const;
+        bool renderInteractionPaths() const;
 
         static RenderingState& instance();
 
@@ -53,6 +54,7 @@ namespace fmri
             bool renderLayers = true;
             bool renderInteractions = true;
             bool activatedOnly = false;
+            bool renderInteractionPaths = false;
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;

@@ -21,7 +21,7 @@ const std::vector<float> & fmri::animate(const std::vector<float> &start, const 
     static std::vector<float> vertexBuffer;
     vertexBuffer = delta;
     caffe::caffe_scal(vertexBuffer.size(), time, vertexBuffer.data());
-    caffe::caffe_add(start.size(), vertexBuffer.data(), start.data(), vertexBuffer.data());
+    caffe::caffe_add(vertexBuffer.size(), vertexBuffer.data(), start.data(), vertexBuffer.data());
 
     return vertexBuffer;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <vector>
 #include "Animation.hpp"
@@ -30,5 +31,6 @@ namespace fmri
         std::vector<std::array<float, 3>> colorBuf;
         std::vector<float> startingPos;
         std::vector<float> delta;
+        std::vector<int> lineIndices;
     };
 }

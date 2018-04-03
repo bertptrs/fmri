@@ -94,6 +94,10 @@ void RenderingState::handleKey(unsigned char x)
             reset();
             break;
 
+        case 'p':
+            toggle(options.renderInteractionPaths);
+            break;
+
         case 'o':
             toggle(options.activatedOnly);
             break;
@@ -254,6 +258,7 @@ void RenderingState::renderOverlayText() const
                        "l: toggle layers visible\n"
                        "i: toggle interactions visible\n"
                        "o: toggle activated nodes only\n"
+                       "p: toggle interaction paths visible\n"
                        "q: quit\n";
     }
 
@@ -311,4 +316,9 @@ void RenderingState::handleSpecialKey(int key)
 bool RenderingState::renderActivatedOnly() const
 {
     return options.activatedOnly;
+}
+
+bool RenderingState::renderInteractionPaths() const
+{
+    return options.renderInteractionPaths;
 }

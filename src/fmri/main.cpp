@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     google::InstallFailureSignalHandler();
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA);
     glutCreateWindow(argv[0]);
 
     // Prepare data for simulations
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_DST_ALPHA,GL_ONE_MINUS_DST_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Start visualisation
     glutMainLoop();
