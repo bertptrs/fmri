@@ -41,7 +41,7 @@ static void check_file(const char *filename)
  * @param targetColor
  * @return true if the read was successful.
  */
-static bool parse_color(const char *input, std::array<float, 4> &targetColor)
+static bool parse_color(const char *input, Color &targetColor)
 {
     if (input[0] == '#') {
         // Attempt to parse #RRGGBBAA
@@ -175,4 +175,9 @@ Options::Options() noexcept :
         labelsPath(nullptr),
         dumpPath(nullptr)
 {
+}
+
+const Color &Options::pathColor() const
+{
+    return pathColor_;
 }

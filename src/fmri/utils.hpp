@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -15,6 +16,8 @@
 namespace fmri
 {
 	typedef float DType;
+
+	typedef std::array<float, 4> Color;
 
     /**
      * The distance between layers in the visualisation.

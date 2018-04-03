@@ -5,6 +5,7 @@
 #include "LayerData.hpp"
 #include "LayerVisualisation.hpp"
 #include "Animation.hpp"
+#include "Options.hpp"
 
 namespace fmri
 {
@@ -40,10 +41,17 @@ namespace fmri
 
         void loadSimulationData(const std::map<string, LayerInfo> &info, std::vector<std::vector<LayerData>> &&data);
         /**
+         * Load rendering-specific options from the given options object.
+         *
+         * @param options
+         */
+        void loadOptions(const Options& options);
+        /**
          * @return Whether the network should only render activated nodes, rather than all of them.
          */
         bool renderActivatedOnly() const;
         bool renderInteractionPaths() const;
+        const Color& pathColor() const;
 
         static RenderingState& instance();
 
@@ -55,6 +63,7 @@ namespace fmri
             bool renderInteractions = true;
             bool activatedOnly = false;
             bool renderInteractionPaths = false;
+            Color pathColor;
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "utils.hpp"
 #include "PNGDumper.hpp"
 
 namespace fmri {
@@ -18,13 +19,14 @@ namespace fmri {
         const string& model() const;
         const string& weights() const;
         const string& means() const;
+        const Color& pathColor() const;
         std::optional<vector<string>> labels() const;
         std::optional<fmri::PNGDumper> imageDumper() const;
 
         const vector<string>& inputs() const;
 
     private:
-        std::array<float, 4> pathColor_;
+        Color pathColor_;
         string modelPath;
         string weightsPath;
         string meansPath;

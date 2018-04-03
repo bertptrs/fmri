@@ -322,3 +322,13 @@ bool RenderingState::renderInteractionPaths() const
 {
     return options.renderInteractionPaths;
 }
+
+void RenderingState::loadOptions(const Options &options)
+{
+    this->options.pathColor = options.pathColor();
+}
+
+const Color &RenderingState::pathColor() const
+{
+    return options.pathColor;
+}
