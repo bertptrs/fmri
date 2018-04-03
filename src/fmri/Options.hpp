@@ -24,13 +24,14 @@ namespace fmri {
         const vector<string>& inputs() const;
 
     private:
-        const string modelPath;
-        const string weightsPath;
-        const string meansPath;
-        const string labelsPath;
-        const string dumpPath;
-        const vector<string> inputPaths;
+        std::array<float, 4> pathColor_;
+        string modelPath;
+        string weightsPath;
+        string meansPath;
+        char const * labelsPath;
+        char const * dumpPath;
+        vector<string> inputPaths;
 
-        Options(string &&, string &&, string&&, string&&, string&&, vector<string> &&) noexcept;
+        Options() noexcept;
     };
 }

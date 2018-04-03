@@ -2,16 +2,15 @@
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>
+#include <glog/logging.h>
 #include "Options.hpp"
-#include "utils.hpp"
 
 using namespace fmri;
-using namespace std;
 
-static void show_help(const char *progname, int exitcode) {
-    cerr << "Usage: " << progname << " -m MODEL -w WEIGHTS INPUTS..." << endl
-         << endl
-         << R"END(Simulate the specified network on the specified inputs.
+[[noreturn]] static void show_help(const char *progname, int exitcode)
+{
+    std::cerr << "Usage: " << progname << " -m MODEL -w WEIGHTS INPUTS...\n\n"
+              << R"END(Simulate the specified network on the specified inputs.
 
 Options:
 	-h	show this message
@@ -19,129 +18,161 @@ Options:
 	-w	(required) the trained weights
     -m  means file. Will be substracted from input if available.
     -l  labels file. Will be used to print prediction labels if available.
-    -d  Image dump dir. Will be filled with PNG images of intermediate results.)END" << endl;
+    -d  Image dump dir. Will be filled with PNG images of intermediate results.
+    -p  Image path color in hex format (#RRGGBB or #RRGGBBAA))END" << std::endl;
 
-    exit(exitcode);
+    std::exit(exitcode);
 }
 
-static void check_file(const char *filename) {
+static void check_file(const char *filename)
+{
     if (access(filename, R_OK) != 0) {
         perror(filename);
         exit(1);
     }
 }
 
-Options Options::parse(const int argc, char *const argv[]) {
-    string model;
-    string weights;
-    string means;
-    string dump;
-    string labels;
+/**
+ * Parse a color string into a color array.
+ *
+ * This function may terminate the program on a partial match.
+ *
+ * @param input
+ * @param targetColor
+ * @return true if the read was successful.
+ */
+static bool parse_color(const char *input, std::array<float, 4> &targetColor)
+{
+    if (input[0] == '#') {
+        // Attempt to parse #RRGGBBAA
+        std::array<unsigned int, 4> colorBuf;
+        const int result = std::sscanf(input, "#%02x%02x%02x%02x", &colorBuf[0], &colorBuf[1], &colorBuf[2],
+                                       &colorBuf[3]);
+        CHECK_GE(result, 3) << "Invalid color HEX format, need at least 3 hex pairs, got " << result << "\n";
+
+        std::transform(colorBuf.begin(), colorBuf.end(), targetColor.begin(), [](auto x) { return x / 255.f; });
+
+        // Optionally, patch the alpha channel if not specified
+        if (result == 3) targetColor[3] = 1;
+        return true;
+    }
+
+    std::cerr << "Unknown color format used (" << input << ")\n";
+
+    return false;
+}
+
+Options Options::parse(const int argc, char *const argv[])
+{
+    Options options;
 
     char c;
 
-    while ((c = getopt(argc, argv, "hm:w:n:l:d:")) != -1) {
+    while ((c = getopt(argc, argv, "hm:w:n:l:d:p:")) != -1) {
         switch (c) {
             case 'h':
                 show_help(argv[0], 0);
-                break;
 
             case 'w':
                 check_file(optarg);
-                weights = optarg;
+                options.weightsPath = optarg;
                 break;
 
             case 'n':
                 check_file(optarg);
-                model = optarg;
+                options.modelPath = optarg;
                 break;
 
             case 'm':
                 check_file(optarg);
-                means = optarg;
+                options.meansPath = optarg;
                 break;
 
             case 'l':
                 check_file(optarg);
-                labels = optarg;
+                options.labelsPath = optarg;
                 break;
 
             case 'd':
-                dump = optarg;
+                options.dumpPath = optarg;
+                break;
+
+            case 'p':
+                if (!parse_color(optarg, options.pathColor_)) {
+                    show_help(argv[0], 1);
+                }
                 break;
 
             case '?':
                 show_help(argv[0], 1);
-                break;
 
             default:
-                cerr << "Unhandled option: " << c << endl;
+                std::cerr << "Unhandled option: " << c << std::endl;
                 abort();
         }
     }
 
-    if (weights.empty()) {
-        cerr << "Weights file is required!" << endl;
+    if (options.weightsPath.empty()) {
+        std::cerr << "Weights file is required!\n";
         show_help(argv[0], 1);
     }
 
-    if (model.empty()) {
-        cerr << "Model file is required!" << endl;
+    if (options.modelPath.empty()) {
+        std::cerr << "Model file is required!\n";
         show_help(argv[0], 1);
     }
 
-    for_each(argv + optind, argv + argc, check_file);
-
-    vector<string> inputs(argv + optind, argv + argc);
-    if (inputs.empty()) {
-        cerr << "No inputs specified" << endl;
+    std::for_each(argv + optind, argv + argc, check_file);
+    options.inputPaths.insert(options.inputPaths.end(), argv + optind, argv + argc);
+    if (options.inputPaths.empty()) {
+        std::cerr << "No inputs specified\n";
         show_help(argv[0], 1);
     }
 
-    return Options(move(model), move(weights), move(means), move(labels), move(dump), move(inputs));
+    return options;
 }
 
-Options::Options(string &&model, string &&weights, string&& means, string&& labels, string&& dumpPath, vector<string> &&inputs) noexcept:
-        modelPath(move(model)),
-        weightsPath(move(weights)),
-        meansPath(means),
-        labelsPath(labels),
-        dumpPath(dumpPath),
-        inputPaths(move(inputs))
+const string &Options::model() const
 {
-}
-
-const string& Options::model() const {
     return modelPath;
 }
 
-const string& Options::weights() const {
+const string &Options::weights() const
+{
     return weightsPath;
 }
 
-const vector<string>& Options::inputs() const {
+const vector<string> &Options::inputs() const
+{
     return inputPaths;
 }
 
-const string& Options::means() const
+const string &Options::means() const
 {
     return meansPath;
 }
 
-optional<vector<string>> Options::labels() const
+std::optional<vector<string>> Options::labels() const
 {
-    if (labelsPath.empty()) {
-        return nullopt;
+    if (!labelsPath) {
+        return std::nullopt;
     } else {
-        return read_vector<string>(labelsPath);
+        return read_vector<std::string>(labelsPath);
     }
 }
 
 std::optional<PNGDumper> Options::imageDumper() const
 {
-    if (dumpPath.empty()) {
-        return nullopt;
+    if (!dumpPath) {
+        return std::nullopt;
     } else {
-        return move(PNGDumper(dumpPath));
+        return PNGDumper(dumpPath);
     }
+}
+
+Options::Options() noexcept :
+        pathColor_({1, 1, 1, 0.1}),
+        labelsPath(nullptr),
+        dumpPath(nullptr)
+{
 }

@@ -31,6 +31,19 @@ auto file_filter_for_extension(std::string_view extension)
     return filter;
 }
 
+
+char * color_string(Gtk::ColorButton &button)
+{
+    char* buffer = new char[2 * 4 + 2]; // 2 per channel, plus #, plus null byte
+    auto color = button.get_rgba();
+
+    // Note: Gdk stores its RGBA values in range 0..66535 instead of 0..255, so need to scale.
+    sprintf(buffer, "#%02x%02x%02x%02x", color.get_red_u() >> 8,
+            color.get_green_u() >> 8, color.get_blue_u() >> 8, color.get_alpha_u() >> 8);
+
+    return buffer;
+}
+
 /**
  * Wrap string into a dynamically allocated c-string.
  *
@@ -55,6 +68,8 @@ public:
     ~Launcher() override = default;
 
 private:
+    int rows;
+
     Gtk::Grid grid;
     Gtk::FileChooserButton fmriChooser;
     Gtk::FileChooserButton modelChooser;
@@ -62,6 +77,7 @@ private:
     Gtk::FileChooserButton labelChooser;
     Gtk::FileChooserButton meansChooser;
     Gtk::FileChooserButton inputChooser;
+    Gtk::ColorButton pathColor;
     Gtk::Button startButton;
 
     void start();
@@ -69,42 +85,47 @@ private:
     std::vector<std::string> getInputFiles();
     Gtk::Label* getManagedLabel(const std::string& contents);
     void findExecutable();
+    void addRowWithLabel(const std::string& label, Gtk::Widget& widget);
 };
 
 Launcher::Launcher()
         :
         Gtk::Window(),
+        rows(0),
         fmriChooser("Select FMRI executable"),
         modelChooser("Select caffe model prototxt"),
         weightsChooser("Select caffe model weights"),
         labelChooser("Select label text file"),
         meansChooser("Select means file"),
         inputChooser("Select input directory", Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER),
+        pathColor(Gdk::RGBA("rgba(255, 255, 255, 0.1)")),
         startButton("Start FMRI")
 {
-    set_size_request(400, -1);
+    set_default_size(400, -1);
+    //set_size_request(400, -1);
     add(grid);
 
+    // Configure all widgets
+    fmriChooser.set_hexpand(true);
+    findExecutable();
+    modelChooser.add_filter(file_filter_for_extension("prototxt"));
+    weightsChooser.add_filter(file_filter_for_extension("caffemodel"));
+    labelChooser.add_filter(file_filter_for_extension("txt"));
+    meansChooser.add_filter(file_filter_for_extension("binaryproto"));
+    pathColor.set_use_alpha(true);
+
+    // Configure grid display options
     grid.set_row_spacing(2);
     grid.set_column_spacing(2);
-    findExecutable();
-    fmriChooser.set_hexpand(true);
-    grid.attach(fmriChooser, 1, 0, 1, 1);
-    grid.attach_next_to(*getManagedLabel("FMRI executable"), fmriChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid.attach(modelChooser, 1, 1, 1, 1);
-    modelChooser.add_filter(file_filter_for_extension("prototxt"));
-    grid.attach_next_to(*getManagedLabel("Model"), modelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid.attach(weightsChooser, 1, 2, 1, 1);
-    weightsChooser.add_filter(file_filter_for_extension("caffemodel"));
-    grid.attach_next_to(*getManagedLabel("Weights"), weightsChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid.attach(labelChooser, 1, 3, 1, 1);
-    labelChooser.add_filter(file_filter_for_extension("txt"));
-    grid.attach_next_to(*getManagedLabel("Labels (optional)"), labelChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid.attach(inputChooser, 1, 4, 1, 1);
-    grid.attach_next_to(*getManagedLabel("Input directory"), inputChooser, Gtk::PositionType::POS_LEFT, 1, 1);
-    grid.attach(meansChooser, 1, 5, 1, 1);
-    meansChooser.add_filter(file_filter_for_extension("binaryproto"));
-    grid.attach_next_to(*getManagedLabel("Means (optional)"), meansChooser, Gtk::PositionType::POS_LEFT, 1, 1);
+
+    // Attach widgets to the grid
+    addRowWithLabel("FMRI executable", fmriChooser);
+    addRowWithLabel("Model", modelChooser);
+    addRowWithLabel("Weights", weightsChooser);
+    addRowWithLabel("Labels (optional)", labelChooser);
+    addRowWithLabel("Input directory", inputChooser);
+    addRowWithLabel("Means (optional)", meansChooser);
+    addRowWithLabel("Path color", pathColor);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
     grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
@@ -137,6 +158,8 @@ void Launcher::start()
             wrap_string(network),
             wrap_string("-w"),
             wrap_string(weights),
+            wrap_string("-p"),
+            color_string(pathColor),
     };
 
     if (labelChooser.get_file()) {
@@ -220,6 +243,13 @@ void Launcher::findExecutable()
             return;
         }
     }
+}
+
+void Launcher::addRowWithLabel(const std::string &label, Gtk::Widget &widget)
+{
+    int currentRow = rows++;
+    grid.attach(widget, 1, currentRow, 1, 1);
+    grid.attach_next_to(*getManagedLabel(label), widget, Gtk::PositionType::POS_LEFT, 1, 1);
 }
 
 int main(int argc, char** argv)
