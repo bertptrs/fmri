@@ -4,6 +4,8 @@
 #include <opencv2/core.hpp>
 #include "InputLayerVisualisation.hpp"
 #include "Range.hpp"
+#include "RenderingState.hpp"
+#include "glutils.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -81,15 +83,7 @@ void InputLayerVisualisation::render()
             0, 0,
     };
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    texture.bind(GL_TEXTURE_2D);
-    glDrawArrays(GL_QUADS, 0, 4);
-    glDisable(GL_TEXTURE_2D);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    float alpha = RenderingState::instance().layerAlpha();
+
+    drawImageTiles(4, vertices, texCoords, texture, alpha);
 }

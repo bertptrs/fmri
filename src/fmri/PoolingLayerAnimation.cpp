@@ -4,6 +4,7 @@
 #include "PoolingLayerAnimation.hpp"
 #include "glutils.hpp"
 #include "MultiImageVisualisation.hpp"
+#include "RenderingState.hpp"
 
 using namespace std;
 using namespace fmri;
@@ -32,7 +33,9 @@ void PoolingLayerAnimation::draw(float timeStep)
 {
     auto& vertexBuffer = animate(startingPositions, deltas, timeStep);
 
-    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), original);
+    float alpha = RenderingState::instance().interactionAlpha();
+
+    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), original, alpha);
 }
 
 Texture PoolingLayerAnimation::loadTextureForData(const LayerData &data)

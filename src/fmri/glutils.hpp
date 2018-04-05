@@ -63,5 +63,6 @@ namespace fmri {
      * @param textureCoords
      * @param texture
      */
-    void drawImageTiles(int n, const float* vertexBuffer, const float* textureCoords, const Texture& texture);
+    void
+    drawImageTiles(int n, const float *vertexBuffer, const float *textureCoords, const Texture &texture, float alpha);
 }

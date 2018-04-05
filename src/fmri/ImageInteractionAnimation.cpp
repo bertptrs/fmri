@@ -1,6 +1,7 @@
 #include "ImageInteractionAnimation.hpp"
 #include "glutils.hpp"
 #include "MultiImageVisualisation.hpp"
+#include "RenderingState.hpp"
 #include <caffe/util/math_functions.hpp>
 
 using namespace fmri;
@@ -10,7 +11,9 @@ void ImageInteractionAnimation::draw(float step)
 {
     auto &vertexBuffer = animate(startingPositions, deltas, step);
 
-    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), texture);
+    float alpha = RenderingState::instance().interactionAlpha();
+
+    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), textureCoordinates.data(), texture, alpha);
 }
 
 ImageInteractionAnimation::ImageInteractionAnimation(const DType *data, const std::vector<int> &shape, const std::vector<float> &prevPositions,

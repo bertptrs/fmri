@@ -138,12 +138,13 @@ void fmri::setOrthographicProjection() {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void fmri::drawImageTiles(int n, const float *vertexBuffer, const float *textureCoords, const Texture &texture)
+void fmri::drawImageTiles(int n, const float *vertexBuffer, const float *textureCoords, const Texture &texture, float alpha)
 {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glColor4f(1, 1, 1, alpha);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     texture.bind(GL_TEXTURE_2D);
     glTexCoordPointer(2, GL_FLOAT, 0, textureCoords);
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer);
