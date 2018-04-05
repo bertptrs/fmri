@@ -23,7 +23,6 @@ find_library(Caffe_LIBRARY
   PATHS ${Caffe_DIR}
   DOC "The Caffe library")
 
-find_package(OpenCV REQUIRED)
 find_package(Glog REQUIRED)
 find_package(Boost 1.55 REQUIRED COMPONENTS system)
 
@@ -48,9 +47,9 @@ if (CAFFE_FOUND)
     add_library(Caffe::Caffe UNKNOWN IMPORTED)
     set_target_properties(Caffe::Caffe PROPERTIES
         INTERFACE_COMPILE_DEFINITIONS "${Caffe_DEFINITIONS}"
-        INTERFACE_INCLUDE_DIRECTORIES "${Caffe_INCLUDE_DIR};${OpenCV_INCLUDE_DIRS}"
+        INTERFACE_INCLUDE_DIRECTORIES "${Caffe_INCLUDE_DIR}"
         IMPORTED_LOCATION "${Caffe_LIBRARY}"
-        INTERFACE_LINK_LIBRARIES "Glog::Glog;Boost::system;${OpenCV_LIBRARIES};${Caffe_ADDITIONAL_LIBS}"
+        INTERFACE_LINK_LIBRARIES "Glog::Glog;Boost::system;${Caffe_ADDITIONAL_LIBS}"
         )
 
     set(Caffe_LIBRARIES ${Caffe_LIBRARY})
