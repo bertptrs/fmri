@@ -1,6 +1,7 @@
 #include "LayerVisualisation.hpp"
 #include "Range.hpp"
 #include "utils.hpp"
+#include "RenderingState.hpp"
 
 const std::vector<float> &fmri::LayerVisualisation::nodePositions() const
 {
@@ -23,6 +24,11 @@ void fmri::LayerVisualisation::initNodePositions<fmri::LayerVisualisation::Order
         nodePositions_.push_back(0);
         nodePositions_.push_back(-spacing * i);
     }
+}
+
+float fmri::LayerVisualisation::getAlpha()
+{
+    return RenderingState::instance().layerAlpha();
 }
 
 template<>

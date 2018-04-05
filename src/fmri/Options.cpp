@@ -70,6 +70,8 @@ Options Options::parse(const int argc, char *const argv[])
                 ("labels,l", value<std::string>(&options.labelsPath), "labels file")
                 ("means,m", value<std::string>(&options.meansPath), "means file")
                 ("path-color,p", value<std::string>(), "color for paths")
+                ("layer-opacity", value<float>(&options.layerTransparancy_), "Opacity for layers")
+                ("interaction-opacity", value<float>(&options.interactionTransparancy_), "Opacity for interactions")
                 ("dump,d", value<std::string>(&options.dumpPath), "dump convolutional images in this directory");
 
         options_description composed = desc;
@@ -92,12 +94,12 @@ Options Options::parse(const int argc, char *const argv[])
         // Sanity checks
         check_file(options.modelPath);
         check_file(options.weightsPath);
-        check_file(options.meansPath);
+        if (!options.meansPath.empty()) check_file(options.meansPath);
+        if (!options.labelsPath.empty()) check_file(options.labelsPath);
         std::for_each(options.inputPaths.begin(), options.inputPaths.end(), check_file);
 
         return options;
     } catch (required_option& e) {
-        std::cerr << e.get_option_name() << std::endl;
         if (e.get_option_name() == "--input") {
             std::cerr << "No input files specified" << std::endl;
         } else {
@@ -149,6 +151,8 @@ std::optional<PNGDumper> Options::imageDumper() const
 }
 
 Options::Options() noexcept :
+        layerTransparancy_(1),
+        interactionTransparancy_(1),
         pathColor_({1, 1, 1, 0.1})
 {
 }
@@ -156,4 +160,14 @@ Options::Options() noexcept :
 const Color &Options::pathColor() const
 {
     return pathColor_;
+}
+
+float Options::layerTransparancy() const
+{
+    return layerTransparancy_;
+}
+
+float Options::interactionTransparancy() const
+{
+    return interactionTransparancy_;
 }

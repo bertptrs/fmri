@@ -31,7 +31,6 @@ auto file_filter_for_extension(std::string_view extension)
     return filter;
 }
 
-
 char * color_string(Gtk::ColorButton &button)
 {
     char* buffer = new char[2 * 4 + 2]; // 2 per channel, plus #, plus null byte
@@ -62,6 +61,15 @@ char* wrap_string(std::string_view str) {
     return wrapper;
 }
 
+
+void float_parameter(std::vector<char *> &argv, std::string_view flag, double value)
+{
+    char buffer[100];
+    argv.push_back(wrap_string(flag));
+    std::sprintf(buffer, "%f", value);
+    argv.push_back(wrap_string(buffer));
+}
+
 class Launcher : public Gtk::Window {
 public:
     Launcher();
@@ -78,6 +86,8 @@ private:
     Gtk::FileChooserButton meansChooser;
     Gtk::FileChooserButton inputChooser;
     Gtk::ColorButton pathColor;
+    Gtk::Scale layerTransparancy;
+    Gtk::Scale interactionTransparancy;
     Gtk::Button startButton;
 
     void start();
@@ -99,6 +109,8 @@ Launcher::Launcher()
         meansChooser("Select means file"),
         inputChooser("Select input directory", Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER),
         pathColor(Gdk::RGBA("rgba(255, 255, 255, 0.1)")),
+        layerTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
+        interactionTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         startButton("Start FMRI")
 {
     set_default_size(400, -1);
@@ -126,6 +138,8 @@ Launcher::Launcher()
     addRowWithLabel("Input directory", inputChooser);
     addRowWithLabel("Means (optional)", meansChooser);
     addRowWithLabel("Path color", pathColor);
+    addRowWithLabel("Layer transparancy", layerTransparancy);
+    addRowWithLabel("Interaction transparancy", interactionTransparancy);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
     grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
@@ -162,6 +176,9 @@ void Launcher::start()
             color_string(pathColor),
     };
 
+    float_parameter(argv, "--layer-opacity", layerTransparancy.get_adjustment()->get_value());
+    float_parameter(argv, "--interaction-opacity", interactionTransparancy.get_adjustment()->get_value());
+
     if (labelChooser.get_file()) {
         argv.push_back(wrap_string("-l"));
         argv.push_back(wrap_string(labelChooser.get_file()->get_path()));
@@ -178,6 +195,11 @@ void Launcher::start()
     argv.push_back(nullptr);
 
     execv(executable.c_str(), argv.data());
+
+    // Discard all allocated memory.
+    std::for_each(argv.begin(), argv.end(), std::default_delete<char>());
+    Gtk::MessageDialog dialog(*this, "Failed to start for unknown reasons.");
+    dialog.run();
 }
 
 bool Launcher::hasFile(const Gtk::FileChooserButton& fileChooser, const std::string& error)

@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 
     // Prepare data for simulations
     Options options = Options::parse(argc, argv);
-    loadSimulationData(options);
     RenderingState::instance().loadOptions(options);
+    loadSimulationData(options);
 
     // Register callbacks
     glutReshapeFunc(changeWindowSize);

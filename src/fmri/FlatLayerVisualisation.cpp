@@ -68,6 +68,8 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
 
     assert(indexPos == indexBuffer.end());
     assert(colorPos == colorBuffer.end());
+
+    patchTransparancy(colorBuffer.begin(), colorBuffer.end());
 }
 
 void FlatLayerVisualisation::render()

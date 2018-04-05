@@ -341,9 +341,11 @@ bool RenderingState::renderInteractionPaths() const
     return options.renderInteractionPaths;
 }
 
-void RenderingState::loadOptions(const Options &options)
+void RenderingState::loadOptions(const Options &programOptions)
 {
-    this->options.pathColor = options.pathColor();
+    options.pathColor = programOptions.pathColor();
+    options.layerAlpha = programOptions.layerTransparancy();
+    options.interactionAlpha = programOptions.interactionTransparancy();
 }
 
 const Color &RenderingState::pathColor() const
@@ -368,4 +370,14 @@ RenderingState::RenderingState() noexcept
 
     // Set initial point size
     glPointSize(3);
+}
+
+float RenderingState::interactionAlpha() const
+{
+    return options.interactionAlpha;
+}
+
+float RenderingState::layerAlpha() const
+{
+    return options.layerAlpha;
 }

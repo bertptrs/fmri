@@ -43,15 +43,17 @@ namespace fmri
         /**
          * Load rendering-specific options from the given options object.
          *
-         * @param options
+         * @param programOptions
          */
-        void loadOptions(const Options& options);
+        void loadOptions(const Options& programOptions);
         /**
          * @return Whether the network should only render activated nodes, rather than all of them.
          */
         bool renderActivatedOnly() const;
         bool renderInteractionPaths() const;
         const Color& pathColor() const;
+        float interactionAlpha() const;
+        float layerAlpha() const;
 
         static RenderingState& instance();
 
@@ -63,6 +65,8 @@ namespace fmri
             bool renderInteractions = true;
             bool activatedOnly = false;
             bool renderInteractionPaths = false;
+            float layerAlpha;
+            float interactionAlpha;
             Color pathColor;
         } options;
         std::array<float, 3> pos;

@@ -58,6 +58,8 @@ ActivityAnimation::ActivityAnimation(
         lineIndices.push_back(i);
         lineIndices.push_back(i + interactions.size());
     }
+
+    patchTransparancy(colorBuf.begin(), colorBuf.end());
 }
 
 void ActivityAnimation::draw(float timeScale)
