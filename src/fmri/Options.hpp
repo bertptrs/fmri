@@ -30,8 +30,8 @@ namespace fmri {
         string modelPath;
         string weightsPath;
         string meansPath;
-        char const * labelsPath;
-        char const * dumpPath;
+        string labelsPath;
+        string dumpPath;
         vector<string> inputPaths;
 
         Options() noexcept;

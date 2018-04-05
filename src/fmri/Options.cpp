@@ -1,34 +1,18 @@
 #include <algorithm>
-#include <cstdio>
 #include <iostream>
-#include <unistd.h>
+#include <boost/program_options.hpp>
 #include <glog/logging.h>
 #include "Options.hpp"
 
 using namespace fmri;
 
-[[noreturn]] static void show_help(const char *progname, int exitcode)
+static void check_file(const std::string& filename)
 {
-    std::cerr << "Usage: " << progname << " -m MODEL -w WEIGHTS INPUTS...\n\n"
-              << R"END(Simulate the specified network on the specified inputs.
+    if (access(filename.c_str(), R_OK) != 0) {
+        char errorBuf[1024];
+        std::snprintf(errorBuf, sizeof(errorBuf) - 1, "%s: %s", filename.c_str(), std::strerror(errno));
 
-Options:
-	-h	show this message
-	-n	(required) the model file to simulate
-	-w	(required) the trained weights
-    -m  means file. Will be substracted from input if available.
-    -l  labels file. Will be used to print prediction labels if available.
-    -d  Image dump dir. Will be filled with PNG images of intermediate results.
-    -p  Image path color in hex format (#RRGGBB or #RRGGBBAA))END" << std::endl;
-
-    std::exit(exitcode);
-}
-
-static void check_file(const char *filename)
-{
-    if (access(filename, R_OK) != 0) {
-        perror(filename);
-        exit(1);
+        throw std::invalid_argument(errorBuf);
     }
 }
 
@@ -41,95 +25,89 @@ static void check_file(const char *filename)
  * @param targetColor
  * @return true if the read was successful.
  */
-static bool parse_color(const char *input, Color &targetColor)
+static void parse_color(const char *input, Color &targetColor)
 {
     if (input[0] == '#') {
         // Attempt to parse #RRGGBBAA
         std::array<unsigned int, 4> colorBuf;
         const int result = std::sscanf(input, "#%02x%02x%02x%02x", &colorBuf[0], &colorBuf[1], &colorBuf[2],
                                        &colorBuf[3]);
-        CHECK_GE(result, 3) << "Invalid color HEX format, need at least 3 hex pairs, got " << result << "\n";
+        if (result < 3) {
+            throw std::invalid_argument("Invalid color HEX format, need at least 3 hex pairs");
+        }
 
         std::transform(colorBuf.begin(), colorBuf.end(), targetColor.begin(), [](auto x) { return x / 255.f; });
 
         // Optionally, patch the alpha channel if not specified
         if (result == 3) targetColor[3] = 1;
-        return true;
+        return;
     }
 
-    std::cerr << "Unknown color format used (" << input << ")\n";
-
-    return false;
+    char errorBuf[1024];
+    std::snprintf(errorBuf, sizeof(errorBuf) - 1, "Unknown color value: %s", input);
+    throw std::invalid_argument(errorBuf);
 }
 
 Options Options::parse(const int argc, char *const argv[])
 {
-    Options options;
+    using namespace boost::program_options;
 
-    char c;
+    try {
+        Options options;
 
-    while ((c = getopt(argc, argv, "hm:w:n:l:d:p:")) != -1) {
-        switch (c) {
-            case 'h':
-                show_help(argv[0], 0);
+        options_description desc("Options");
+        positional_options_description positionals;
+        positionals.add("input", -1);
 
-            case 'w':
-                check_file(optarg);
-                options.weightsPath = optarg;
-                break;
+        options_description hidden;
+        hidden.add_options()
+                ("input", value<std::vector<std::string>>(&options.inputPaths)->required()->composing());
 
-            case 'n':
-                check_file(optarg);
-                options.modelPath = optarg;
-                break;
+        desc.add_options()
+                ("help,h", "Show this help message")
+                ("weights,w", value<std::string>(&options.weightsPath)->required(), "weights file for the network")
+                ("network,n", value<std::string>(&options.modelPath)->required(), "caffe model file for the network")
+                ("labels,l", value<std::string>(&options.labelsPath), "labels file")
+                ("means,m", value<std::string>(&options.meansPath), "means file")
+                ("path-color,p", value<std::string>(), "color for paths")
+                ("dump,d", value<std::string>(&options.dumpPath), "dump convolutional images in this directory");
 
-            case 'm':
-                check_file(optarg);
-                options.meansPath = optarg;
-                break;
+        options_description composed = desc;
+        composed.add(hidden);
 
-            case 'l':
-                check_file(optarg);
-                options.labelsPath = optarg;
-                break;
+        variables_map vm;
+        store(command_line_parser(argc, argv).options(composed).positional(positionals).run(), vm);
 
-            case 'd':
-                options.dumpPath = optarg;
-                break;
-
-            case 'p':
-                if (!parse_color(optarg, options.pathColor_)) {
-                    show_help(argv[0], 1);
-                }
-                break;
-
-            case '?':
-                show_help(argv[0], 1);
-
-            default:
-                std::cerr << "Unhandled option: " << c << std::endl;
-                abort();
+        if (vm.count("help")) {
+            std::cout << "Usage: " << argv[0] << " [OPTIONS] [INPUTS]\n\n" << desc << '\n';
+            std::exit(0);
         }
+
+        notify(vm);
+
+        if (vm.count("path-color")) {
+            parse_color(vm["path-color"].as<std::string>().c_str(), options.pathColor_);
+        }
+
+        // Sanity checks
+        check_file(options.modelPath);
+        check_file(options.weightsPath);
+        check_file(options.meansPath);
+        std::for_each(options.inputPaths.begin(), options.inputPaths.end(), check_file);
+
+        return options;
+    } catch (required_option& e) {
+        std::cerr << e.get_option_name() << std::endl;
+        if (e.get_option_name() == "--input") {
+            std::cerr << "No input files specified" << std::endl;
+        } else {
+            std::cerr << e.what() << std::endl;
+        }
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
     }
 
-    if (options.weightsPath.empty()) {
-        std::cerr << "Weights file is required!\n";
-        show_help(argv[0], 1);
-    }
-
-    if (options.modelPath.empty()) {
-        std::cerr << "Model file is required!\n";
-        show_help(argv[0], 1);
-    }
-
-    std::for_each(argv + optind, argv + argc, check_file);
-    options.inputPaths.insert(options.inputPaths.end(), argv + optind, argv + argc);
-    if (options.inputPaths.empty()) {
-        std::cerr << "No inputs specified\n";
-        show_help(argv[0], 1);
-    }
-
-    return options;
+    std::exit(1);
 }
 
 const string &Options::model() const
@@ -154,7 +132,7 @@ const string &Options::means() const
 
 std::optional<vector<string>> Options::labels() const
 {
-    if (!labelsPath) {
+    if (labelsPath.empty()) {
         return std::nullopt;
     } else {
         return read_vector<std::string>(labelsPath);
@@ -163,7 +141,7 @@ std::optional<vector<string>> Options::labels() const
 
 std::optional<PNGDumper> Options::imageDumper() const
 {
-    if (!dumpPath) {
+    if (dumpPath.empty()) {
         return std::nullopt;
     } else {
         return PNGDumper(dumpPath);
@@ -171,9 +149,7 @@ std::optional<PNGDumper> Options::imageDumper() const
 }
 
 Options::Options() noexcept :
-        pathColor_({1, 1, 1, 0.1}),
-        labelsPath(nullptr),
-        dumpPath(nullptr)
+        pathColor_({1, 1, 1, 0.1})
 {
 }
 

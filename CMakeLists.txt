@@ -23,12 +23,14 @@ find_package(Caffe REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(png++ REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 
 target_link_libraries(fmri PUBLIC
 	Caffe::Caffe
 	GLUT::GLUT
 	OpenGL::GLU
 	png++::png++
+	Boost::program_options
 	)
 
 target_include_directories(fmri PUBLIC
@@ -46,7 +48,6 @@ target_link_libraries(deinplace Caffe::Caffe protobuf::libprotobuf)
 
 # Build isntructions for the launcher tool
 find_package(GTK3 REQUIRED COMPONENTS gtk gtkmm)
-find_package(Boost REQUIRED COMPONENTS filesystem)
 add_executable(fmri-launcher src/tools/launcher.cpp)
 target_compile_options(fmri-launcher PRIVATE "-Wall" "-Wextra" "-pedantic")
 target_link_libraries(fmri-launcher GTK3::gtkmm Boost::filesystem GTK3::gtk)
