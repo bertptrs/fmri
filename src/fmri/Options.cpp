@@ -10,7 +10,7 @@ static void check_file(const std::string& filename)
 {
     if (access(filename.c_str(), R_OK) != 0) {
         char errorBuf[1024];
-        std::snprintf(errorBuf, sizeof(errorBuf) - 1, "%s: %s", filename.c_str(), std::strerror(errno));
+        std::snprintf(errorBuf, sizeof(errorBuf), "%s: %s", filename.c_str(), std::strerror(errno));
 
         throw std::invalid_argument(errorBuf);
     }
@@ -44,7 +44,7 @@ static void parse_color(const char *input, Color &targetColor)
     }
 
     char errorBuf[1024];
-    std::snprintf(errorBuf, sizeof(errorBuf) - 1, "Unknown color value: %s", input);
+    std::snprintf(errorBuf, sizeof(errorBuf), "Unknown color value: %s", input);
     throw std::invalid_argument(errorBuf);
 }
 
