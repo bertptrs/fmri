@@ -12,7 +12,6 @@ The following programs/libraries need to be installed on your system:
 - Google log (glog)
 - OpenCV (at least 2.6, 3.x works fine.)
 - Boost System
-- PNG++
 
 Note that most of these are dependencies of Caffe, and thus will
 probably already be on your system. For OS-specific instructions, see
@@ -22,7 +21,6 @@ below.
 
 1. Install either `caffe` or `caffe-cpu` from the AUR.
 2. Install other dependencies:
-    - `png++`
     - `cmake`
     - `freeglut`
     - `gtkmm3`
@@ -35,10 +33,9 @@ Caffe is available from the Ubuntu repositories from version 17.10
 process. The commands required are as follows:
 
     # Install dependencies
-    sudo apt install libcaffe-cpu-dev freeglut3-dev libpng++-dev \
+    sudo apt install libcaffe-cpu-dev freeglut3-dev libgtkmm-3.0-dev \
         build-essential cmake libopencv-dev libboost-system-dev \
-        libgoogle-glog-dev libblas-dev libprotobuf-dev \
-        libgtkmm-3.0-dev
+        libgoogle-glog-dev libblas-dev libprotobuf-dev
 
     # Do the build normally
 
