@@ -162,6 +162,7 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
     caffe::caffe_sub(prevState.numEntries(), curState.data(), prevState.data(), changes.data());
 
     if (curState.shape().size() == 2) {
+        rescale(changes.begin(), changes.end(), 0, 1);
         EntryList results;
         for (auto i : Range(curState.numEntries())) {
             if (curState.data()[i] > EPSILON) {
@@ -169,15 +170,9 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
             }
         }
 
-        const auto maxValue = max_element(results.begin(), results.end())->first;
-
         return new ActivityAnimation(results, prevPositions.data(), curPositions.data(),
-                                     [=](float i) -> Color {
-                                                 if (maxValue == 0) {
-                                                     return {1, 1, 1, 1};
-                                                 } else {
-                                                     return {1 - i / maxValue, 1 - i / maxValue, 1, 1};
-                                                 }
+                                     [](float i) -> Color {
+            return {1 - i, 1 - i, 1};
                                              });
     } else {
         return new ImageInteractionAnimation(changes.data(), prevState.shape(), prevPositions, curPositions);
