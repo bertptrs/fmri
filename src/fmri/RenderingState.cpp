@@ -242,7 +242,7 @@ void RenderingState::render(float time) const
         glPushMatrix();
         renderLayerName(currentData->at(i).name());
         if (options.renderLayers) {
-            layerVisualisations[i]->render();
+            layerVisualisations[i]->draw(time);
         }
         if (options.renderInteractions && i < interactionAnimations.size() && interactionAnimations[i]) {
             interactionAnimations[i]->draw(time);

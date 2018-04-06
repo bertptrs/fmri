@@ -11,7 +11,7 @@ namespace fmri
     public:
         explicit InputLayerVisualisation(const LayerData &data);
 
-        void render() override;
+        void draw(float time) override;
 
     private:
         Texture texture;

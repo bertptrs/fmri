@@ -38,13 +38,15 @@ ActivityAnimation::ActivityAnimation(
     startingPos.reserve(bufferLength);
     vector<float> endPos;
     endPos.reserve(bufferLength);
-    colorBuf.reserve(interactions.size());
+    transform(interactions.begin(), interactions.end(), back_inserter(colorBuffer), [&coloring](auto e) {
+        return coloring(e.first);
+    });
+    colorBuffer.reserve(interactions.size());
+
 
     for (auto &entry : interactions) {
         auto *aPos = &aPositions[3 * entry.second.first];
         auto *bPos = &bPositions[3 * entry.second.second];
-
-        colorBuf.push_back(coloring(entry.first));
 
         for (auto i : Range(3)) {
             startingPos.emplace_back(aPos[i]);
@@ -59,7 +61,7 @@ ActivityAnimation::ActivityAnimation(
         lineIndices.push_back(i + interactions.size());
     }
 
-    patchTransparancy(colorBuf.begin(), colorBuf.end());
+    patchTransparancy();
 }
 
 void ActivityAnimation::draw(float timeScale)
@@ -68,7 +70,7 @@ void ActivityAnimation::draw(float timeScale)
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-    glColorPointer(std::tuple_size<Color>::value, GL_FLOAT, 0, colorBuf.data());
+    glColorPointer(std::tuple_size<Color>::value, GL_FLOAT, 0, colorBuffer.data());
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
     glDrawArrays(GL_POINTS, 0, bufferLength / 3);
     glDisableClientState(GL_COLOR_ARRAY);

@@ -27,7 +27,6 @@ namespace fmri
 
     private:
         std::size_t bufferLength;
-        std::vector<Color> colorBuf;
         std::vector<float> startingPos;
         std::vector<float> delta;
         std::vector<int> lineIndices;

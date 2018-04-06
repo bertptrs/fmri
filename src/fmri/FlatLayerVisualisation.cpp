@@ -29,7 +29,6 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
         LayerVisualisation(layer.numEntries()),
         ordering(ordering),
         vertexBuffer(layer.numEntries() * NODE_FACES.size()),
-        colorBuffer(layer.numEntries() * VERTICES_PER_NODE),
         indexBuffer(layer.numEntries() * NODE_FACES.size())
 {
     auto &shape = layer.shape();
@@ -45,7 +44,7 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
 
     auto scalingMax = std::max(abs(*minElem), abs(*maxElem));
 
-    auto colorPos = colorBuffer.begin();
+    auto colorPos = std::back_inserter(colorBuffer);
     auto indexPos = indexBuffer.begin();
 
     for (int i : Range(limit)) {
@@ -67,12 +66,10 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
     }
 
     assert(indexPos == indexBuffer.end());
-    assert(colorPos == colorBuffer.end());
-
-    patchTransparancy(colorBuffer.begin(), colorBuffer.end());
+    patchTransparancy();
 }
 
-void FlatLayerVisualisation::render()
+void FlatLayerVisualisation::draw(float time)
 {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -85,7 +82,7 @@ void FlatLayerVisualisation::render()
     glDisableClientState(GL_COLOR_ARRAY);
 
     // Now draw wireframe
-    glColor4f(0, 0, 0, 1);
+    glColor4f(0, 0, 0, getAlpha());
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

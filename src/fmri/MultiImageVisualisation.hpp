@@ -20,7 +20,7 @@ namespace fmri
 
         explicit MultiImageVisualisation(const LayerData&);
 
-        void render() override;
+        void draw(float time) override;
 
         static vector<float> getVertices(const std::vector<float> &nodePositions, float scaling = 1);
         static std::vector<float> getTexCoords(int n);

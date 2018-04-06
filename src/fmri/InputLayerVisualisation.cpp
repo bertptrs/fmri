@@ -67,7 +67,7 @@ InputLayerVisualisation::InputLayerVisualisation(const LayerData &data)
     gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_FLOAT, imageData.data());
 }
 
-void InputLayerVisualisation::render()
+void InputLayerVisualisation::draw(float time)
 {
     const float vertices[] = {
             0, 0, 0,

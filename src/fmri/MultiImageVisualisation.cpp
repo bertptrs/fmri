@@ -25,7 +25,7 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
     texCoordBuffer = getTexCoords(channels);
 }
 
-void MultiImageVisualisation::render()
+void MultiImageVisualisation::draw(float time)
 {
     float alpha = RenderingState::instance().layerAlpha();
     drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), texCoordBuffer.data(), texture, alpha);

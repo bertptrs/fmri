@@ -12,12 +12,11 @@ namespace fmri
     public:
         explicit FlatLayerVisualisation(const LayerData &layer, Ordering ordering);
 
-        void render() override;
+        void draw(float time) override;
 
     private:
         Ordering ordering;
         std::vector<float> vertexBuffer;
-        std::vector<Color> colorBuffer;
         std::vector<int> indexBuffer;
         std::vector<int> activeIndexBuffer;
 

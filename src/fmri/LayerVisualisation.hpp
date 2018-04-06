@@ -2,10 +2,12 @@
 
 #include <vector>
 #include "utils.hpp"
+#include "Drawable.hpp"
 
 namespace fmri
 {
     class LayerVisualisation
+            : public Drawable
     {
     public:
         enum class Ordering {
@@ -17,28 +19,15 @@ namespace fmri
         explicit LayerVisualisation(size_t numNodes);
         virtual ~LayerVisualisation() = default;
 
-        virtual void render() = 0;
         virtual const std::vector<float>& nodePositions() const;
 
-    private:
-        static float getAlpha();
+    protected:
+        float getAlpha() override;
 
     protected:
         std::vector<float> nodePositions_;
 
         template<Ordering Order>
         void initNodePositions(size_t n, float spacing);
-
-        template<typename It>
-        void patchTransparancy(It begin, It end)
-        {
-            if constexpr (std::tuple_size<Color>::value >= 4) {
-                const auto alpha = getAlpha();
-                for (; begin != end; ++begin) {
-                    Color &color = *begin;
-                    color[3] = alpha;
-                }
-            }
-        }
     };
 }
