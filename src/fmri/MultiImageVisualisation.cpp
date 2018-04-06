@@ -2,7 +2,6 @@
 #include "MultiImageVisualisation.hpp"
 #include "glutils.hpp"
 #include "Range.hpp"
-#include "RenderingState.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -25,10 +24,9 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
     texCoordBuffer = getTexCoords(channels);
 }
 
-void MultiImageVisualisation::draw(float time)
+void MultiImageVisualisation::draw(float)
 {
-    float alpha = RenderingState::instance().layerAlpha();
-    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), texCoordBuffer.data(), texture, alpha);
+    drawImageTiles(vertexBuffer.size() / 3, vertexBuffer.data(), texCoordBuffer.data(), texture, getAlpha());
 }
 
 vector<float> MultiImageVisualisation::getVertices(const std::vector<float> &nodePositions, float scaling)
