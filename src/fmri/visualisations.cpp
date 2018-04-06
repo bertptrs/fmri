@@ -164,7 +164,9 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
     if (curState.shape().size() == 2) {
         EntryList results;
         for (auto i : Range(curState.numEntries())) {
-            results.emplace_back(changes[i], make_pair(i, i));
+            if (curState.data()[i] > EPSILON) {
+                results.emplace_back(changes[i], make_pair(i, i));
+            }
         }
 
         const auto maxValue = max_element(results.begin(), results.end())->first;
@@ -196,7 +198,9 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
         EntryList entries;
         entries.reserve(scaling.size());
         for (auto i : Range(scaling.size())) {
-            entries.emplace_back(scaling[i], make_pair(i, i));
+            if (std::abs(curState.data()[i]) > EPSILON) {
+                entries.emplace_back(scaling[i], make_pair(i, i));
+            }
         }
 
         auto max_val = *max_element(scaling.begin(), scaling.end());
