@@ -22,7 +22,6 @@ target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
 find_package(Caffe REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
-find_package(png++ REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs)
 
@@ -30,7 +29,6 @@ target_link_libraries(fmri PUBLIC
 	Caffe::Caffe
 	GLUT::GLUT
 	OpenGL::GLU
-	png++::png++
 	Boost::program_options
 	opencv_core
 	opencv_imgproc

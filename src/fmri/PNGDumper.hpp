@@ -23,6 +23,5 @@ namespace fmri
 
         void dumpImageSeries(const LayerData &data);
 
-        string getFilename(const string &basic_string, int i, int j);
     };
 }

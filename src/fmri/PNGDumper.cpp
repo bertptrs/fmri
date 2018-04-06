@@ -2,7 +2,8 @@
 
 #include <glog/logging.h>
 #include <sys/stat.h>
-#include <png++/png.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 #include "PNGDumper.hpp"
 
@@ -50,41 +51,21 @@ void PNGDumper::dumpImageSeries(const LayerData &layer)
     const auto images = shape[0], channels = shape[1], height = shape[2], width = shape[3];
     const auto imagePixels = width * height;
 
-    // Buffer for storing the current image data.
-    vector<DType> buffer(imagePixels);
+    cv::Mat image(width, height, CV_32FC1);
 
     auto data = layer.data();
 
-    png::image<png::gray_pixel> image(width, height);
-
     for (int i = 0; i < images; ++i) {
         for (int j = 0; j < channels; ++j) {
-            memcpy(buffer.data(), data, imagePixels * sizeof(DType));
+            char pathBuf[PATH_MAX];
+            std::copy_n(data, imagePixels, image.begin<float>());
+            rescale(image.begin<float>(), image.end<float>(), 0, 255);
+            std::snprintf(pathBuf, sizeof(pathBuf), "%s/%s-%d-%d.png", baseDir_.c_str(), layer.name().c_str(), i, j);
 
-            // advance the buffer;
+            cv::imwrite(pathBuf, image);
+
             data += imagePixels;
-
-            rescale(buffer.begin(), buffer.end(), 0.0, 255.0);
-
-            for (int y = 0; y < height; ++y) {
-                for (int x = 0; x < width; ++x) {
-                    image[y][x] = png::gray_pixel((int) buffer[x + y * width]);
-                }
-            }
-
-            image.write(getFilename(layer.name(), i, j));
         }
     }
 }
 
-string PNGDumper::getFilename(const string &layerName, int i, int j)
-{
-    stringstream nameBuilder;
-
-    nameBuilder << baseDir_
-                << "/" << layerName
-                << "-" << i
-                << "-" << j << ".png";
-
-    return nameBuilder.str();
-}

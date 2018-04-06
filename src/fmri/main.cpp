@@ -28,7 +28,6 @@ static void loadSimulationData(const Options &options)
     }
 
     CHECK_GT(results.size(), 0) << "Should have some results" << endl;
-    RenderingState::instance().loadSimulationData(simulator.layerInfo(), std::move(results));
 
     if (dumper) {
         for (auto &layer : *results.begin()) {
@@ -46,6 +45,8 @@ static void loadSimulationData(const Options &options)
             LOG(INFO) << "Got answer: " << labels[bestIndex] << endl;
         }
     }
+
+    RenderingState::instance().loadSimulationData(simulator.layerInfo(), std::move(results));
 }
 
 int main(int argc, char *argv[])
