@@ -10,7 +10,7 @@ namespace fmri
     class DummyLayerVisualisation : public LayerVisualisation
     {
     public:
-        void draw(float time) override
+        void draw(float) override
         {};
     };
 }

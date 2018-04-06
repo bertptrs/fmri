@@ -4,7 +4,6 @@
 #include <opencv2/core.hpp>
 #include "InputLayerVisualisation.hpp"
 #include "Range.hpp"
-#include "RenderingState.hpp"
 #include "glutils.hpp"
 
 using namespace fmri;
@@ -67,7 +66,7 @@ InputLayerVisualisation::InputLayerVisualisation(const LayerData &data)
     gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_FLOAT, imageData.data());
 }
 
-void InputLayerVisualisation::draw(float time)
+void InputLayerVisualisation::draw(float)
 {
     const float vertices[] = {
             0, 0, 0,
@@ -83,7 +82,7 @@ void InputLayerVisualisation::draw(float time)
             0, 0,
     };
 
-    float alpha = RenderingState::instance().layerAlpha();
+    float alpha = getAlpha();
 
     drawImageTiles(4, vertices, texCoords, texture, alpha);
 }
