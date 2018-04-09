@@ -98,6 +98,7 @@ private:
     Gtk::FileChooserButton meansChooser;
     Gtk::FileChooserButton inputChooser;
     Gtk::ColorButton pathColor;
+    Gtk::Scale layerDistance;
     Gtk::Scale layerTransparancy;
     Gtk::Scale interactionTransparancy;
     Gtk::Button startButton;
@@ -121,6 +122,7 @@ Launcher::Launcher()
         meansChooser("Select means file"),
         inputChooser("Select input directory", Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER),
         pathColor(Gdk::RGBA("rgba(255, 255, 255, 0.1)")),
+        layerDistance(Gtk::Adjustment::create(10, 0, 100, 0, 0.1, 0)),
         layerTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         startButton("Start FMRI")
@@ -157,6 +159,7 @@ Launcher::Launcher()
     addRowWithLabel("Input directory", inputChooser);
     addRowWithLabel("Means (optional)", meansChooser);
     addRowWithLabel("Path color", pathColor);
+    addRowWithLabel("Layer distance", layerDistance);
     addRowWithLabel("Layer transparancy", layerTransparancy);
     addRowWithLabel("Interaction transparancy", interactionTransparancy);
 
@@ -197,6 +200,7 @@ void Launcher::start()
 
     float_parameter(argv, "--layer-opacity", layerTransparancy.get_value());
     float_parameter(argv, "--interaction-opacity", interactionTransparancy.get_value());
+    float_parameter(argv, "--layer-distance", layerDistance.get_value());
 
     if (labelChooser.get_file()) {
         argv.push_back(wrap_string("-l"));

@@ -17,6 +17,24 @@ static void check_file(const std::string& filename)
 }
 
 /**
+ * Create a boost::program_options::value for some variable.
+ *
+ * Utility method to make generating value wrappers less repetitive. This
+ * method automatically sets the default value to whatever the variable
+ * currently holds.
+ *
+ * @tparam T
+ * @param val Variable to be set/use as default.
+ * @return A value wrapper
+ */
+template<typename T>
+inline static auto value_for(T& val)
+{
+    return boost::program_options::value<T>(&val)
+            ->default_value(val);
+}
+
+/**
  * Parse a color string into a color array.
  *
  * This function may terminate the program on a partial match.
@@ -70,9 +88,10 @@ Options::Options(int argc, char * const argv[]):
                 ("network,n", value<std::string>(&modelPath)->required(), "caffe model file for the network")
                 ("labels,l", value<std::string>(&labelsPath), "labels file")
                 ("means,m", value<std::string>(&meansPath), "means file")
-                ("path-color,p", value<std::string>(), "color for paths")
-                ("layer-opacity", value<float>(&layerTransparancy_), "Opacity for layers")
-                ("interaction-opacity", value<float>(&interactionTransparancy_), "Opacity for interactions")
+                ("path-color,p", value<std::string>()->default_value("#ffffff19"), "color for paths")
+                ("layer-opacity", value_for(layerTransparancy_), "Opacity for layers")
+                ("interaction-opacity", value_for(interactionTransparancy_), "Opacity for interactions")
+                ("layer-distance", value_for(LAYER_X_OFFSET), "Distance between layers")
                 ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
         options_description composed = desc;

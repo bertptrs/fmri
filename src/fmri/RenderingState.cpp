@@ -236,7 +236,7 @@ void RenderingState::render(float time) const
 
 
     glPushMatrix();
-    glTranslatef(5 * currentData->size(), 0, 0);
+    glTranslatef(-LAYER_X_OFFSET / 2 * currentData->size(), 0, 0);
 
     for (auto i : Range(currentData->size())) {
         glPushMatrix();

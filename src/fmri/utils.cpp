@@ -1,7 +1,7 @@
 #include <caffe/util/math_functions.hpp>
 #include "utils.hpp"
 
-const float fmri::LAYER_X_OFFSET = -10;
+float fmri::LAYER_X_OFFSET = 10;
 
 std::default_random_engine &fmri::rng()
 {

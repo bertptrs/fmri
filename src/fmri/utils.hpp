@@ -21,8 +21,10 @@ namespace fmri
 
     /**
      * The distance between layers in the visualisation.
+     *
+     * This value is set from the options parser when provided.
      */
-	extern const float LAYER_X_OFFSET;
+	extern float LAYER_X_OFFSET;
 
     constexpr const float EPSILON = 1e-10f;
 
