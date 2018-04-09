@@ -3,6 +3,7 @@
 #include <boost/program_options.hpp>
 #include <glog/logging.h>
 #include "Options.hpp"
+#include "visualisations.hpp"
 
 using namespace fmri;
 
@@ -92,6 +93,7 @@ Options::Options(int argc, char * const argv[]):
                 ("layer-opacity", value_for(layerTransparancy_), "Opacity for layers")
                 ("interaction-opacity", value_for(interactionTransparancy_), "Opacity for interactions")
                 ("layer-distance", value_for(LAYER_X_OFFSET), "Distance between layers")
+                ("interaction-limit", value_for(INTERACTION_LIMIT), "Maximum number of interactions per layer")
                 ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
         options_description composed = desc;

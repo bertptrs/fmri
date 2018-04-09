@@ -14,8 +14,7 @@
 using namespace fmri;
 using namespace std;
 
-// Maximum number of interactions shown
-static constexpr size_t INTERACTION_LIMIT = 10000;
+std::size_t fmri::INTERACTION_LIMIT = 10000;
 
 typedef vector<pair<float, pair<size_t, size_t>>> EntryList;
 

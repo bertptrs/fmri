@@ -7,6 +7,20 @@
 
 namespace fmri {
     /**
+     * Maximum number of interactions per layer.
+     *
+     * Controls the number of interactions per layer for performance
+     * reasons. Only the top INTERACTION_LIMIT interactions are shown
+     * to limit the amount of computations needed for animation.
+     *
+     * Note that this number currently applies only to InnerProduct
+     * type layers.
+     *
+     * This value is set from the options parser.
+     */
+    extern std::size_t INTERACTION_LIMIT;
+
+    /**
      * Generate a static visualisation of a layer state.
      *
      * @param data

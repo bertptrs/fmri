@@ -75,6 +75,14 @@ void float_parameter(std::vector<char *> &argv, std::string_view flag, double va
     argv.push_back(wrap_string(buffer));
 }
 
+void int_parameter(std::vector<char*> &argv, std::string_view flag, int value)
+{
+    char buffer[100];
+    argv.push_back(wrap_string(flag));
+    std::sprintf(buffer, "%d", value);
+    argv.push_back(wrap_string(buffer));
+}
+
 void set_default_path(Gtk::FileChooserButton& chooser, const char* path)
 {
     if (file_exists(path)) {
@@ -101,6 +109,7 @@ private:
     Gtk::Scale layerDistance;
     Gtk::Scale layerTransparancy;
     Gtk::Scale interactionTransparancy;
+    Gtk::SpinButton interactionLimit;
     Gtk::Button startButton;
 
     void start();
@@ -125,6 +134,7 @@ Launcher::Launcher()
         layerDistance(Gtk::Adjustment::create(10, 0, 100, 0, 0.1, 0)),
         layerTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
+        interactionLimit(Gtk::Adjustment::create(10000, 4096, std::numeric_limits<int>::max()), 10000),
         startButton("Start FMRI")
 {
     set_default_size(400, -1);
@@ -162,6 +172,7 @@ Launcher::Launcher()
     addRowWithLabel("Layer distance", layerDistance);
     addRowWithLabel("Layer transparancy", layerTransparancy);
     addRowWithLabel("Interaction transparancy", interactionTransparancy);
+    addRowWithLabel("Interaction limit", interactionLimit);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
     grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
@@ -201,6 +212,7 @@ void Launcher::start()
     float_parameter(argv, "--layer-opacity", layerTransparancy.get_value());
     float_parameter(argv, "--interaction-opacity", interactionTransparancy.get_value());
     float_parameter(argv, "--layer-distance", layerDistance.get_value());
+    int_parameter(argv, "--interaction-limit", interactionLimit.get_value());
 
     if (labelChooser.get_file()) {
         argv.push_back(wrap_string("-l"));
