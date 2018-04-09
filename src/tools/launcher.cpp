@@ -5,6 +5,11 @@
 
 using namespace std::string_literals;
 
+bool file_exists(const char* path, unsigned int mode = F_OK)
+{
+    return access(path, mode) == 0;
+}
+
 bool executable_exists(std::string_view dir, std::string_view executable)
 {
     if (dir.size() + executable.size() + 1 >= PATH_MAX) {
@@ -17,7 +22,7 @@ bool executable_exists(std::string_view dir, std::string_view executable)
     ptr = std::copy(executable.begin(), executable.end(), ptr + 1);
     *ptr = '\0';
 
-    return access(path_buf, F_OK | X_OK) == 0;
+    return file_exists(path_buf, F_OK | X_OK);
 }
 
 auto file_filter_for_extension(std::string_view extension)
@@ -70,6 +75,13 @@ void float_parameter(std::vector<char *> &argv, std::string_view flag, double va
     argv.push_back(wrap_string(buffer));
 }
 
+void set_default_path(Gtk::FileChooserButton& chooser, const char* path)
+{
+    if (file_exists(path)) {
+        chooser.set_filename(path);
+    }
+}
+
 class Launcher : public Gtk::Window {
 public:
     Launcher();
@@ -119,12 +131,19 @@ Launcher::Launcher()
 
     // Configure all widgets
     fmriChooser.set_hexpand(true);
-    findExecutable();
     modelChooser.add_filter(file_filter_for_extension("prototxt"));
     weightsChooser.add_filter(file_filter_for_extension("caffemodel"));
     labelChooser.add_filter(file_filter_for_extension("txt"));
     meansChooser.add_filter(file_filter_for_extension("binaryproto"));
     pathColor.set_use_alpha(true);
+
+    // Set the default paths if called from the expected place
+    findExecutable();
+    set_default_path(modelChooser, "../data/models/alexnet/model-dedup.prototxt");
+    set_default_path(weightsChooser, "../data/models/alexnet/bvlc_alexnet.caffemodel");
+    set_default_path(labelChooser, "../data/ilsvrc12/synset_words.txt");
+    set_default_path(meansChooser, "../data/ilsvrc12/imagenet_mean.binaryproto");
+    set_default_path(inputChooser, "../data/samples");
 
     // Configure grid display options
     grid.set_row_spacing(2);
@@ -176,8 +195,8 @@ void Launcher::start()
             color_string(pathColor),
     };
 
-    float_parameter(argv, "--layer-opacity", layerTransparancy.get_adjustment()->get_value());
-    float_parameter(argv, "--interaction-opacity", interactionTransparancy.get_adjustment()->get_value());
+    float_parameter(argv, "--layer-opacity", layerTransparancy.get_value());
+    float_parameter(argv, "--interaction-opacity", interactionTransparancy.get_value());
 
     if (labelChooser.get_file()) {
         argv.push_back(wrap_string("-l"));
