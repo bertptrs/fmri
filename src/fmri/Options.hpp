@@ -14,7 +14,7 @@ namespace fmri {
 
     class Options {
     public:
-        static Options parse(const int argc, char *const argv[]);
+        Options(const int argc, char *const argv[]);
 
         const string& model() const;
         const string& weights() const;
@@ -37,7 +37,5 @@ namespace fmri {
         string labelsPath;
         string dumpPath;
         vector<string> inputPaths;
-
-        Options() noexcept;
     };
 }

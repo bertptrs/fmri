@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     glutCreateWindow(argv[0]);
 
     // Prepare data for simulations
-    Options options = Options::parse(argc, argv);
+    Options options(argc, argv);
     RenderingState::instance().loadOptions(options);
     loadSimulationData(options);
 

@@ -48,31 +48,32 @@ static void parse_color(const char *input, Color &targetColor)
     throw std::invalid_argument(errorBuf);
 }
 
-Options Options::parse(const int argc, char *const argv[])
+Options::Options(int argc, char * const argv[]):
+        layerTransparancy_(1),
+        interactionTransparancy_(1),
+        pathColor_({1, 1, 1, 0.1})
 {
     using namespace boost::program_options;
 
     try {
-        Options options;
-
         options_description desc("Options");
         positional_options_description positionals;
         positionals.add("input", -1);
 
         options_description hidden;
         hidden.add_options()
-                ("input", value<std::vector<std::string>>(&options.inputPaths)->required()->composing());
+                ("input", value<std::vector<std::string>>(&inputPaths)->required()->composing());
 
         desc.add_options()
                 ("help,h", "Show this help message")
-                ("weights,w", value<std::string>(&options.weightsPath)->required(), "weights file for the network")
-                ("network,n", value<std::string>(&options.modelPath)->required(), "caffe model file for the network")
-                ("labels,l", value<std::string>(&options.labelsPath), "labels file")
-                ("means,m", value<std::string>(&options.meansPath), "means file")
+                ("weights,w", value<std::string>(&weightsPath)->required(), "weights file for the network")
+                ("network,n", value<std::string>(&modelPath)->required(), "caffe model file for the network")
+                ("labels,l", value<std::string>(&labelsPath), "labels file")
+                ("means,m", value<std::string>(&meansPath), "means file")
                 ("path-color,p", value<std::string>(), "color for paths")
-                ("layer-opacity", value<float>(&options.layerTransparancy_), "Opacity for layers")
-                ("interaction-opacity", value<float>(&options.interactionTransparancy_), "Opacity for interactions")
-                ("dump,d", value<std::string>(&options.dumpPath), "dump convolutional images in this directory");
+                ("layer-opacity", value<float>(&layerTransparancy_), "Opacity for layers")
+                ("interaction-opacity", value<float>(&interactionTransparancy_), "Opacity for interactions")
+                ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
         options_description composed = desc;
         composed.add(hidden);
@@ -88,17 +89,16 @@ Options Options::parse(const int argc, char *const argv[])
         notify(vm);
 
         if (vm.count("path-color")) {
-            parse_color(vm["path-color"].as<std::string>().c_str(), options.pathColor_);
+            parse_color(vm["path-color"].as<std::string>().c_str(), pathColor_);
         }
 
         // Sanity checks
-        check_file(options.modelPath);
-        check_file(options.weightsPath);
-        if (!options.meansPath.empty()) check_file(options.meansPath);
-        if (!options.labelsPath.empty()) check_file(options.labelsPath);
-        std::for_each(options.inputPaths.begin(), options.inputPaths.end(), check_file);
-
-        return options;
+        check_file(modelPath);
+        check_file(weightsPath);
+        if (!meansPath.empty()) check_file(meansPath);
+        if (!labelsPath.empty()) check_file(labelsPath);
+        std::for_each(inputPaths.begin(), inputPaths.end(), check_file);
+        return;
     } catch (required_option& e) {
         if (e.get_option_name() == "--input") {
             std::cerr << "No input files specified" << std::endl;
@@ -148,13 +148,6 @@ std::optional<PNGDumper> Options::imageDumper() const
     } else {
         return PNGDumper(dumpPath);
     }
-}
-
-Options::Options() noexcept :
-        layerTransparancy_(1),
-        interactionTransparancy_(1),
-        pathColor_({1, 1, 1, 0.1})
-{
 }
 
 const Color &Options::pathColor() const
