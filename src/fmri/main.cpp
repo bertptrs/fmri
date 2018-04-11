@@ -40,7 +40,7 @@ static void loadSimulationData(const Options &options)
     if (optLabels) {
         auto& labels = *optLabels;
         for (const auto& result : results) {
-            auto& last = *result.rbegin();
+            auto &last = *result.rbegin();
             auto bestIndex = std::distance(last.data(), max_element(last.data(), last.data() + last.numEntries()));
             LOG(INFO) << "Got answer: " << labels[bestIndex] << endl;
         }

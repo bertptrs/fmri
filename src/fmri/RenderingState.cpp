@@ -9,7 +9,7 @@
 
 using namespace fmri;
 
-static inline void toggle(bool& b)
+static inline void toggle(bool &b)
 {
     b = !b;
 }
@@ -32,7 +32,8 @@ static float getFPS()
     return fps;
 }
 
-static void updatePointSize(float dir) {
+static void updatePointSize(float dir)
+{
     float size, granularity;
     glGetFloatv(GL_POINT_SIZE, &size);
     glGetFloatv(GL_POINT_SIZE_GRANULARITY, &granularity);
@@ -127,7 +128,7 @@ void RenderingState::handleKey(unsigned char x)
     glutPostRedisplay();
 }
 
-std::string RenderingState::debugInfo()const
+std::string RenderingState::debugInfo() const
 {
     std::stringstream buffer;
     buffer << "Pos(x,y,z) = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ")\n";
@@ -146,7 +147,7 @@ void RenderingState::reset()
     angle[1] = 0;
 }
 
-void RenderingState::configureRenderingContext()const
+void RenderingState::configureRenderingContext() const
 {
     glLoadIdentity();
     glRotatef(angle[1], 1, 0, 0);
@@ -163,9 +164,12 @@ RenderingState &RenderingState::instance()
 void RenderingState::registerControls()
 {
     reset();
-    glutPassiveMotionFunc([](int x, int y) {
+    auto motionFunc = [](int x, int y) {
         RenderingState::instance().handleMouseAt(x, y);
-    });
+    };
+    glutPassiveMotionFunc(motionFunc);
+    glutMotionFunc(motionFunc);
+
     glutKeyboardFunc([](auto key, auto, auto) {
         RenderingState::instance().handleKey(key);
     });
@@ -174,12 +178,25 @@ void RenderingState::registerControls()
         RenderingState::instance().render(time);
     });
     glutIdleFunc([]() {
-        checkGLErrors();
-        throttleIdleFunc();
-        glutPostRedisplay();
+        RenderingState::instance().idleFunc();
     });
     glutSpecialFunc([](int key, int, int) {
         RenderingState::instance().handleSpecialKey(key);
+    });
+    glutMouseFunc([](int button, int state, int, int) {
+        auto& options = RenderingState::instance().options;
+        switch (button) {
+            case GLUT_LEFT_BUTTON:
+                options.mouse_1_pressed = state == GLUT_DOWN;
+                break;
+            case GLUT_RIGHT_BUTTON:
+                options.mouse_2_pressed = state == GLUT_DOWN;
+                break;
+
+            default:
+                // Do nothing.
+                break;
+        }
     });
 }
 
@@ -380,4 +397,18 @@ float RenderingState::interactionAlpha() const
 float RenderingState::layerAlpha() const
 {
     return options.layerAlpha;
+}
+
+void RenderingState::idleFunc()
+{
+    if (options.mouse_1_pressed) {
+        move('w', false);
+    }
+    if (options.mouse_2_pressed) {
+        move('s', false);
+    }
+
+    checkGLErrors();
+    throttleIdleFunc();
+    glutPostRedisplay();
 }
