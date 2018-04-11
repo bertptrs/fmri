@@ -253,20 +253,23 @@ void RenderingState::render(float time) const
 
 
     glPushMatrix();
-    glTranslatef(-LAYER_X_OFFSET / 2 * currentData->size(), 0, 0);
 
-    for (auto i : Range(currentData->size())) {
-        glPushMatrix();
-        renderLayerName(currentData->at(i).name());
-        if (options.renderLayers) {
-            layerVisualisations[i]->draw(time);
+    // Ensure we render back-to-front for transparency
+    if (angle[0] <= 0) {
+        // Render from the first to the last layer.
+        glTranslatef(-LAYER_X_OFFSET / 2 * currentData->size(), 0, 0);
+        for (auto i : Range(currentData->size())) {
+            drawLayer(time, i);
+            glTranslatef(LAYER_X_OFFSET, 0, 0);
         }
-        if (options.renderInteractions && i < interactionAnimations.size() && interactionAnimations[i]) {
-            interactionAnimations[i]->draw(time);
-        }
+    } else {
+        // Render from the last layer to the first layer.
+        glTranslatef(LAYER_X_OFFSET / 2 * (currentData->size() - 2), 0, 0);
+        for (auto i = currentData->size(); i--;) {
+            drawLayer(time, i);
 
-        glPopMatrix();
-        glTranslatef(LAYER_X_OFFSET, 0, 0);
+            glTranslatef(-LAYER_X_OFFSET, 0, 0);
+        }
     }
 
     glPopMatrix();
@@ -274,6 +277,21 @@ void RenderingState::render(float time) const
     renderOverlayText();
 
     glutSwapBuffers();
+}
+
+void RenderingState::drawLayer(float time, unsigned long i) const
+{
+    glPushMatrix();
+
+    renderLayerName(currentData->at(i).name());
+    if (options.renderLayers) {
+                layerVisualisations[i]->draw(time);
+            }
+    if (options.renderInteractions && i < interactionAnimations.size() && interactionAnimations[i]) {
+                interactionAnimations[i]->draw(time);
+            }
+
+    glPopMatrix();
 }
 
 void RenderingState::renderOverlayText() const
