@@ -23,7 +23,7 @@ find_package(Caffe REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)
-find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs)
+find_package(OpenCV 3 REQUIRED COMPONENTS core imgproc imgcodecs)
 
 target_link_libraries(fmri PUBLIC
 	Caffe::Caffe
