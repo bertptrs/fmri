@@ -222,6 +222,10 @@ void RenderingState::loadSimulationData(const std::map<string, LayerInfo> &info,
 
 void RenderingState::queueUpdate()
 {
+    // Make sure that visualisations are cleared in the current thread
+    layerVisualisations.clear();
+    interactionAnimations.clear();
+
     loadingFuture = std::async(std::launch::async, []() {
         RenderingState::instance().updateVisualisers();
     });
