@@ -6,7 +6,6 @@
 #include <chrono>
 #include <thread>
 #include "glutils.hpp"
-#include "Range.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -18,16 +17,6 @@ static void handleGLError(GLenum error) {
 
         default:
             cerr << "OpenGL error: " << (const char*) gluGetString(error) << endl;
-    }
-}
-
-static void rescaleSubImages(vector<float>& textureBuffer, int subImages) {
-    auto cur = textureBuffer.begin();
-    const auto increment = textureBuffer.size() / subImages;
-
-    while (cur != textureBuffer.end()) {
-        rescale(cur, cur + increment, 0, 1);
-        advance(cur, increment);
     }
 }
 
