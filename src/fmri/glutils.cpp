@@ -31,19 +31,6 @@ static void rescaleSubImages(vector<float>& textureBuffer, int subImages) {
     }
 }
 
-fmri::Texture fmri::loadTexture(DType const *data, int width, int height, int subImages)
-{
-    // Load and scale texture
-    vector<float> textureBuffer(data, data + (width * height));
-    rescaleSubImages(textureBuffer, subImages);
-
-    Texture texture;
-    texture.configure(GL_TEXTURE_2D);
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_LUMINANCE, width, height, GL_LUMINANCE, GL_FLOAT, textureBuffer.data());
-
-    return texture;
-}
-
 void fmri::changeWindowSize(int w, int h)
 {
     // Prevent a divide by zero, when window is too short
