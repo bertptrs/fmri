@@ -217,7 +217,17 @@ void RenderingState::loadSimulationData(const std::map<string, LayerInfo> &info,
     layerData = std::move(data);
     currentData = layerData.begin();
 
-    updateVisualisers();
+    queueUpdate();
+}
+
+void RenderingState::queueUpdate()
+{
+    loadingFuture = std::async(std::launch::async, []() {
+        // Currently causes a segfault, due to threaded OpenGL.
+        // Possible solution: don't do GL things while loading.
+        //RenderingState::instance().updateVisualisers();
+    });
+    isLoading = true;
 }
 
 void RenderingState::updateVisualisers()
@@ -249,34 +259,60 @@ void RenderingState::render(float time) const
     // Clear Color and Depth Buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    configureRenderingContext();
+    if (!isLoading) {
+        renderVisualisation(time);
+    } else {
+        renderLoadingScreen();
+    }
 
+    glutSwapBuffers();
+}
+
+void RenderingState::renderVisualisation(float time) const
+{
+    configureRenderingContext();
 
     glPushMatrix();
 
     // Ensure we render back-to-front for transparency
     if (angle[0] <= 0) {
-        // Render from the first to the last layer.
-        glTranslatef(-LAYER_X_OFFSET / 2 * currentData->size(), 0, 0);
-        for (auto i : Range(currentData->size())) {
-            drawLayer(time, i);
-            glTranslatef(LAYER_X_OFFSET, 0, 0);
-        }
-    } else {
-        // Render from the last layer to the first layer.
-        glTranslatef(LAYER_X_OFFSET / 2 * (currentData->size() - 2), 0, 0);
-        for (auto i = currentData->size(); i--;) {
-            drawLayer(time, i);
+            // Render from the first to the last layer.
+            glTranslatef(-LAYER_X_OFFSET / 2 * currentData->size(), 0, 0);
+            for (auto i : Range(currentData->size())) {
+                drawLayer(time, i);
+                glTranslatef(LAYER_X_OFFSET, 0, 0);
+            }
+        } else {
+            // Render from the last layer to the first layer.
+            glTranslatef(LAYER_X_OFFSET / 2 * (currentData->size() - 2), 0, 0);
+            for (auto i = currentData->size(); i--;) {
+                drawLayer(time, i);
 
-            glTranslatef(-LAYER_X_OFFSET, 0, 0);
+                glTranslatef(-LAYER_X_OFFSET, 0, 0);
+            }
         }
-    }
 
     glPopMatrix();
 
     renderOverlayText();
+}
 
-    glutSwapBuffers();
+void RenderingState::renderLoadingScreen() const
+{
+    glLoadIdentity();
+    glTranslatef(0, 0, -4);
+    glRotatef(360 * getAnimationStep(std::chrono::seconds(4)), 0, 1, 0);
+    glColor3f(1, 1, 1);
+    glutWireTeapot(1);
+
+
+    auto pulse = std::cos(2 * M_PI * getAnimationStep(std::chrono::seconds(3)));
+    pulse *= pulse;
+    glColor3d(pulse, pulse, 0);
+    glLoadIdentity();
+    setOrthographicProjection();
+    renderText("Loading...", 5, 15);
+    restorePerspectiveProjection();
 }
 
 void RenderingState::drawLayer(float time, unsigned long i) const
@@ -341,7 +377,7 @@ void RenderingState::handleSpecialKey(int key)
                 currentData = layerData.end();
             }
             --currentData;
-            updateVisualisers();
+            queueUpdate();
             break;
 
         case GLUT_KEY_RIGHT:
@@ -349,7 +385,7 @@ void RenderingState::handleSpecialKey(int key)
             if (currentData == layerData.end()) {
                 currentData = layerData.begin();
             }
-            updateVisualisers();
+            queueUpdate();
             break;
 
         case GLUT_KEY_F1:
@@ -419,14 +455,32 @@ float RenderingState::layerAlpha() const
 
 void RenderingState::idleFunc()
 {
-    if (options.mouse_1_pressed) {
-        move('w', false);
-    }
-    if (options.mouse_2_pressed) {
-        move('s', false);
-    }
+    if (isLoading && loadingFuture.valid()) {
+        auto result = loadingFuture.wait_for(std::chrono::milliseconds(40));
+        switch (result) {
+            case std::future_status::deferred:
+                LOG(ERROR) << "loading status was deferred, invalid state!";
+                abort();
 
-    checkGLErrors();
-    throttleIdleFunc();
+            case std::future_status::timeout:
+                // Still loading
+                break;
+
+            case std::future_status::ready:
+                loadingFuture.get();
+                //isLoading = false;
+                break;
+        }
+    } else {
+        if (options.mouse_1_pressed) {
+            move('w', false);
+        }
+        if (options.mouse_2_pressed) {
+            move('s', false);
+        }
+
+        checkGLErrors();
+        throttleIdleFunc();
+    }
     glutPostRedisplay();
 }

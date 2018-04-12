@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <future>
 #include "LayerInfo.hpp"
 #include "LayerData.hpp"
 #include "LayerVisualisation.hpp"
@@ -78,6 +79,9 @@ namespace fmri
         std::vector<std::vector<LayerData>>::iterator currentData;
         std::vector<std::unique_ptr<LayerVisualisation>> layerVisualisations;
         std::vector<std::unique_ptr<Animation>> interactionAnimations;
+        bool isLoading = false;
+        std::future<void> loadingFuture;
+
 
         RenderingState() noexcept;
 
@@ -92,5 +96,11 @@ namespace fmri
         void renderLayerName(const std::string& name) const;
 
         void drawLayer(float time, unsigned long i) const;
+
+        void queueUpdate();
+
+        void renderLoadingScreen() const;
+
+        void renderVisualisation(float time) const;
     };
 }

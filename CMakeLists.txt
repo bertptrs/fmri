@@ -24,6 +24,7 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 find_package(OpenCV 3 REQUIRED COMPONENTS core imgproc imgcodecs)
+find_package(Threads REQUIRED)
 
 target_link_libraries(fmri PUBLIC
 	Caffe::Caffe
@@ -33,6 +34,7 @@ target_link_libraries(fmri PUBLIC
 	opencv_core
 	opencv_imgproc
 	opencv_imgcodecs
+	Threads::Threads
 	)
 
 target_include_directories(fmri PUBLIC
