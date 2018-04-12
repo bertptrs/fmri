@@ -12,6 +12,7 @@ namespace fmri
 
         virtual void draw(float time) = 0;
         virtual void patchTransparancy();
+        virtual void glLoad();
 
     protected:
         std::vector<Color> colorBuffer;

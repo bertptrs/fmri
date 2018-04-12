@@ -102,5 +102,7 @@ namespace fmri
         void renderLoadingScreen() const;
 
         void renderVisualisation(float time) const;
+
+        void loadGLItems();
     };
 }

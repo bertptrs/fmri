@@ -13,10 +13,15 @@ namespace fmri
 
         void draw(float time) override;
 
+        void glLoad() override;
+
     private:
-        Texture texture;
         float targetWidth;
         float targetHeight;
+        int width;
+        int height;
+        Texture texture;
+        std::vector<float> textureBuffer;
 
     };
 }

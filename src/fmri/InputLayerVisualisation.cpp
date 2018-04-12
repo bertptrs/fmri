@@ -19,8 +19,10 @@ using namespace std;
  * @param data Layer data to generate an image for.
  * @return A normalized RGB image, stored in a vector.
  */
-static vector<float> getRGBImage(const LayerData &data)
+static unique_ptr<float[]> getRGBImage(const LayerData &data)
 {
+    CHECK_EQ(data.shape().size(), 4) << "Should be image-like-layer.";
+    CHECK_EQ(data.shape()[0], 1) << "Should be a single image";
     vector<cv::Mat> channels;
     const int numPixels = data.shape()[2] * data.shape()[3];
     for (auto i : Range(3)) {
@@ -29,7 +31,7 @@ static vector<float> getRGBImage(const LayerData &data)
         }
 
         cv::Mat channel(data.shape()[3], data.shape()[2], CV_32FC1);
-        copy(data.data() + i * numPixels, data.data() + (i + 1) * numPixels, channel.begin<float>());
+        copy_n(data.data() + i * numPixels, numPixels, channel.begin<float>());
         channels.push_back(channel);
     }
 
@@ -40,19 +42,18 @@ static vector<float> getRGBImage(const LayerData &data)
 
     outImage = outImage.reshape(1);
 
-    vector<float> final(outImage.begin<float>(), outImage.end<float>());
-    rescale(final.begin(), final.end(), 0.f, 1.f);
+    auto final = make_unique<float[]>(data.numEntries());
+    std::copy_n(outImage.begin<float>(), data.numEntries(), final.get());
 
     return final;
 }
 
-InputLayerVisualisation::InputLayerVisualisation(const LayerData &data)
+InputLayerVisualisation::InputLayerVisualisation(const LayerData &data) :
+        width(data.shape().at(2)),
+        height(data.shape().at(3)),
+        texture(getRGBImage(data), width, height, GL_RGB)
 {
-    CHECK_EQ(data.shape().size(), 4) << "Should be image-like-layer." << endl;
-    auto imageData = getRGBImage(data);
-
-    const auto images = data.shape()[0], channels = data.shape()[1], width = data.shape()[2], height = data.shape()[3];
-    CHECK_EQ(images, 1) << "Should be single image" << endl;
+    const auto channels = data.shape()[1];
 
     targetWidth = width / 5.f;
     targetHeight = width / 5.f;
@@ -61,9 +62,6 @@ InputLayerVisualisation::InputLayerVisualisation(const LayerData &data)
     for (auto i : Range(3, 3 * channels)) {
         nodePositions_.push_back(nodePositions_[i % 3]);
     }
-
-    texture.configure(GL_TEXTURE_2D);
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_FLOAT, imageData.data());
 }
 
 void InputLayerVisualisation::draw(float)
@@ -85,4 +83,11 @@ void InputLayerVisualisation::draw(float)
     float alpha = getAlpha();
 
     drawImageTiles(4, vertices, texCoords, texture, alpha);
+}
+
+void InputLayerVisualisation::glLoad()
+{
+    Drawable::glLoad();
+
+    texture.configure(GL_TEXTURE_2D);
 }

@@ -6,19 +6,16 @@
 using namespace fmri;
 using namespace std;
 
-MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer)
+MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer) :
+    texture(layer.data(), layer.shape().at(2), layer.shape().at(3) * layer.shape().at(1), GL_LUMINANCE, layer.shape().at(1))
 {
     auto dimensions = layer.shape();
-    CHECK_EQ(4, dimensions.size()) << "Should be image-like layer";
 
     const auto images = dimensions[0],
-            channels = dimensions[1],
-            width = dimensions[2],
-            height = dimensions[3];
+            channels = dimensions[1];
 
     CHECK_EQ(1, images) << "Only single input image is supported" << endl;
 
-    texture = loadTexture(layer.data(), width, channels * height, channels);
     initNodePositions<Ordering::SQUARE>(channels, 3);
     vertexBuffer = getVertices(nodePositions_);
     texCoordBuffer = getTexCoords(channels);
@@ -64,4 +61,11 @@ std::vector<float> MultiImageVisualisation::getTexCoords(int n)
     }
 
     return coords;
+}
+
+void MultiImageVisualisation::glLoad()
+{
+    Drawable::glLoad();
+
+    texture.configure(GL_TEXTURE_2D);
 }

@@ -14,6 +14,7 @@ namespace fmri
                                       const std::vector<float> &curPositions);
 
         void draw(float timeStep) override;
+        void glLoad() override;
 
     private:
         Texture original;

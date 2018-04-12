@@ -41,5 +41,13 @@ Texture PoolingLayerAnimation::loadTextureForData(const LayerData &data)
     CHECK_EQ(data.shape()[0], 1) << "Only single images supported";
 
     auto channels = data.shape()[1], width = data.shape()[2], height = data.shape()[3];
-    return loadTexture(data.data(), width, height * channels, channels);
+    return Texture(data.data(), width, height * channels, GL_LUMINANCE, channels);
+}
+
+void PoolingLayerAnimation::glLoad()
+{
+    Drawable::glLoad();
+
+    original.configure(GL_TEXTURE_2D);
+    downSampled.configure(GL_TEXTURE_2D);
 }

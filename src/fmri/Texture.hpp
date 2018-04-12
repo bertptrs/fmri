@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <GL/gl.h>
 
 namespace fmri
@@ -13,18 +14,11 @@ namespace fmri
     class Texture
     {
     public:
-        /**
-         * Allocate a new texture
-         */
         Texture() noexcept;
+        Texture(const float* data, int width, int height, GLuint format, int subImages = 1);
+        Texture(std::unique_ptr<float[]> &&data, int width, int height, GLuint format, int subImages = 1);
         Texture(Texture &&) noexcept;
         Texture(const Texture &) = delete;
-
-        /**
-         * Own an existing texture
-         * @param id original texture ID.
-         */
-        explicit Texture(GLuint id) noexcept;
 
         ~Texture();
 
@@ -36,10 +30,19 @@ namespace fmri
          * @param target valid target for glBindTexture.
          */
         void bind(GLenum target) const;
-        void configure(GLenum target) const;
+        void configure(GLenum target);
 
     private:
         GLuint id;
+        int width;
+        int height;
+        GLuint format;
+        std::unique_ptr<float[]> data;
 
+        void ensureReference();
+
+        void preCalc(int subImages);
+
+        int getStride();
     };
 }

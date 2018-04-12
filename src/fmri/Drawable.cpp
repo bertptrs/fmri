@@ -14,3 +14,8 @@ void fmri::Drawable::patchTransparancy()
         (*it)[3] = alpha;
     }
 }
+
+void fmri::Drawable::glLoad()
+{
+    // Do nothing
+}

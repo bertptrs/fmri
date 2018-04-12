@@ -223,9 +223,7 @@ void RenderingState::loadSimulationData(const std::map<string, LayerInfo> &info,
 void RenderingState::queueUpdate()
 {
     loadingFuture = std::async(std::launch::async, []() {
-        // Currently causes a segfault, due to threaded OpenGL.
-        // Possible solution: don't do GL things while loading.
-        //RenderingState::instance().updateVisualisers();
+        RenderingState::instance().updateVisualisers();
     });
     isLoading = true;
 }
@@ -456,7 +454,7 @@ float RenderingState::layerAlpha() const
 void RenderingState::idleFunc()
 {
     if (isLoading && loadingFuture.valid()) {
-        auto result = loadingFuture.wait_for(std::chrono::milliseconds(40));
+        auto result = loadingFuture.wait_for(std::chrono::milliseconds(16));
         switch (result) {
             case std::future_status::deferred:
                 LOG(ERROR) << "loading status was deferred, invalid state!";
@@ -468,7 +466,8 @@ void RenderingState::idleFunc()
 
             case std::future_status::ready:
                 loadingFuture.get();
-                //isLoading = false;
+                loadGLItems();
+                isLoading = false;
                 break;
         }
     } else {
@@ -483,4 +482,10 @@ void RenderingState::idleFunc()
         throttleIdleFunc();
     }
     glutPostRedisplay();
+}
+
+void RenderingState::loadGLItems()
+{
+    std::for_each(layerVisualisations.begin(), layerVisualisations.end(), [](auto& x) { x->glLoad(); });
+    std::for_each(interactionAnimations.begin(), interactionAnimations.end(), [](auto& x) { if (x) x->glLoad(); });
 }

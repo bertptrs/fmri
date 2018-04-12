@@ -11,7 +11,8 @@ namespace fmri
     public:
         ImageInteractionAnimation(const DType *data, const std::vector<int> &shape, const std::vector<float> &prevPositions,
                                           const std::vector<float> &curPositions);
-        virtual void draw(float step);
+        void draw(float step) override;
+        void glLoad() override;
 
     private:
         Texture texture;

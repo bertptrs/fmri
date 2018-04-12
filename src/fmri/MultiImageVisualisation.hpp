@@ -22,6 +22,8 @@ namespace fmri
 
         void draw(float time) override;
 
+        void glLoad() override;
+
         static vector<float> getVertices(const std::vector<float> &nodePositions, float scaling = 1);
         static std::vector<float> getTexCoords(int n);
 
