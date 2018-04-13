@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 #include <GL/glut.h>
 #include <map>
+#include <cstdarg>
 
 #include "LayerData.hpp"
 #include "Options.hpp"
@@ -53,6 +54,8 @@ int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
+
+    registerErrorCallbacks();
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA);

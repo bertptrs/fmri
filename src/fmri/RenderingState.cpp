@@ -481,8 +481,6 @@ void RenderingState::idleFunc()
         if (options.mouse_2_pressed) {
             move('s', false);
         }
-
-        checkGLErrors();
         throttleIdleFunc();
     }
     glutPostRedisplay();

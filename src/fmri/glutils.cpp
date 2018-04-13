@@ -7,18 +7,12 @@
 #include <thread>
 #include "glutils.hpp"
 
+#ifdef FREEGLUT
+#include <GL/freeglut.h>
+#endif
+
 using namespace fmri;
 using namespace std;
-
-static void handleGLError(GLenum error) {
-    switch (error) {
-        case GL_NO_ERROR:
-            return;
-
-        default:
-            cerr << "OpenGL error: " << (const char*) gluGetString(error) << endl;
-    }
-}
 
 void fmri::changeWindowSize(int w, int h)
 {
@@ -56,13 +50,6 @@ void fmri::renderText(std::string_view text, int x, int y)
         } else {
             glutBitmapCharacter(font, c);
         }
-    }
-}
-
-void fmri::checkGLErrors()
-{
-    while (auto error = glGetError()) {
-        handleGLError(error);
     }
 }
 
@@ -128,4 +115,24 @@ void fmri::drawImageTiles(int n, const float *vertexBuffer, const float *texture
     glDisable(GL_TEXTURE_2D);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+
+void fmri::registerErrorCallbacks()
+{
+#ifdef FREEGLUT
+    glutInitErrorFunc([](const char* format, va_list args) {
+        char buffer[1024];
+        std::vsnprintf(buffer, sizeof(buffer), format, args);
+        LOG(ERROR) << "freeglut: " << buffer;
+    });
+    glutInitWarningFunc([](const char* format, va_list args) {
+        char buffer[1024];
+        std::vsnprintf(buffer, sizeof(buffer), format, args);
+        LOG(WARNING) << "freeglut: " << buffer;
+    });
+    LOG(INFO) << "Freeglut error handlers installed successfully";
+#else
+    LOG(INFO) << "Compiled without freeglut, error handlers not available.";
+#endif
 }

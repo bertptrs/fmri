@@ -30,11 +30,6 @@ namespace fmri {
     void renderText(std::string_view text, int x = 0, int y = 0);
 
     /**
-     * Check if there are OpenGL errors and report them.
-     */
-    void checkGLErrors();
-
-    /**
      * Slow down until the idle func is being called a reasonable amount of times.
      */
     void throttleIdleFunc();
@@ -55,4 +50,9 @@ namespace fmri {
      */
     void
     drawImageTiles(int n, const float *vertexBuffer, const float *textureCoords, const Texture &texture, float alpha);
+
+    /**
+     * Attempmt to register
+     */
+    void registerErrorCallbacks();
 }

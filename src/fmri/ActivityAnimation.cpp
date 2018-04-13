@@ -78,7 +78,6 @@ void ActivityAnimation::draw(float timeScale)
         glColor4fv(RenderingState::instance().pathColor().data());
         glVertexPointer(3, GL_FLOAT, 0, startingPos.data());
         glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_INT, lineIndices.data());
-        checkGLErrors();
     }
     glDisableClientState(GL_VERTEX_ARRAY);
 }
