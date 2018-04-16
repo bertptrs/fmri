@@ -93,6 +93,10 @@ void RenderingState::move(unsigned char key, bool sprint)
 
 void RenderingState::handleKey(unsigned char x)
 {
+    if (isLoading()) {
+        // Don't handle user input while loading.
+        return;
+    }
     switch (x) {
         case 'w':
         case 'a':
@@ -365,6 +369,10 @@ void RenderingState::renderLayerName(const std::string &name) const
 
 void RenderingState::handleSpecialKey(int key)
 {
+    if (isLoading()) {
+        // Don't handle user input while loading.
+        return;
+    }
     switch (key) {
         case GLUT_KEY_LEFT:
             if (currentData == layerData.begin()) {
