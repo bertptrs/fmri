@@ -99,8 +99,6 @@ namespace fmri
 
         void queueUpdate();
 
-        void renderLoadingScreen() const;
-
         void renderVisualisation(float time) const;
 
         void loadGLItems();

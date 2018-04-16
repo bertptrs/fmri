@@ -42,6 +42,23 @@ static void updatePointSize(float dir)
     glPointSize(std::max(1.f, size));
 }
 
+static void renderLoadingScreen()
+{
+    glLoadIdentity();
+    glTranslatef(0, 0, -4);
+    glRotatef(360 * getAnimationStep(std::chrono::seconds(4)), 0, 1, 0);
+    glColor3f(1, 1, 1);
+    glutWireTeapot(1);
+
+    auto pulse = std::cos(2 * M_PI * getAnimationStep(std::chrono::seconds(3)));
+    pulse *= pulse;
+    glColor3d(pulse, pulse, 0);
+    glLoadIdentity();
+    setOrthographicProjection();
+    renderText("Loading...", 5, 15);
+    restorePerspectiveProjection();
+}
+
 void RenderingState::move(unsigned char key, bool sprint)
 {
     float speed = 0.5f;
@@ -297,24 +314,6 @@ void RenderingState::renderVisualisation(float time) const
     glPopMatrix();
 
     renderOverlayText();
-}
-
-void RenderingState::renderLoadingScreen() const
-{
-    glLoadIdentity();
-    glTranslatef(0, 0, -4);
-    glRotatef(360 * getAnimationStep(std::chrono::seconds(4)), 0, 1, 0);
-    glColor3f(1, 1, 1);
-    glutWireTeapot(1);
-
-
-    auto pulse = std::cos(2 * M_PI * getAnimationStep(std::chrono::seconds(3)));
-    pulse *= pulse;
-    glColor3d(pulse, pulse, 0);
-    glLoadIdentity();
-    setOrthographicProjection();
-    renderText("Loading...", 5, 15);
-    restorePerspectiveProjection();
 }
 
 void RenderingState::drawLayer(float time, unsigned long i) const
