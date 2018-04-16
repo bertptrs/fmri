@@ -40,7 +40,6 @@ namespace fmri
         void handleSpecialKey(int key);
         void render(float time) const;
 
-        void loadSimulationData(const std::map<string, LayerInfo> &info, std::vector<std::vector<LayerData>> &&data);
         /**
          * Load rendering-specific options from the given options object.
          *
@@ -79,8 +78,8 @@ namespace fmri
         std::vector<std::vector<LayerData>>::iterator currentData;
         std::vector<std::unique_ptr<LayerVisualisation>> layerVisualisations;
         std::vector<std::unique_ptr<Animation>> interactionAnimations;
-        bool isLoading = false;
-        std::future<void> loadingFuture;
+        std::future<bool> visualisationFuture;
+        std::future<std::pair<decltype(layerInfo), decltype(layerData)>> simulationFuture;
 
 
         RenderingState() noexcept;
@@ -102,5 +101,7 @@ namespace fmri
         void renderVisualisation(float time) const;
 
         void loadGLItems();
+
+        bool isLoading() const;
     };
 }

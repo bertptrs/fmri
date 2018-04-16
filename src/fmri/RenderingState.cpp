@@ -6,6 +6,7 @@
 #include "visualisations.hpp"
 #include "Range.hpp"
 #include "glutils.hpp"
+#include "Simulator.hpp"
 
 using namespace fmri;
 
@@ -228,25 +229,17 @@ void RenderingState::handleMouseAt(int x, int y)
     glutPostRedisplay();
 }
 
-void RenderingState::loadSimulationData(const std::map<string, LayerInfo> &info, vector<vector<LayerData>> &&data)
-{
-    layerInfo = std::move(info);
-    layerData = std::move(data);
-    currentData = layerData.begin();
-
-    queueUpdate();
-}
-
 void RenderingState::queueUpdate()
 {
     // Make sure that visualisations are cleared in the current thread
     layerVisualisations.clear();
     interactionAnimations.clear();
 
-    loadingFuture = std::async(std::launch::async, []() {
+    visualisationFuture = std::async(std::launch::async, []() {
         RenderingState::instance().updateVisualisers();
+
+        return true;
     });
-    isLoading = true;
 }
 
 void RenderingState::updateVisualisers()
@@ -278,7 +271,7 @@ void RenderingState::render(float time) const
     // Clear Color and Depth Buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (!isLoading) {
+    if (!isLoading()) {
         renderVisualisation(time);
     } else {
         renderLoadingScreen();
@@ -418,6 +411,8 @@ void RenderingState::loadOptions(const Options &programOptions)
     options.pathColor = programOptions.pathColor();
     options.layerAlpha = programOptions.layerTransparancy();
     options.interactionAlpha = programOptions.interactionTransparancy();
+
+    simulationFuture = std::async(std::launch::async, Simulator::loadSimulationData, programOptions);
 }
 
 const Color &RenderingState::pathColor() const
@@ -454,24 +449,47 @@ float RenderingState::layerAlpha() const
     return options.layerAlpha;
 }
 
+/**
+ * Attempt to wait for completion of a future, for less than a frame.
+ *
+ * @tparam T
+ * @param f The future to wait for
+ * @return The result of the computation, or an empty optional if it hasn't finished.
+ */
+template<class T>
+static std::optional<T> awaitCompletion(std::future<T>& f)
+{
+    constexpr auto waitTime = std::chrono::milliseconds(10);
+    switch (f.wait_for(waitTime)) {
+        case std::future_status::timeout:
+            return std::nullopt;
+
+        case std::future_status::ready:
+            return f.get();
+
+        default:
+            LOG(ERROR) << "loading status was deferred, invalid state!";
+            abort();
+    }
+}
+
+
 void RenderingState::idleFunc()
 {
-    if (isLoading && loadingFuture.valid()) {
-        auto result = loadingFuture.wait_for(std::chrono::milliseconds(16));
-        switch (result) {
-            case std::future_status::deferred:
-                LOG(ERROR) << "loading status was deferred, invalid state!";
-                abort();
-
-            case std::future_status::timeout:
-                // Still loading
-                break;
-
-            case std::future_status::ready:
-                loadingFuture.get();
+    if (isLoading()) {
+        if (visualisationFuture.valid()) {
+            auto result = awaitCompletion(visualisationFuture);
+            if (result) {
                 loadGLItems();
-                isLoading = false;
-                break;
+                return;
+            }
+        } else if (simulationFuture.valid()) {
+            auto result = awaitCompletion(simulationFuture);
+            if (result) {
+                tie(layerInfo, layerData) = std::move(*result);
+                currentData = layerData.begin();
+                queueUpdate();
+            }
         }
     } else {
         if (options.mouse_1_pressed) {
@@ -489,4 +507,9 @@ void RenderingState::loadGLItems()
 {
     std::for_each(layerVisualisations.begin(), layerVisualisations.end(), [](auto& x) { x->glLoad(); });
     std::for_each(interactionAnimations.begin(), interactionAnimations.end(), [](auto& x) { if (x) x->glLoad(); });
+}
+
+bool RenderingState::isLoading() const
+{
+    return visualisationFuture.valid() || simulationFuture.valid();
 }

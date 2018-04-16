@@ -231,3 +231,34 @@ const map<string, LayerInfo> & Simulator::layerInfo() const
 {
     return pImpl->layerInfo();
 }
+
+std::pair<std::map<std::string, LayerInfo>, std::vector<std::vector<LayerData>>>
+fmri::Simulator::loadSimulationData(const Options &options)
+{
+    Simulator simulator(options.model(), options.weights(), options.means());
+
+    std::vector<std::vector<LayerData>> results;
+    transform(options.inputs().begin(), options.inputs().end(), back_inserter(results), [&simulator] (auto& x) {
+        return simulator.simulate(x);
+    });
+
+    auto dumper = options.imageDumper();
+    if (dumper) {
+        for (auto &layer : *results.begin()) {
+            dumper->dump(layer);
+        }
+    }
+
+    const auto optLabels = options.labels();
+
+    if (optLabels) {
+        auto& labels = *optLabels;
+        for (const auto& result : results) {
+            auto &last = *result.rbegin();
+            auto bestIndex = std::distance(last.data(), max_element(last.data(), last.data() + last.numEntries()));
+            LOG(INFO) << "Got answer: " << labels[bestIndex] << endl;
+        }
+    }
+
+    return make_pair(simulator.layerInfo(), std::move(results));
+}
