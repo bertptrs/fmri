@@ -60,6 +60,46 @@ static void renderLoadingScreen()
     restorePerspectiveProjection();
 }
 
+typedef std::vector<std::vector<std::pair<std::unique_ptr<LayerVisualisation>, std::unique_ptr<Animation>>>> VisualisationList;
+
+static VisualisationList loadVisualisations(const Options& options)
+{
+    using namespace std;
+
+    auto [layerInfo, layerData] = Simulator::loadSimulationData(options);
+
+    VisualisationList result;
+
+    for (auto &&item : layerData) {
+        vector<unique_ptr<LayerVisualisation>> layers;
+        vector<unique_ptr<Animation>> animations;
+        LayerData* prevData = nullptr;
+
+        for (LayerData &layer : item) {
+            unique_ptr<LayerVisualisation> layerVisualisation(getVisualisationForLayer(layer, layerInfo.at(layer.name())));
+
+            if (prevData != nullptr) {
+                auto animation = getActivityAnimation(*prevData, layer, layerInfo.at(layer.name()), (*layers.rbegin())->nodePositions(), layerVisualisation->nodePositions());
+                animations.emplace_back(animation);
+            }
+
+            layers.emplace_back(move(layerVisualisation));
+            prevData = &layer;
+        }
+
+        VisualisationList::value_type dataSet;
+
+        for (auto i = 0u; i < layers.size(); ++i) {
+            auto interaction = i < animations.size() ? move(animations[i]) : nullptr;
+            dataSet.emplace_back(move(layers[i]), move(interaction));
+        }
+
+        result.push_back(move(dataSet));
+    }
+
+    return result;
+}
+
 void RenderingState::move(unsigned char key, bool sprint)
 {
     float speed = 0.5f;
@@ -233,43 +273,6 @@ void RenderingState::handleMouseAt(int x, int y)
     glutPostRedisplay();
 }
 
-void RenderingState::queueUpdate()
-{
-    // Make sure that visualisations are cleared in the current thread
-    layerVisualisations.clear();
-    interactionAnimations.clear();
-
-    visualisationFuture = std::async(std::launch::async, []() {
-        RenderingState::instance().updateVisualisers();
-
-        return true;
-    });
-}
-
-void RenderingState::updateVisualisers()
-{
-    layerVisualisations.clear();
-    interactionAnimations.clear();
-    LayerData *prevState = nullptr;
-    LayerVisualisation *prevVisualisation = nullptr;
-
-    for (LayerData &layer : *currentData) {
-        LayerVisualisation *visualisation = getVisualisationForLayer(layer, layerInfo.at(layer.name()));
-        if (prevState && prevVisualisation && visualisation) {
-            auto interaction = getActivityAnimation(*prevState, layer, layerInfo.at(layer.name()),
-                                                    prevVisualisation->nodePositions(), visualisation->nodePositions());
-            interactionAnimations.emplace_back(interaction);
-        }
-
-        layerVisualisations.emplace_back(visualisation);
-
-        prevVisualisation = visualisation;
-        prevState = &layer;
-    }
-
-    glutPostRedisplay();
-}
-
 void RenderingState::render(float time) const
 {
     // Clear Color and Depth Buffers
@@ -317,13 +320,16 @@ void RenderingState::drawLayer(float time, unsigned long i) const
 {
     glPushMatrix();
 
-    renderLayerName(currentData->at(i).name());
+    auto& layer = currentData->at(i);
+
+    // TODO: make names available again.
+    // renderLayerName(currentData->at(i).name());
     if (options.renderLayers) {
-                layerVisualisations[i]->draw(time);
-            }
-    if (options.renderInteractions && i < interactionAnimations.size() && interactionAnimations[i]) {
-                interactionAnimations[i]->draw(time);
-            }
+        layer.first->draw(time);
+    }
+    if (options.renderInteractions && layer.second) {
+        layer.second->draw(time);
+    }
 
     glPopMatrix();
 }
@@ -361,7 +367,7 @@ void RenderingState::renderLayerName(const std::string &name) const
     glColor3f(0.5, 0.5, 0.5);
     auto layerName = name;
     layerName += ": ";
-    layerName += LayerInfo::nameByType(layerInfo.at(name).type());
+    //layerName += LayerInfo::nameByType(layerInfo.at(name).type());
     renderText(layerName);
 
     glTranslatef(0, 0, -10);
@@ -375,19 +381,17 @@ void RenderingState::handleSpecialKey(int key)
     }
     switch (key) {
         case GLUT_KEY_LEFT:
-            if (currentData == layerData.begin()) {
-                currentData = layerData.end();
+            if (currentData == visualisations.begin()) {
+                currentData = visualisations.end();
             }
             --currentData;
-            queueUpdate();
             break;
 
         case GLUT_KEY_RIGHT:
             ++currentData;
-            if (currentData == layerData.end()) {
-                currentData = layerData.begin();
+            if (currentData == visualisations.end()) {
+                currentData = visualisations.begin();
             }
-            queueUpdate();
             break;
 
         case GLUT_KEY_F1:
@@ -420,7 +424,7 @@ void RenderingState::loadOptions(const Options &programOptions)
     options.layerAlpha = programOptions.layerTransparancy();
     options.interactionAlpha = programOptions.interactionTransparancy();
 
-    simulationFuture = std::async(std::launch::async, Simulator::loadSimulationData, programOptions);
+    loadingFuture = std::async(std::launch::async, loadVisualisations, programOptions);
 }
 
 const Color &RenderingState::pathColor() const
@@ -485,19 +489,10 @@ static std::optional<T> awaitCompletion(std::future<T>& f)
 void RenderingState::idleFunc()
 {
     if (isLoading()) {
-        if (visualisationFuture.valid()) {
-            auto result = awaitCompletion(visualisationFuture);
-            if (result) {
-                loadGLItems();
-                return;
-            }
-        } else if (simulationFuture.valid()) {
-            auto result = awaitCompletion(simulationFuture);
-            if (result) {
-                tie(layerInfo, layerData) = std::move(*result);
-                currentData = layerData.begin();
-                queueUpdate();
-            }
+        if (auto result = awaitCompletion(loadingFuture); result) {
+            visualisations = std::move(*result);
+            loadGLItems();
+            currentData = visualisations.begin();
         }
     } else {
         if (options.mouse_1_pressed) {
@@ -513,11 +508,17 @@ void RenderingState::idleFunc()
 
 void RenderingState::loadGLItems()
 {
-    std::for_each(layerVisualisations.begin(), layerVisualisations.end(), [](auto& x) { x->glLoad(); });
-    std::for_each(interactionAnimations.begin(), interactionAnimations.end(), [](auto& x) { if (x) x->glLoad(); });
+    for (auto &item : visualisations) {
+        for (auto &item2 : item) {
+            item2.first->glLoad();
+            if (item2.second) {
+                item2.second->glLoad();
+            }
+        }
+    }
 }
 
 bool RenderingState::isLoading() const
 {
-    return visualisationFuture.valid() || simulationFuture.valid();
+    return loadingFuture.valid();
 }

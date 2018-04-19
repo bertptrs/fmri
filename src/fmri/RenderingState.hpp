@@ -73,13 +73,10 @@ namespace fmri
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;
-        std::map<std::string, LayerInfo> layerInfo;
-        std::vector<std::vector<LayerData>> layerData;
-        std::vector<std::vector<LayerData>>::iterator currentData;
-        std::vector<std::unique_ptr<LayerVisualisation>> layerVisualisations;
-        std::vector<std::unique_ptr<Animation>> interactionAnimations;
-        std::future<bool> visualisationFuture;
-        std::future<std::pair<decltype(layerInfo), decltype(layerData)>> simulationFuture;
+        std::vector<std::vector<std::pair<std::unique_ptr<LayerVisualisation>, std::unique_ptr<Animation>>>> visualisations;
+        std::future<decltype(visualisations)> loadingFuture;
+
+        decltype(visualisations)::iterator currentData;
 
 
         RenderingState() noexcept;
@@ -87,7 +84,7 @@ namespace fmri
         void configureRenderingContext() const;
 
         void move(unsigned char key, bool sprint);
-        void updateVisualisers();
+
         void idleFunc();
 
         std::string debugInfo() const;
@@ -95,8 +92,6 @@ namespace fmri
         void renderLayerName(const std::string& name) const;
 
         void drawLayer(float time, unsigned long i) const;
-
-        void queueUpdate();
 
         void renderVisualisation(float time) const;
 
