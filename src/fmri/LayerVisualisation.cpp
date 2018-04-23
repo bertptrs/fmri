@@ -1,7 +1,9 @@
+#include <GL/gl.h>
 #include "LayerVisualisation.hpp"
 #include "Range.hpp"
 #include "utils.hpp"
 #include "RenderingState.hpp"
+#include "glutils.hpp"
 
 const std::vector<float> &fmri::LayerVisualisation::nodePositions() const
 {
@@ -29,6 +31,21 @@ void fmri::LayerVisualisation::initNodePositions<fmri::LayerVisualisation::Order
 float fmri::LayerVisualisation::getAlpha()
 {
     return RenderingState::instance().layerAlpha();
+}
+
+void fmri::LayerVisualisation::setupLayerName(std::string_view name, fmri::LayerInfo::Type type)
+{
+    displayName = name;
+    displayName += ": ";
+    displayName += LayerInfo::nameByType(type);
+}
+
+void fmri::LayerVisualisation::drawLayerName() const
+{
+    glColor3f(0.5, 0.5, 0.5);
+    renderText(displayName);
+
+    glTranslatef(0, 0, -10);
 }
 
 template<>

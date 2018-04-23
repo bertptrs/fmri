@@ -322,8 +322,7 @@ void RenderingState::drawLayer(float time, unsigned long i) const
 
     auto& layer = currentData->at(i);
 
-    // TODO: make names available again.
-    // renderLayerName(currentData->at(i).name());
+    layer.first->drawLayerName();
     if (options.renderLayers) {
         layer.first->draw(time);
     }
@@ -360,17 +359,6 @@ void RenderingState::renderOverlayText() const
     glColor3f(1, 1, 0);
     renderText(overlayText.str(), 2, 10);
     restorePerspectiveProjection();
-}
-
-void RenderingState::renderLayerName(const std::string &name) const
-{
-    glColor3f(0.5, 0.5, 0.5);
-    auto layerName = name;
-    layerName += ": ";
-    //layerName += LayerInfo::nameByType(layerInfo.at(name).type());
-    renderText(layerName);
-
-    glTranslatef(0, 0, -10);
 }
 
 void RenderingState::handleSpecialKey(int key)

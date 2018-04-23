@@ -67,7 +67,7 @@ static EntryList deduplicate(const EntryList& entries)
     return result;
 }
 
-fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &data, const fmri::LayerInfo &info)
+static fmri::LayerVisualisation *getAppropriateLayer(const fmri::LayerData &data, const fmri::LayerInfo &info)
 {
     switch (info.type()) {
         case LayerInfo::Type::Input:
@@ -89,6 +89,14 @@ fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &
                     return new DummyLayerVisualisation();
             }
     }
+}
+
+fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &data, const fmri::LayerInfo &info)
+{
+    auto layer = getAppropriateLayer(data, info);
+    layer->setupLayerName(data.name(), info.type());
+
+    return layer;
 }
 
 static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, const fmri::LayerInfo &layer,

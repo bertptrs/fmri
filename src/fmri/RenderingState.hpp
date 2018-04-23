@@ -89,7 +89,6 @@ namespace fmri
 
         std::string debugInfo() const;
         void renderOverlayText() const;
-        void renderLayerName(const std::string& name) const;
 
         void drawLayer(float time, unsigned long i) const;
 
