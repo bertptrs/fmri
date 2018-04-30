@@ -136,3 +136,12 @@ void fmri::registerErrorCallbacks()
     LOG(INFO) << "Compiled without freeglut, error handlers not available.";
 #endif
 }
+
+void fmri::setGlColor(const Color &c)
+{
+    if constexpr (alphaEnabled()) {
+        glColor4fv(c.data());
+    } else {
+        glColor3fv(c.data());
+    }
+}

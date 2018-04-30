@@ -16,5 +16,6 @@ namespace fmri
 
         std::vector<std::string> nodeLabels;
         std::vector<float> nodePositions_;
+        std::vector<int> nodeIndices;
     };
 }

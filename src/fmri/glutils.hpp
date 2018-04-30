@@ -52,7 +52,15 @@ namespace fmri {
     drawImageTiles(int n, const float *vertexBuffer, const float *textureCoords, const Texture &texture, float alpha);
 
     /**
-     * Attempmt to register
+     * Attempt to register error handlers in GLUT.
+     *
+     * Only works in Freeglut.
      */
     void registerErrorCallbacks();
+
+    /**
+     * Set GL drawing color from internal color.
+     * @param c
+     */
+    void setGlColor(const Color& c);
 }
