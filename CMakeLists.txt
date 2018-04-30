@@ -13,6 +13,9 @@ file(GLOB fmri_SRC
 	"src/fmri/*.hpp"
 )
 
+option(WITH_LAUNCHER "build GUI launcher" ON)
+option(WITH_DEINPLACE "build deinplace tool" ON)
+
 add_executable(fmri ${fmri_SRC})
 
 # Enable better warnings
@@ -39,19 +42,26 @@ target_link_libraries(fmri PUBLIC
 
 target_include_directories(fmri PUBLIC
 	${Caffe_INCLUDE_DIRS}
-	${OpenCV_INCLUDE_DIRS})
+)
 
-# Build instructions for the deinplace tool
-find_package(Protobuf REQUIRED)
-add_executable(fmri-deinplace "src/tools/deinplace.cpp")
-target_compile_options(fmri-deinplace PRIVATE "-Wall" "-Wextra" "-pedantic")
-target_link_libraries(fmri-deinplace Caffe::Caffe protobuf::libprotobuf)
+install(TARGETS fmri DESTINATION bin)
 
-# Build isntructions for the launcher tool
-find_package(GTK3 REQUIRED COMPONENTS gtk gtkmm)
-add_executable(fmri-launcher src/tools/launcher.cpp)
-target_compile_options(fmri-launcher PRIVATE "-Wall" "-Wextra" "-pedantic")
-target_link_libraries(fmri-launcher GTK3::gtkmm Boost::filesystem GTK3::gtk)
+if (WITH_DEINPLACE)
+	# Build instructions for the deinplace tool
+	find_package(Protobuf REQUIRED)
+	add_executable(fmri-deinplace "src/tools/deinplace.cpp")
+	target_compile_options(fmri-deinplace PRIVATE "-Wall" "-Wextra" "-pedantic")
+	target_link_libraries(fmri-deinplace Caffe::Caffe protobuf::libprotobuf)
+	install(TARGETS fmri-deinplace DESTINATION bin)
+endif()
+
+if (WITH_LAUNCHER)
+	# Build isntructions for the launcher tool
+	find_package(GTK3 REQUIRED COMPONENTS gtk gtkmm)
+	add_executable(fmri-launcher src/tools/launcher.cpp)
+	target_compile_options(fmri-launcher PRIVATE "-Wall" "-Wextra" "-pedantic")
+	target_link_libraries(fmri-launcher GTK3::gtkmm Boost::filesystem GTK3::gtk)
+	install(TARGETS fmri-launcher DESTINATION bin)
+endif()
 
 # Allow the package to be installed
-install(TARGETS fmri fmri-deinplace fmri-launcher DESTINATION bin)
