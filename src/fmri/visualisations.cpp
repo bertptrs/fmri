@@ -93,6 +93,7 @@ static fmri::LayerVisualisation *getAppropriateLayer(const fmri::LayerData &data
 
 fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &data, const fmri::LayerInfo &info)
 {
+    LOG(INFO) << "Loading state visualisation for " << data.name();
     auto layer = getAppropriateLayer(data, info);
     layer->setupLayerName(data.name(), info.type());
 
@@ -102,8 +103,6 @@ fmri::LayerVisualisation *fmri::getVisualisationForLayer(const fmri::LayerData &
 static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, const fmri::LayerInfo &layer,
                                              const vector<float> &prevPositions, const vector<float> &curPositions)
 {
-    LOG(INFO) << "Computing top interactions for " << layer.name() << endl;
-
     auto data = prevState.data();
 
     CHECK_GE(layer.parameters().size(), 1) << "Layer should have correct parameters";
@@ -250,6 +249,7 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
         return nullptr;
     }
 
+    LOG(INFO) << "Loading interaction for " << layer.name();
 
     switch (layer.type()) {
         case LayerInfo::Type::InnerProduct:

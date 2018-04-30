@@ -67,18 +67,24 @@ static VisualisationList loadVisualisations(const Options& options)
 {
     using namespace std;
 
-    auto [layerInfo, layerData] = Simulator::loadSimulationData(options);
+    Simulator simulator(options.model(), options.weights(), options.means());
 
+    const auto layerInfo = simulator.layerInfo();
     auto labels = options.labels();
 
     VisualisationList result;
 
-    for (auto &&item : layerData) {
+    auto dumper = options.imageDumper();
+
+    for (auto& input : options.inputs()) {
+        LOG(INFO) << "Simulating " << input;
+        auto item = simulator.simulate(input);
+
         vector<unique_ptr<LayerVisualisation>> layers;
         vector<unique_ptr<Animation>> animations;
         LayerData* prevData = nullptr;
 
-        for (LayerData &layer : item) {
+        for (auto &layer : item) {
             unique_ptr<LayerVisualisation> layerVisualisation(getVisualisationForLayer(layer, layerInfo.at(layer.name())));
 
             if (prevData != nullptr) {
@@ -88,12 +94,22 @@ static VisualisationList loadVisualisations(const Options& options)
 
             layers.emplace_back(move(layerVisualisation));
             prevData = &layer;
+
         }
 
         VisualisationList::value_type dataSet;
 
         if (labels) {
+            auto &last = *item.rbegin();
+            auto bestIndex = std::distance(last.data(), max_element(last.data(), last.data() + last.numEntries()));
+            LOG(INFO) << "Got answer: " << labels->at(bestIndex) << endl;
             animations.emplace_back(new LabelVisualisation(layers.rbegin()->get()->nodePositions(), *prevData, labels.value()));
+        }
+
+        if (dumper) {
+            for (auto &layer : item) {
+                dumper->dump(layer);
+            }
         }
 
         for (auto i = 0u; i < layers.size(); ++i) {
