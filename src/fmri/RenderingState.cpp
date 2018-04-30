@@ -44,6 +44,8 @@ static void updatePointSize(float dir)
     glPointSize(std::max(1.f, size));
 }
 
+static unsigned int loadingPct;
+
 static void renderLoadingScreen()
 {
     glLoadIdentity();
@@ -52,12 +54,15 @@ static void renderLoadingScreen()
     glColor3f(1, 1, 1);
     glutWireTeapot(1);
 
+    char state[1024];
+    std::snprintf(state, sizeof(state), "Loading... %u%%", loadingPct);
+
     auto pulse = std::cos(2 * M_PI * getAnimationStep(std::chrono::seconds(3)));
     pulse *= pulse;
     glColor3d(pulse, pulse, 0);
     glLoadIdentity();
     setOrthographicProjection();
-    renderText("Loading...", 5, 15);
+    renderText(state, 5, 15);
     restorePerspectiveProjection();
 }
 
@@ -77,6 +82,7 @@ static VisualisationList loadVisualisations(const Options& options)
     auto dumper = options.imageDumper();
 
     for (auto& input : options.inputs()) {
+        loadingPct = 100 * result.size() / options.inputs().size();
         LOG(INFO) << "Simulating " << input;
         auto item = simulator.simulate(input);
 
