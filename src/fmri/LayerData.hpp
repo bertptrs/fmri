@@ -30,7 +30,9 @@ namespace fmri
         const string &name() const;
         const vector<int> &shape() const;
         DType const *data() const;
-        size_t numEntries() const;
+        std::size_t numEntries() const;
+
+        const DType& operator[] (std::size_t i) const;
     private:
         string name_;
         vector<int> shape_;

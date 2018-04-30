@@ -2,7 +2,7 @@
 
 void fmri::Drawable::patchTransparancy()
 {
-    if constexpr (std::tuple_size<Color>::value < 4) {
+    if constexpr (!alphaEnabled()) {
         // Not compiling with alpha support
         return;
     }

@@ -246,4 +246,11 @@ namespace fmri
      * @return Resulting list of floats.
      */
     const std::vector<float> & animate(const std::vector<float> &start, const std::vector<float> &delta, float time);
+
+    /**
+     * @return Whether alpha support is enabled, compile time.
+     */
+    constexpr bool alphaEnabled() {
+        return std::tuple_size<Color>::value >= 4;
+    }
 }

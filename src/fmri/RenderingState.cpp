@@ -7,6 +7,7 @@
 #include "Range.hpp"
 #include "glutils.hpp"
 #include "Simulator.hpp"
+#include "LabelVisualisation.hpp"
 
 using namespace fmri;
 
@@ -68,6 +69,8 @@ static VisualisationList loadVisualisations(const Options& options)
 
     auto [layerInfo, layerData] = Simulator::loadSimulationData(options);
 
+    auto labels = options.labels();
+
     VisualisationList result;
 
     for (auto &&item : layerData) {
@@ -88,6 +91,10 @@ static VisualisationList loadVisualisations(const Options& options)
         }
 
         VisualisationList::value_type dataSet;
+
+        if (labels) {
+            animations.emplace_back(new LabelVisualisation(layers.rbegin()->get()->nodePositions(), *prevData, labels.value()));
+        }
 
         for (auto i = 0u; i < layers.size(); ++i) {
             auto interaction = i < animations.size() ? move(animations[i]) : nullptr;

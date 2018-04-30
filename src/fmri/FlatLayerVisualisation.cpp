@@ -19,7 +19,7 @@ static inline void computeColor(float intensity, float limit, Color& destination
         destination[1] = saturation;
         destination[2] = saturation;
     }
-    if constexpr (std::tuple_size<Color>::value >= 4) {
+    if constexpr (alphaEnabled()) {
         // We have an alpha channel, set it to 1.
         destination[3] = 1;
     }

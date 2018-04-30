@@ -42,6 +42,11 @@ DType const * LayerData::data() const
 	return data_.get();
 }
 
+const DType &LayerData::operator[](std::size_t i) const
+{
+    return data_[i];
+}
+
 ostream& operator<< (ostream& o, const LayerData& layer)
 {
     o << layer.name() << '(';
