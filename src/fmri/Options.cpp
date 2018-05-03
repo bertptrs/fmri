@@ -2,6 +2,7 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <glog/logging.h>
+#include <GL/gl.h>
 #include "Options.hpp"
 #include "visualisations.hpp"
 
@@ -67,6 +68,17 @@ static void parse_color(const char *input, Color &targetColor)
     throw std::invalid_argument(errorBuf);
 }
 
+static inline void parse_color(const std::string& input, Color& targetColor)
+{
+    parse_color(input.c_str(), targetColor);
+}
+
+static void use_color(const boost::program_options::variables_map& vm, const char* key, Color& target) {
+    if (vm.count(key)) {
+        parse_color(vm[key].as<std::string>(), target);
+    }
+}
+
 Options::Options(int argc, char * const argv[]):
         layerTransparancy_(1),
         interactionTransparancy_(1),
@@ -94,6 +106,10 @@ Options::Options(int argc, char * const argv[]):
                 ("interaction-opacity", value_for(interactionTransparancy_), "Opacity for interactions")
                 ("layer-distance", value_for(LAYER_X_OFFSET), "Distance between layers")
                 ("interaction-limit", value_for(INTERACTION_LIMIT), "Maximum number of interactions per layer")
+                ("neutral-color", value<std::string>(), "Color for showing neutral states")
+                ("positive-color", value<std::string>(), "Color for showing positive states")
+                ("negative-color", value<std::string>(), "Color for showing negative states")
+                ("background-color", value<std::string>()->default_value("#00000000"), "Color for showing neutral states")
                 ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
         options_description composed = desc;
@@ -109,8 +125,15 @@ Options::Options(int argc, char * const argv[]):
 
         notify(vm);
 
-        if (vm.count("path-color")) {
-            parse_color(vm["path-color"].as<std::string>().c_str(), pathColor_);
+        use_color(vm, "path-color", pathColor_);
+        use_color(vm, "neutral-color", NEUTRAL_COLOR);
+        use_color(vm, "positive-color", POSITIVE_COLOR);
+        use_color(vm, "negative-color", NEGATIVE_COLOR);
+
+        if (vm.count("background-color")) {
+            Color bg;
+            parse_color(vm["background-color"].as<std::string>(), bg);
+            glClearColor(bg[0], bg[1], bg[2], bg[3]);
         }
 
         // Sanity checks

@@ -98,6 +98,8 @@ public:
 private:
     int rows;
 
+    Gtk::Box box;
+    Gtk::ScrolledWindow scrolledWindow;
     Gtk::Grid grid;
     Gtk::FileChooserButton fmriChooser;
     Gtk::FileChooserButton modelChooser;
@@ -106,6 +108,10 @@ private:
     Gtk::FileChooserButton meansChooser;
     Gtk::FileChooserButton inputChooser;
     Gtk::ColorButton pathColor;
+    Gtk::ColorButton bgColor;
+    Gtk::ColorButton neutralColor;
+    Gtk::ColorButton positiveColor;
+    Gtk::ColorButton negativeColor;
     Gtk::Scale layerDistance;
     Gtk::Scale layerTransparancy;
     Gtk::Scale interactionTransparancy;
@@ -118,12 +124,14 @@ private:
     Gtk::Label* getManagedLabel(const std::string& contents);
     void findExecutable();
     void addRowWithLabel(const std::string& label, Gtk::Widget& widget);
+    void addHeaderRow(const std::string& header);
 };
 
 Launcher::Launcher()
         :
         Gtk::Window(),
         rows(0),
+        box(Gtk::Orientation::ORIENTATION_VERTICAL),
         fmriChooser("Select FMRI executable"),
         modelChooser("Select caffe model prototxt"),
         weightsChooser("Select caffe model weights"),
@@ -131,15 +139,22 @@ Launcher::Launcher()
         meansChooser("Select means file"),
         inputChooser("Select input directory", Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SELECT_FOLDER),
         pathColor(Gdk::RGBA("rgba(255, 255, 255, 0.1)")),
+        bgColor(Gdk::RGBA("rgba(0, 0, 0, 0)")),
+        neutralColor(Gdk::RGBA("rgba(255, 255, 255, 1)")),
+        positiveColor(Gdk::RGBA("rgba(0, 0, 255, 1)")),
+        negativeColor(Gdk::RGBA("rgba(255, 0, 0, 1)")),
         layerDistance(Gtk::Adjustment::create(10, 0, 100, 0, 0.1, 0)),
         layerTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionLimit(Gtk::Adjustment::create(10000, 4096, std::numeric_limits<int>::max()), 10000),
         startButton("Start FMRI")
 {
-    set_default_size(400, -1);
-    //set_size_request(400, -1);
-    add(grid);
+    set_default_size(480, 320);
+    add(box);
+    box.add(scrolledWindow);
+    scrolledWindow.set_vexpand(true);
+    box.add(startButton);
+    scrolledWindow.add(grid);
 
     // Configure all widgets
     fmriChooser.set_hexpand(true);
@@ -168,14 +183,20 @@ Launcher::Launcher()
     addRowWithLabel("Labels (optional)", labelChooser);
     addRowWithLabel("Input directory", inputChooser);
     addRowWithLabel("Means (optional)", meansChooser);
+    addHeaderRow("Color settings");
     addRowWithLabel("Path color", pathColor);
+    addRowWithLabel("Background color", bgColor);
+    addRowWithLabel("Neutral color", neutralColor);
+    addRowWithLabel("Positive color", positiveColor);
+    addRowWithLabel("Negative color", negativeColor);
+    addHeaderRow("Misc settings");
     addRowWithLabel("Layer distance", layerDistance);
     addRowWithLabel("Layer transparancy", layerTransparancy);
     addRowWithLabel("Interaction transparancy", interactionTransparancy);
     addRowWithLabel("Interaction limit", interactionLimit);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
-    grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
+    //grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
     show_all_children(true);
 }
 
@@ -207,6 +228,14 @@ void Launcher::start()
             wrap_string(weights),
             wrap_string("-p"),
             color_string(pathColor),
+            wrap_string("--background-color"),
+            color_string(bgColor),
+            wrap_string("--neutral-color"),
+            color_string(neutralColor),
+            wrap_string("--positive-color"),
+            color_string(positiveColor),
+            wrap_string("--negative-color"),
+            color_string(negativeColor)
     };
 
     float_parameter(argv, "--layer-opacity", layerTransparancy.get_value());
@@ -307,6 +336,14 @@ void Launcher::addRowWithLabel(const std::string &label, Gtk::Widget &widget)
     int currentRow = rows++;
     grid.attach(widget, 1, currentRow, 1, 1);
     grid.attach_next_to(*getManagedLabel(label), widget, Gtk::PositionType::POS_LEFT, 1, 1);
+}
+
+void Launcher::addHeaderRow(const std::string &header)
+{
+    int currentRow = rows++;
+    auto label = getManagedLabel(header);
+    label->set_markup("<b>" + header + "</b>");
+    grid.attach(*label, 0, currentRow, 2, 1);
 }
 
 int main(int argc, char** argv)
