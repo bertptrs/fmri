@@ -19,6 +19,27 @@ namespace fmri
 
 	typedef std::array<float, 4> Color;
 
+	extern Color NEUTRAL_COLOR;
+	extern Color POSITIVE_COLOR;
+	extern Color NEGATIVE_COLOR;
+
+	/**
+	 * Linearly interpolate between two colors
+	 *
+	 * @param aPart fraction of color A to use. [0, 1]
+	 * @param a First color
+	 * @param b Second color
+	 * @return The interpolated color.
+	 */
+	inline Color interpolate(float aPart, const Color& a, const Color& b) {
+	    Color r;
+	    std::transform(a.begin(), a.end(), b.begin(), r.begin(), [aPart] (auto a, auto b) {
+	        return aPart * a + (1 - aPart) * b;
+	    });
+
+	    return r;
+	}
+
     /**
      * The distance between layers in the visualisation.
      *
@@ -159,15 +180,6 @@ namespace fmri
 
         return cols;
     }
-
-    /**
-     * Get a globally initialized random number generator.
-     *
-     * This RNG should always be used as a reference, to make sure the state actually updates.
-     *
-     * @return A reference to the global RNG.
-     */
-    std::default_random_engine& rng();
 
     /**
      * Get the current animation offset for a particular animation.

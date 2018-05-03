@@ -3,18 +3,9 @@
 
 float fmri::LAYER_X_OFFSET = 10;
 
-std::default_random_engine &fmri::rng()
-{
-    static std::default_random_engine rng;
-    static std::default_random_engine::result_type seed = 0;
-
-    if (seed == 0) {
-        std::random_device dev;
-        rng.seed(seed = dev());
-    }
-
-    return rng;
-}
+fmri::Color fmri::NEUTRAL_COLOR = {1, 1, 1, 1};
+fmri::Color fmri::NEGATIVE_COLOR = {1, 0, 0, 1};
+fmri::Color fmri::POSITIVE_COLOR = {0, 0, 1, 1};
 
 const std::vector<float> & fmri::animate(const std::vector<float> &start, const std::vector<float> &delta, float time)
 {

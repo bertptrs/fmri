@@ -23,8 +23,6 @@ namespace fmri
                     const float *aPositions, const float *bPositions, ColoringFunction coloring);
         void draw(float timeScale) override;
 
-        static Color colorBySign(float intensity);
-
     private:
         std::size_t bufferLength;
         std::vector<float> startingPos;

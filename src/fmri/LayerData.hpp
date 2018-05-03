@@ -32,6 +32,9 @@ namespace fmri
         DType const *data() const;
         std::size_t numEntries() const;
 
+        DType const *begin() const;
+        DType const *end() const;
+
         const DType& operator[] (std::size_t i) const;
     private:
         string name_;

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <numeric>
 #include <caffe/util/math_functions.hpp>
+#include <valarray>
 #include "visualisations.hpp"
 #include "DummyLayerVisualisation.hpp"
 #include "MultiImageVisualisation.hpp"
@@ -168,7 +169,6 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
     caffe::caffe_sub(prevState.numEntries(), curState.data(), prevState.data(), changes.data());
 
     if (curState.shape().size() == 2) {
-        rescale(changes.begin(), changes.end(), 0, 1);
         EntryList results;
         for (auto i : Range(curState.numEntries())) {
             if (curState.data()[i] > EPSILON) {
@@ -176,10 +176,7 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
             }
         }
 
-        return new ActivityAnimation(results, prevPositions.data(), curPositions.data(),
-                                     [](float i) -> Color {
-            return {1 - i, 1 - i, 1};
-                                             });
+        return new ActivityAnimation(results, prevPositions.data(), curPositions.data());
     } else {
         return new ImageInteractionAnimation(changes.data(), prevState.shape(), prevPositions, curPositions);
     }
@@ -189,36 +186,26 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
                                           const vector<float> &prevPositions,
                                           const vector<float> &curPositions) {
     CHECK(prevState.shape() == curState.shape()) << "Shapes should be of equal size" << endl;
-    vector<DType> scaling(std::accumulate(prevState.shape().begin(), prevState.shape().end(), 1u, multiplies<void>()));
-    caffe::caffe_div(scaling.size(), prevState.data(), curState.data(), scaling.data());
+    valarray<DType> scaling(prevState.data(), prevState.numEntries());
+    scaling /= valarray<DType>(curState.data(), curState.numEntries());
 
     // Fix divisions by zero. For those cases, pick 1 since it doesn't matter anyway.
-    normalize(scaling.begin(), scaling.end());
+    normalize(begin(scaling), end(scaling));
+    scaling = log(scaling);
 
     if (prevState.shape().size() == 2) {
+        scaling /= scaling.max();
         EntryList entries;
         entries.reserve(scaling.size());
         for (auto i : Range(scaling.size())) {
-            if (std::abs(curState.data()[i]) > EPSILON) {
+            if (std::abs(curState[i]) > EPSILON) {
                 entries.emplace_back(scaling[i], make_pair(i, i));
             }
         }
+        return new ActivityAnimation(entries, prevPositions.data(), curPositions.data());
 
-        auto max_val = *max_element(scaling.begin(), scaling.end());
-
-        return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(),
-                                     [=](float i) -> Color {
-                                         auto intensity = clamp((i - 1) / (max_val - 1), 0.f, 1.f);
-                                         return {
-                                                 1 - intensity,
-                                                 1,
-                                                 1,
-                                                 1
-                                         };
-                                     });
     } else {
-        transform(scaling.begin(), scaling.end(), scaling.begin(), [](float x) { return log(x); });
-        return new ImageInteractionAnimation(scaling.data(), prevState.shape(), prevPositions, curPositions);
+        return new ImageInteractionAnimation(&scaling[0], prevState.shape(), prevPositions, curPositions);
     }
 }
 
@@ -235,9 +222,7 @@ static Animation *getSoftmaxAnimation(const fmri::LayerData &curState, const vec
         entries.emplace_back(intensities[i], make_pair(i, i));
     }
 
-    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data(), [](auto i) -> Color {
-        return {1 - i, 1 - i, 1};
-    });
+    return new ActivityAnimation(entries, prevPositions.data(), curPositions.data());
 }
 
 Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const fmri::LayerData &curState,

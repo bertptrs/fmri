@@ -11,35 +11,21 @@
 using namespace std;
 using namespace fmri;
 
-Color ActivityAnimation::colorBySign(float intensity)
-{
-    if (intensity > 0) {
-        return {0, 1, 0, 1};
-    } else {
-        return {1, 0, 0, 1};
-    }
-}
-
 ActivityAnimation::ActivityAnimation(
             const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
             const float *aPositions, const float *bPositions) :
-        ActivityAnimation(interactions, aPositions, bPositions, ActivityAnimation::colorBySign)
-{
-}
-
-ActivityAnimation::ActivityAnimation(
-            const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
-            const float *aPositions, const float *bPositions, ColoringFunction coloring)
-        :
         bufferLength(3 * interactions.size()),
         delta(bufferLength)
 {
-    CHECK(coloring) << "Invalid coloring function passed.";
     startingPos.reserve(bufferLength);
     vector<float> endPos;
     endPos.reserve(bufferLength);
-    transform(interactions.begin(), interactions.end(), back_inserter(colorBuffer), [&coloring](auto e) {
-        return coloring(e.first);
+    transform(interactions.begin(), interactions.end(), back_inserter(colorBuffer), [](auto e) {
+        if (e.first > 0) {
+            return interpolate(e.first, POSITIVE_COLOR, NEUTRAL_COLOR);
+        } else {
+            return interpolate(e.first + 1, NEUTRAL_COLOR, NEGATIVE_COLOR);
+        }
     });
     colorBuffer.reserve(interactions.size());
 

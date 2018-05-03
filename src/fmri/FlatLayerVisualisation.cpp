@@ -11,13 +11,9 @@ static inline void computeColor(float intensity, float limit, Color& destination
 {
     const float saturation = std::min(-std::log(std::abs(intensity) / limit) / 10.0f, 1.0f);
     if (intensity > 0) {
-        destination[0] = saturation;
-        destination[1] = saturation;
-        destination[2] = 1;
+        destination = interpolate(saturation, NEUTRAL_COLOR, POSITIVE_COLOR);
     } else {
-        destination[0] = 1;
-        destination[1] = saturation;
-        destination[2] = saturation;
+        destination = interpolate(saturation, NEUTRAL_COLOR, NEGATIVE_COLOR);
     }
     if constexpr (alphaEnabled()) {
         // We have an alpha channel, set it to 1.

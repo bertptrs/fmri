@@ -43,7 +43,7 @@ LabelVisualisation::LabelVisualisation(const std::vector<float> &positions, cons
             continue;
         }
 
-        colorBuffer.emplace_back(Color{1 - prevData[i] / maxVal, 1 - prevData[i] / maxVal, 1});
+        colorBuffer.emplace_back(interpolate(prevData[i] / maxVal, POSITIVE_COLOR, NEUTRAL_COLOR));
         std::copy_n(positions.begin() + 3 * i, 3, nodeInserter);
         nodeLabels.emplace_back(labels[i]);
     }
