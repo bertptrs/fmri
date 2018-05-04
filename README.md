@@ -35,9 +35,13 @@ process. The commands required are as follows:
     # Install dependencies
     sudo apt install libcaffe-cpu-dev freeglut3-dev libgtkmm-3.0-dev \
         build-essential cmake libopencv-dev libboost-system-dev \
-        libgoogle-glog-dev libblas-dev libprotobuf-dev
+        libgoogle-glog-dev libblas-dev libprotobuf-dev \
+        libboost-filesystem-dev libboost-program_options-dev
 
     # Do the build normally
+
+These commands were tested on Ubuntu 18.04. Versions as old as 16.04
+will work, but can be very painful and labor intesnive to set up.
 
 Older versions of Ubuntu need some help, as the `caffe` package does not
 exist, and the supplied `cmake` version is too old.
@@ -67,7 +71,7 @@ This program can operate on most Caffe models, provided they don't
 split/merge the input, since the visualisers cannot handle more than
 one input.
 
-There is one valid model provided, Caffenet. It can be downloaded by
+There are a few valid models provided. It can be downloaded by
 running `./download-models.sh` from the data folder.
 
 After that, you can, for example, run the program as follows
@@ -78,15 +82,20 @@ After that, you can, for example, run the program as follows
         -l ../data/ilsvrc12/synset_words.txt \
         ../data/samples/*.jpg
 
-This will run the network on the deduplicated caffenet (see: [limitations](#lmitations))
+This will run the network on the deduplicated caffenet (see: [limitations](#limitations))
 with the correct weights file and the labels file supplied, on all jpegs
 located in the samples folder. More advanced usage can be discovered using
 the `-h` option of the executable.
 
+Additionally, a graphical launcher is included, called `fmri-launcher`.
+It is built by default unless disabled at compile time. The interface
+contains a button or a chooser for every option in the program.
+
 ### Controls
 
 You can move around with the WASD keys, and look around using the mouse.
-Arrow keys change the currently loaded input.
+Arrow keys change the currently loaded input. F1 brings up an overlay
+that tells you all other options.
 
 ## Limitations
 
