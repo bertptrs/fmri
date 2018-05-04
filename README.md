@@ -36,7 +36,7 @@ process. The commands required are as follows:
     sudo apt install libcaffe-cpu-dev freeglut3-dev libgtkmm-3.0-dev \
         build-essential cmake libopencv-dev libboost-system-dev \
         libgoogle-glog-dev libblas-dev libprotobuf-dev \
-        libboost-filesystem-dev libboost-program_options-dev
+        libboost-filesystem-dev libboost-program-options-dev
 
     # Do the build normally
 
