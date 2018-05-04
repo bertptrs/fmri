@@ -2,6 +2,7 @@
 #include <fstream>
 #include <memory>
 #include <fcntl.h>
+#include <iostream>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <caffe/proto/caffe.pb.h>
