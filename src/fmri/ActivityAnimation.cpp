@@ -60,10 +60,14 @@ void ActivityAnimation::draw(float timeScale)
     glVertexPointer(3, GL_FLOAT, 0, vertexBuffer.data());
     glDrawArrays(GL_POINTS, 0, bufferLength / 3);
     glDisableClientState(GL_COLOR_ARRAY);
-    if (RenderingState::instance().renderInteractionPaths()) {
-        setGlColor(RenderingState::instance().pathColor());
-        glVertexPointer(3, GL_FLOAT, 0, startingPos.data());
-        glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_INT, lineIndices.data());
-    }
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void ActivityAnimation::drawPaths()
+{
+    glEnableClientState(GL_VERTEX_ARRAY);
+    setGlColor(RenderingState::instance().pathColor());
+    glVertexPointer(3, GL_FLOAT, 0, startingPos.data());
+    glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_INT, lineIndices.data());
     glDisableClientState(GL_VERTEX_ARRAY);
 }

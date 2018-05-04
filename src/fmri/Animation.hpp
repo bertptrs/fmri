@@ -11,6 +11,8 @@ namespace fmri
     public:
         virtual ~Animation() = default;
 
+        virtual void drawPaths();
+
     protected:
         float getAlpha() override;
     };

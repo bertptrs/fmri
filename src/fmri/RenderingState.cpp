@@ -355,8 +355,13 @@ void RenderingState::drawLayer(float time, unsigned long i) const
     if (options.renderLayers) {
         layer.first->draw(time);
     }
-    if (options.renderInteractions && layer.second) {
-        layer.second->draw(time);
+    if (layer.second) {
+        if (options.renderInteractions) {
+            layer.second->draw(time);
+        }
+        if (options.renderInteractionPaths) {
+            layer.second->drawPaths();
+        }
     }
 
     glPopMatrix();

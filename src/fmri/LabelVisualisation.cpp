@@ -7,14 +7,6 @@ using namespace fmri;
 
 void LabelVisualisation::draw(float)
 {
-    if (RenderingState::instance().renderInteractionPaths()) {
-        setGlColor(RenderingState::instance().pathColor());
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 0, nodePositions_.data());
-        glDrawElements(GL_LINES, nodeIndices.size(), GL_UNSIGNED_INT, nodeIndices.data());
-        glDisableClientState(GL_VERTEX_ARRAY);
-    }
-
     glPushMatrix();
     glTranslatef(LAYER_X_OFFSET, 0, 0);
 
@@ -63,4 +55,13 @@ LabelVisualisation::LabelVisualisation(const std::vector<float> &positions, cons
 
 
     patchTransparancy();
+}
+
+void LabelVisualisation::drawPaths()
+{
+    setGlColor(RenderingState::instance().pathColor());
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, nodePositions_.data());
+    glDrawElements(GL_LINES, nodeIndices.size(), GL_UNSIGNED_INT, nodeIndices.data());
+    glDisableClientState(GL_VERTEX_ARRAY);
 }

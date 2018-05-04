@@ -18,10 +18,9 @@ namespace fmri
         ActivityAnimation(
                     const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
                     const float *aPositions, const float *bPositions);
-        ActivityAnimation(
-                    const std::vector<std::pair<DType, std::pair<std::size_t, std::size_t>>> &interactions,
-                    const float *aPositions, const float *bPositions, ColoringFunction coloring);
+
         void draw(float timeScale) override;
+        void drawPaths() override;
 
     private:
         std::size_t bufferLength;

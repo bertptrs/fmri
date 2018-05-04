@@ -10,6 +10,7 @@ namespace fmri
     public:
         LabelVisualisation(const std::vector<float>& positions, const LayerData& prevData, const std::vector<std::string>& labels);
         void draw(float time) override;
+        void drawPaths() override;
 
     private:
         static constexpr float DISPLAY_LIMIT = 0.01;
