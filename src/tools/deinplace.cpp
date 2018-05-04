@@ -37,7 +37,12 @@ void show_help(std::string_view name, int exit_code)
 
 int get_file_descriptor(std::string_view file_name, int mode)
 {
-    int fd = open(file_name.data(), mode);
+    int fd;
+    if ((mode & O_CREAT) || (mode & O_TMPFILE)) {
+        fd = open(file_name.data(), mode, 0666);
+    } else {
+        fd = open(file_name.data(), mode);
+    }
     if (fd < 0) {
         perror("get_file_descriptor");
         exit(1);
@@ -60,6 +65,7 @@ void read_options(int argc, char **argv)
                 options.output_filename = optarg;
                 break;
             case '?':
+            default:
                 show_help(argv[0], 1);
                 break;
         }
