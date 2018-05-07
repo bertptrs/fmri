@@ -19,6 +19,9 @@ MultiImageVisualisation::MultiImageVisualisation(const fmri::LayerData &layer) :
     initNodePositions<Ordering::SQUARE>(channels, 3);
     vertexBuffer = getVertices(nodePositions_);
     texCoordBuffer = getTexCoords(channels);
+
+    handleBrainMode(vertexBuffer);
+    handleBrainMode(nodePositions_);
 }
 
 void MultiImageVisualisation::draw(float)

@@ -20,7 +20,7 @@ PoolingLayerAnimation::PoolingLayerAnimation(const LayerData &prevData, const La
     CHECK_EQ(prevPositions.size(), curPositions.size()) << "Layers should be same size. Caffe error?";
     const auto downScaling = sqrt(
             static_cast<float>(curData.shape()[2] * curData.shape()[3]) / (prevData.shape()[2] * prevData.shape()[3]));
-    const auto targetPositions = MultiImageVisualisation::getVertices(curPositions, downScaling);
+    auto targetPositions = MultiImageVisualisation::getVertices(curPositions, downScaling);
     caffe::caffe_sub(targetPositions.size(), targetPositions.data(), startingPositions.data(), deltas.data());
 
     for (auto i = 0u; i < deltas.size(); i+=3) {

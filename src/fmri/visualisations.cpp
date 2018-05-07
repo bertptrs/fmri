@@ -11,6 +11,7 @@
 #include "InputLayerVisualisation.hpp"
 #include "PoolingLayerAnimation.hpp"
 #include "ImageInteractionAnimation.hpp"
+#include "RenderingState.hpp"
 
 using namespace fmri;
 using namespace std;
@@ -66,6 +67,11 @@ static EntryList deduplicate(const EntryList& entries)
     });
 
     return result;
+}
+
+static inline bool brainModeEnabled()
+{
+    return RenderingState::instance().brainMode();
 }
 
 static fmri::LayerVisualisation *getAppropriateLayer(const fmri::LayerData &data, const fmri::LayerInfo &info)
@@ -180,7 +186,11 @@ static Animation *getReLUAnimation(const fmri::LayerData &prevState,
 
         return new ActivityAnimation(results, prevPositions.data(), curPositions.data());
     } else {
-        return new ImageInteractionAnimation(changes.data(), prevState.shape(), prevPositions, curPositions);
+        if (!brainModeEnabled()) {
+            return new ImageInteractionAnimation(changes.data(), prevState.shape(), prevPositions, curPositions);
+        } else {
+            return nullptr;
+        }
     }
 }
 
@@ -207,7 +217,11 @@ static Animation *getNormalizingAnimation(const fmri::LayerData &prevState, cons
         return new ActivityAnimation(entries, prevPositions.data(), curPositions.data());
 
     } else {
-        return new ImageInteractionAnimation(&scaling[0], prevState.shape(), prevPositions, curPositions);
+        if (!brainModeEnabled()) {
+            return new ImageInteractionAnimation(&scaling[0], prevState.shape(), prevPositions, curPositions);
+        } else {
+            return nullptr;
+        }
     }
 }
 
@@ -250,7 +264,11 @@ Animation * fmri::getActivityAnimation(const fmri::LayerData &prevState, const f
             return getReLUAnimation(prevState, curState, prevPositions, curPositions);
 
         case LayerInfo::Type::Pooling:
-            return new PoolingLayerAnimation(prevState, curState, prevPositions, curPositions);
+            if (!brainModeEnabled()) {
+                return new PoolingLayerAnimation(prevState, curState, prevPositions, curPositions);
+            } else {
+                return nullptr;
+            }
 
         case LayerInfo::Type::LRN:
             return getNormalizingAnimation(prevState, curState, prevPositions, curPositions);

@@ -440,6 +440,7 @@ void RenderingState::loadOptions(const Options &programOptions)
     options.pathColor = programOptions.pathColor();
     options.layerAlpha = programOptions.layerTransparency();
     options.interactionAlpha = programOptions.interactionTransparency();
+    options.brainMode = programOptions.brainMode();
 
     loadingFuture = std::async(std::launch::async, loadVisualisations, programOptions);
 }
@@ -538,4 +539,9 @@ void RenderingState::loadGLItems()
 bool RenderingState::isLoading() const
 {
     return loadingFuture.valid();
+}
+
+bool RenderingState::brainMode()
+{
+    return options.brainMode;
 }

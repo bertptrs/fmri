@@ -54,6 +54,7 @@ namespace fmri
         const Color& pathColor() const;
         float interactionAlpha() const;
         float layerAlpha() const;
+        bool brainMode();
 
         static RenderingState& instance();
 
@@ -70,6 +71,7 @@ namespace fmri
             Color pathColor;
             bool mouse_1_pressed = false;
             bool mouse_2_pressed = false;
+            bool brainMode;
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;

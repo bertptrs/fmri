@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "utils.hpp"
 
 namespace fmri
@@ -24,6 +25,8 @@ namespace fmri
          * The default implementation does nothing.
          */
         virtual void glLoad();
+
+        virtual void handleBrainMode(std::vector<float>& vertices);
 
     protected:
         std::vector<Color> colorBuffer;

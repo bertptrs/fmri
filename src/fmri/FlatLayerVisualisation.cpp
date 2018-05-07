@@ -63,6 +63,8 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
 
     assert(indexPos == indexBuffer.end());
     patchTransparency();
+    handleBrainMode(vertexBuffer);
+    handleBrainMode(nodePositions_);
 }
 
 void FlatLayerVisualisation::draw(float)
