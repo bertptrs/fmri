@@ -21,13 +21,6 @@ add_executable(fmri ${fmri_SRC})
 # Enable better warnings
 target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
 
-# Use FLTO where possible, for performance
-include(CheckIPOSupported)
-check_ipo_supported(RESULT IPO_SUPPORTED)
-if (IPO_SUPPORTED)
-	set_property(TARGET fmri PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
-endif()
-
 # Prefer GLNVD if available
 if (POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
