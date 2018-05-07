@@ -55,8 +55,12 @@ InputLayerVisualisation::InputLayerVisualisation(const LayerData &data) :
 {
     const auto channels = data.shape()[1];
 
-    targetWidth = width / 5.f;
-    targetHeight = width / 5.f;
+    if (brainModeEnabled()) {
+        targetWidth = targetHeight = BRAIN_SIZE;
+    } else {
+        targetWidth = width / 5.f;
+        targetHeight = height / 5.f;
+    }
 
     nodePositions_ = {0, targetHeight / 2, targetWidth / -2};
     for (auto i : Range(3, 3 * channels)) {

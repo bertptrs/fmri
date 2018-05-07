@@ -26,12 +26,14 @@ namespace fmri
          */
         virtual void glLoad();
 
-        virtual void handleBrainMode(std::vector<float>& vertices);
-
     protected:
+        static constexpr auto BRAIN_SIZE = 15;
+
         std::vector<Color> colorBuffer;
 
         virtual float getAlpha() = 0;
+        virtual void handleBrainMode(std::vector<float>& vertices);
+        static bool brainModeEnabled();
     };
 
 }

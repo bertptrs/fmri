@@ -23,11 +23,9 @@ void fmri::Drawable::glLoad()
 
 void fmri::Drawable::handleBrainMode(std::vector<float> &vertices)
 {
-    if (!fmri::RenderingState::instance().brainMode()) {
+    if (!brainModeEnabled()) {
         return;
     }
-
-    constexpr auto BRAIN_SIZE = 15;
 
     std::array<float, 3> maxVals = {0, 0, 0};
 
@@ -46,4 +44,9 @@ void fmri::Drawable::handleBrainMode(std::vector<float> &vertices)
     for (auto i = 0u; i < limit; ++i) {
         vertices[i] *= scaling[i % 3];
     }
+}
+
+bool fmri::Drawable::brainModeEnabled()
+{
+    return fmri::RenderingState::instance().brainMode();
 }
