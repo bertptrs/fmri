@@ -82,7 +82,8 @@ static void use_color(const boost::program_options::variables_map& vm, const cha
 Options::Options(int argc, char * const argv[]):
         layerTransparancy_(1),
         interactionTransparancy_(1),
-        pathColor_({1, 1, 1, 0.1})
+        pathColor_({1, 1, 1, 0.1}),
+        brainMode_(false)
 {
     using namespace boost::program_options;
 
@@ -110,6 +111,7 @@ Options::Options(int argc, char * const argv[]):
                 ("positive-color", value<std::string>(), "Color for showing positive states")
                 ("negative-color", value<std::string>(), "Color for showing negative states")
                 ("background-color", value<std::string>()->default_value("#00000000"), "Color for showing neutral states")
+                ("brain-mode,b", bool_switch(&brainMode_), "Enable brain mode")
                 ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
         options_description composed = desc;
@@ -207,4 +209,9 @@ float Options::layerTransparancy() const
 float Options::interactionTransparancy() const
 {
     return interactionTransparancy_;
+}
+
+bool Options::brainMode() const
+{
+    return brainMode_;
 }

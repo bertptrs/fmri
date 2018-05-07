@@ -116,6 +116,7 @@ private:
     Gtk::Scale layerTransparancy;
     Gtk::Scale interactionTransparancy;
     Gtk::SpinButton interactionLimit;
+    Gtk::Switch brainSwitch;
     Gtk::Button startButton;
 
     void start();
@@ -163,6 +164,7 @@ Launcher::Launcher()
     labelChooser.add_filter(file_filter_for_extension("txt"));
     meansChooser.add_filter(file_filter_for_extension("binaryproto"));
     pathColor.set_use_alpha(true);
+    brainSwitch.set_state(false);
 
     // Set the default paths if called from the expected place
     findExecutable();
@@ -194,6 +196,7 @@ Launcher::Launcher()
     addRowWithLabel("Layer transparancy", layerTransparancy);
     addRowWithLabel("Interaction transparancy", interactionTransparancy);
     addRowWithLabel("Interaction limit", interactionLimit);
+    addRowWithLabel("Brain mode", brainSwitch);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
     //grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
@@ -253,6 +256,10 @@ void Launcher::start()
         argv.push_back(wrap_string(meansChooser.get_file()->get_path()));
     }
 
+    if (brainSwitch.get_state()) {
+        argv.push_back(wrap_string("-b"));
+    }
+
     std::transform(inputs.begin(), inputs.end(), std::back_inserter(argv),
             [](const auto& x) { return wrap_string(x); });
 
@@ -261,7 +268,7 @@ void Launcher::start()
     execv(executable.c_str(), argv.data());
 
     // Discard all allocated memory.
-    std::for_each(argv.begin(), argv.end(), std::default_delete<char>());
+    std::for_each(argv.begin(), argv.end(), std::default_delete<char[]>());
     Gtk::MessageDialog dialog(*this, "Failed to start for unknown reasons.");
     dialog.run();
 }
