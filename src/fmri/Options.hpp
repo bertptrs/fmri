@@ -22,15 +22,15 @@ namespace fmri {
         const Color& pathColor() const;
         std::optional<vector<string>> labels() const;
         std::optional<fmri::PNGDumper> imageDumper() const;
-        float layerTransparancy() const;
-        float interactionTransparancy() const;
+        float layerTransparency() const;
+        float interactionTransparency() const;
 
         const vector<string>& inputs() const;
         bool brainMode() const;
 
     private:
-        float layerTransparancy_;
-        float interactionTransparancy_;
+        float layerTransparency_;
+        float interactionTransparency_;
         Color pathColor_;
         string modelPath;
         string weightsPath;

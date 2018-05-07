@@ -80,8 +80,8 @@ static void use_color(const boost::program_options::variables_map& vm, const cha
 }
 
 Options::Options(int argc, char * const argv[]):
-        layerTransparancy_(1),
-        interactionTransparancy_(1),
+        layerTransparency_(1),
+        interactionTransparency_(1),
         pathColor_({1, 1, 1, 0.1}),
         brainMode_(false)
 {
@@ -103,8 +103,8 @@ Options::Options(int argc, char * const argv[]):
                 ("labels,l", value<std::string>(&labelsPath), "labels file")
                 ("means,m", value<std::string>(&meansPath), "means file")
                 ("path-color,p", value<std::string>()->default_value("#ffffff19"), "color for paths")
-                ("layer-opacity", value_for(layerTransparancy_), "Opacity for layers")
-                ("interaction-opacity", value_for(interactionTransparancy_), "Opacity for interactions")
+                ("layer-opacity", value_for(layerTransparency_), "Opacity for layers")
+                ("interaction-opacity", value_for(interactionTransparency_), "Opacity for interactions")
                 ("layer-distance", value_for(LAYER_X_OFFSET), "Distance between layers")
                 ("interaction-limit", value_for(INTERACTION_LIMIT), "Maximum number of interactions per layer")
                 ("neutral-color", value<std::string>(), "Color for showing neutral states")
@@ -201,14 +201,14 @@ const Color &Options::pathColor() const
     return pathColor_;
 }
 
-float Options::layerTransparancy() const
+float Options::layerTransparency() const
 {
-    return layerTransparancy_;
+    return layerTransparency_;
 }
 
-float Options::interactionTransparancy() const
+float Options::interactionTransparency() const
 {
-    return interactionTransparancy_;
+    return interactionTransparency_;
 }
 
 bool Options::brainMode() const

@@ -14,7 +14,7 @@ namespace fmri
         virtual ~Drawable() = default;
 
         virtual void draw(float time) = 0;
-        virtual void patchTransparancy();
+        virtual void patchTransparency();
         /**
          * Do any GL related initialization.
          *

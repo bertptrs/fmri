@@ -62,7 +62,7 @@ FlatLayerVisualisation::FlatLayerVisualisation(const LayerData &layer, Ordering 
     }
 
     assert(indexPos == indexBuffer.end());
-    patchTransparancy();
+    patchTransparency();
 }
 
 void FlatLayerVisualisation::draw(float)

@@ -47,7 +47,7 @@ ActivityAnimation::ActivityAnimation(
         lineIndices.push_back(i + interactions.size());
     }
 
-    patchTransparancy();
+    patchTransparency();
 }
 
 void ActivityAnimation::draw(float timeScale)

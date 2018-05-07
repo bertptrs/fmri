@@ -438,8 +438,8 @@ bool RenderingState::renderActivatedOnly() const
 void RenderingState::loadOptions(const Options &programOptions)
 {
     options.pathColor = programOptions.pathColor();
-    options.layerAlpha = programOptions.layerTransparancy();
-    options.interactionAlpha = programOptions.interactionTransparancy();
+    options.layerAlpha = programOptions.layerTransparency();
+    options.interactionAlpha = programOptions.interactionTransparency();
 
     loadingFuture = std::async(std::launch::async, loadVisualisations, programOptions);
 }

@@ -1,6 +1,6 @@
 #include "Drawable.hpp"
 
-void fmri::Drawable::patchTransparancy()
+void fmri::Drawable::patchTransparency()
 {
     if constexpr (!alphaEnabled()) {
         // Not compiling with alpha support

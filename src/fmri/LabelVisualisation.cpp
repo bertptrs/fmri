@@ -54,7 +54,7 @@ LabelVisualisation::LabelVisualisation(const std::vector<float> &positions, cons
     }
 
 
-    patchTransparancy();
+    patchTransparency();
 }
 
 void LabelVisualisation::drawPaths()

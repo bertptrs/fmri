@@ -113,8 +113,8 @@ private:
     Gtk::ColorButton positiveColor;
     Gtk::ColorButton negativeColor;
     Gtk::Scale layerDistance;
-    Gtk::Scale layerTransparancy;
-    Gtk::Scale interactionTransparancy;
+    Gtk::Scale layerTransparency;
+    Gtk::Scale interactionTransparency;
     Gtk::SpinButton interactionLimit;
     Gtk::Switch brainSwitch;
     Gtk::Button startButton;
@@ -145,8 +145,8 @@ Launcher::Launcher()
         positiveColor(Gdk::RGBA("rgba(0, 0, 255, 1)")),
         negativeColor(Gdk::RGBA("rgba(255, 0, 0, 1)")),
         layerDistance(Gtk::Adjustment::create(10, 0, 100, 0, 0.1, 0)),
-        layerTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
-        interactionTransparancy(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
+        layerTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
+        interactionTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionLimit(Gtk::Adjustment::create(10000, 4096, std::numeric_limits<int>::max()), 10000),
         startButton("Start FMRI")
 {
@@ -193,8 +193,8 @@ Launcher::Launcher()
     addRowWithLabel("Negative color", negativeColor);
     addHeaderRow("Misc settings");
     addRowWithLabel("Layer distance", layerDistance);
-    addRowWithLabel("Layer transparancy", layerTransparancy);
-    addRowWithLabel("Interaction transparancy", interactionTransparancy);
+    addRowWithLabel("Layer transparency", layerTransparency);
+    addRowWithLabel("Interaction transparency", interactionTransparency);
     addRowWithLabel("Interaction limit", interactionLimit);
     addRowWithLabel("Brain mode", brainSwitch);
 
@@ -241,8 +241,8 @@ void Launcher::start()
             color_string(negativeColor)
     };
 
-    float_parameter(argv, "--layer-opacity", layerTransparancy.get_value());
-    float_parameter(argv, "--interaction-opacity", interactionTransparancy.get_value());
+    float_parameter(argv, "--layer-opacity", layerTransparency.get_value());
+    float_parameter(argv, "--interaction-opacity", interactionTransparency.get_value());
     float_parameter(argv, "--layer-distance", layerDistance.get_value());
     int_parameter(argv, "--interaction-limit", interactionLimit.get_value());
 
