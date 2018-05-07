@@ -14,6 +14,8 @@ namespace fmri
 
         void draw(float time) override;
 
+        static float intensityFunction(float f, float limit);
+
     private:
         Ordering ordering;
         std::vector<float> vertexBuffer;

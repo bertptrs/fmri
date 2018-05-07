@@ -50,7 +50,7 @@ namespace fmri
          * @return Whether the network should only render activated nodes, rather than all of them.
          */
         bool renderActivatedOnly() const;
-        bool renderInteractionPaths() const;
+
         const Color& pathColor() const;
         float interactionAlpha() const;
         float layerAlpha() const;

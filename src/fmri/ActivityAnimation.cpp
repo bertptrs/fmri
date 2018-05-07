@@ -24,7 +24,7 @@ ActivityAnimation::ActivityAnimation(
         if (e.first > 0) {
             return interpolate(e.first, POSITIVE_COLOR, NEUTRAL_COLOR);
         } else {
-            return interpolate(e.first + 1, NEUTRAL_COLOR, NEGATIVE_COLOR);
+            return interpolate(-e.first, NEGATIVE_COLOR, NEUTRAL_COLOR);
         }
     });
     colorBuffer.reserve(interactions.size());

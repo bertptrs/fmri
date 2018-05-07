@@ -120,19 +120,21 @@ static Animation *getFullyConnectedAnimation(const fmri::LayerData &prevState, c
     }
 
     const auto desiredSize = min(INTERACTION_LIMIT, numEntries);
-    auto idx = arg_partial_sort(interactions.begin(), interactions.begin() + desiredSize, interactions.end(),
+    auto idx = arg_partial_sort(begin(interactions), begin(interactions) + desiredSize, end(interactions),
                                 [](auto a, auto b) {
                                     return abs(a) > abs(b);
                                 });
 
     EntryList result;
     result.reserve(desiredSize);
+    auto absMax = std::abs(interactions[idx[0]]);
     const auto normalizer = getNodeNormalizer(prevState);
     for (auto i : idx) {
         if (abs(interactions[i]) < EPSILON){
             break;
         }
-        result.emplace_back(interactions[i], make_pair((i % shape[1]) / normalizer, i / shape[1]));
+        result.emplace_back(FlatLayerVisualisation::intensityFunction(interactions[i], absMax),
+                            make_pair((i % shape[1]) / normalizer, i / shape[1]));
     }
 
     return new ActivityAnimation(result, prevPositions.data(), curPositions.data());

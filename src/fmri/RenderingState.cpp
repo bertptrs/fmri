@@ -435,11 +435,6 @@ bool RenderingState::renderActivatedOnly() const
     return options.activatedOnly;
 }
 
-bool RenderingState::renderInteractionPaths() const
-{
-    return options.renderInteractionPaths;
-}
-
 void RenderingState::loadOptions(const Options &programOptions)
 {
     options.pathColor = programOptions.pathColor();

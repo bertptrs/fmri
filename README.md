@@ -38,6 +38,7 @@ process. The commands required are as follows:
         libgoogle-glog-dev libblas-dev libprotobuf-dev \
         libboost-filesystem-dev libboost-program-options-dev
 
+    # Replace libcaffe-cpu-dev with libcaffe-cuda-dev for CUDA support
     # Do the build normally
 
 These commands were tested on Ubuntu 18.04. Versions as old as 16.04

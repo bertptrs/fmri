@@ -43,6 +43,10 @@ void fmri::renderText(std::string_view text, int x, int y)
 {
     constexpr auto font = GLUT_BITMAP_HELVETICA_10;
     glRasterPos2i(x, y);
+#ifdef FREEGLUT
+    std::string textBuffer(text);
+    glutBitmapString(font, reinterpret_cast<const unsigned char *>(textBuffer.c_str()));
+#else
     for (char c : text) {
         if (c == '\n') {
             y += 12;
@@ -51,6 +55,7 @@ void fmri::renderText(std::string_view text, int x, int y)
             glutBitmapCharacter(font, c);
         }
     }
+#endif
 }
 
 void fmri::throttleIdleFunc()

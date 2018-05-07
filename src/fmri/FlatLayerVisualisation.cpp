@@ -9,11 +9,11 @@ using namespace fmri;
 
 static inline void computeColor(float intensity, float limit, Color& destination)
 {
-    const float saturation = std::min(-std::log(std::abs(intensity) / limit) / 10.0f, 1.0f);
-    if (intensity > 0) {
-        destination = interpolate(saturation, NEUTRAL_COLOR, POSITIVE_COLOR);
+    const float saturation = FlatLayerVisualisation::intensityFunction(intensity, limit);
+    if (saturation > 0) {
+        destination = interpolate(saturation, POSITIVE_COLOR, NEUTRAL_COLOR);
     } else {
-        destination = interpolate(saturation, NEUTRAL_COLOR, NEGATIVE_COLOR);
+        destination = interpolate(-saturation, NEGATIVE_COLOR, NEUTRAL_COLOR);
     }
     if constexpr (alphaEnabled()) {
         // We have an alpha channel, set it to 1.
@@ -105,4 +105,16 @@ void FlatLayerVisualisation::initializeNodePositions(std::size_t entries)
             initNodePositions<Ordering::SQUARE>(entries, 2);
             break;
     }
+}
+
+float FlatLayerVisualisation::intensityFunction(float f, float limit)
+{
+    if (abs(f) < EPSILON) {
+        return 0;
+    }
+
+    const float magnitude = std::log(std::abs(f) / limit);
+    const float result = std::clamp(1 + magnitude / 10.f, 0.f, 1.f);
+
+    return std::copysign(result, f);
 }
