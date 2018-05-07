@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8.0)
+cmake_minimum_required (VERSION 3.9.0)
 project(FMRI CXX)
 
 # Allow us to define custom modules
@@ -20,6 +20,18 @@ add_executable(fmri ${fmri_SRC})
 
 # Enable better warnings
 target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
+
+# Use FLTO where possible, for performance
+include(CheckIPOSupported)
+check_ipo_supported(RESULT IPO_SUPPORTED)
+if (IPO_SUPPORTED)
+	set_property(TARGET fmri PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
+# Prefer GLNVD if available
+if (POLICY CMP0072)
+	cmake_policy(SET CMP0072 NEW)
+endif()
 
 # Find dependencies
 find_package(Caffe REQUIRED)
