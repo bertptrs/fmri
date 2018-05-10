@@ -25,7 +25,7 @@ LabelVisualisation::LabelVisualisation(const std::vector<float> &positions, cons
                                        const std::vector<std::string> &labels)
 {
     const auto limit = std::min(prevData.numEntries(), labels.size());
-    const auto maxVal = *std::max_element(prevData.data(), prevData.data() + prevData.numEntries());
+    const auto maxVal = *std::max_element(prevData.begin(), prevData.end());
 
     auto nodeInserter = std::back_inserter(nodePositions_);
 
@@ -35,9 +35,12 @@ LabelVisualisation::LabelVisualisation(const std::vector<float> &positions, cons
             continue;
         }
 
+        char nameBuffer[50];
+        std::snprintf(nameBuffer, sizeof(nameBuffer), "%.2f - %s", prevData[i], labels[i].c_str());
+
         colorBuffer.emplace_back(interpolate(prevData[i] / maxVal, POSITIVE_COLOR, NEUTRAL_COLOR));
         std::copy_n(positions.begin() + 3 * i, 3, nodeInserter);
-        nodeLabels.emplace_back(labels[i]);
+        nodeLabels.emplace_back(nameBuffer);
     }
 
     // Now fix the points for the interaction paths.
