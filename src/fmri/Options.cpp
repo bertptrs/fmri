@@ -2,6 +2,7 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 #include <glog/logging.h>
+#include <fstream>
 #include <GL/gl.h>
 #include "Options.hpp"
 #include "visualisations.hpp"
@@ -79,6 +80,23 @@ static void use_color(const boost::program_options::variables_map& vm, const cha
     }
 }
 
+std::ifstream getConfigFile(const char * name)
+{
+    // Determine the XDG_CONFIG_HOME
+    char configBuf[PATH_MAX];
+    if (char* configHome = std::getenv("XDG_CONFIG_HOME"); configHome != nullptr) {
+        std::strncpy(configBuf, configHome, sizeof(configBuf));
+    } else {
+        std::snprintf(configBuf, sizeof(configBuf), "%s/.config", getenv("HOME"));
+    }
+
+    char fileBuf[PATH_MAX];
+    std::snprintf(fileBuf, sizeof(fileBuf), "%s/fmri/%s", configBuf, name);
+
+    std::ifstream configFile(fileBuf);
+    return configFile;
+}
+
 Options::Options(int argc, char * const argv[]):
         layerTransparency_(1),
         interactionTransparency_(1),
@@ -88,7 +106,20 @@ Options::Options(int argc, char * const argv[]):
     using namespace boost::program_options;
 
     try {
-        options_description desc("Options");
+        const bool brainMode = std::any_of(argv, argv + argc, [](auto x) {return !std::strcmp("-b", x) || !std::strcmp("--brainmode", x);});
+        if (brainMode) {
+            // Alternative defaults for brain mode,
+            // As suggested by Michael Lew
+            NEUTRAL_COLOR = {0.5, 0.5, 0.5, 1};
+            NEGATIVE_COLOR = {0, 0, 0, 1};
+            POSITIVE_COLOR = {1, 1, 1, 1};
+            LAYER_X_OFFSET = 0.8;
+            interactionTransparency_ = 1;
+            layerTransparency_ = 0.2;
+        }
+        bool show_help = false;
+        options_description desc;
+        options_description cli("Options");
         positional_options_description positionals;
         positionals.add("input", -1);
 
@@ -96,8 +127,11 @@ Options::Options(int argc, char * const argv[]):
         hidden.add_options()
                 ("input", value<std::vector<std::string>>(&inputPaths)->required()->composing());
 
+        cli.add_options()
+                ("brain-mode,b", bool_switch(&brainMode_), "Enable brain mode")
+                ("help,h", bool_switch(&show_help), "Show this help message");
+
         desc.add_options()
-                ("help,h", "Show this help message")
                 ("weights,w", value<std::string>(&weightsPath)->required(), "weights file for the network")
                 ("network,n", value<std::string>(&modelPath)->required(), "caffe model file for the network")
                 ("labels,l", value<std::string>(&labelsPath), "labels file")
@@ -111,17 +145,27 @@ Options::Options(int argc, char * const argv[]):
                 ("positive-color", value<std::string>(), "Color for showing positive states")
                 ("negative-color", value<std::string>(), "Color for showing negative states")
                 ("background-color", value<std::string>()->default_value("#00000000"), "Color for showing neutral states")
-                ("brain-mode,b", bool_switch(&brainMode_), "Enable brain mode")
                 ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
-        options_description composed = desc;
+        cli.add(desc);
+        options_description composed = cli;
         composed.add(hidden);
 
         variables_map vm;
-        store(command_line_parser(argc, argv).options(composed).positional(positionals).run(), vm);
 
-        if (vm.count("help")) {
-            std::cout << "Usage: " << argv[0] << " [OPTIONS] [INPUTS]\n\n" << desc << '\n';
+        // Boost handles priority as: first defined wins. So, first CLI, then brain mode, then config.
+        store(command_line_parser(argc, argv).options(composed).positional(positionals).run(), vm);
+        if (brainMode) {
+            if (auto config = getConfigFile("brain.ini"); config.good()) {
+                store(parse_config_file(config, desc, true), vm);
+            }
+        }
+        if (auto config = getConfigFile("main.ini"); config.good()) {
+            store(parse_config_file(config, desc, true), vm);
+        }
+
+        if (show_help) {
+            std::cout << "Usage: " << argv[0] << " [OPTIONS] [INPUTS]\n\n" << cli << '\n';
             std::exit(0);
         }
 
