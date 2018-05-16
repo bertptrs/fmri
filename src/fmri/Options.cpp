@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <iostream>
 #include <boost/program_options.hpp>
-#include <glog/logging.h>
 #include <fstream>
 #include <GL/gl.h>
 #include "Options.hpp"
@@ -48,10 +47,10 @@ inline static auto value_for(T& val)
  */
 static void parse_color(const char *input, Color &targetColor)
 {
-    if (input[0] == '#') {
+    if (isxdigit(input[0])) {
         // Attempt to parse #RRGGBBAA
         std::array<unsigned int, 4> colorBuf;
-        const int result = std::sscanf(input, "#%02x%02x%02x%02x", &colorBuf[0], &colorBuf[1], &colorBuf[2],
+        const int result = std::sscanf(input, "%02x%02x%02x%02x", &colorBuf[0], &colorBuf[1], &colorBuf[2],
                                        &colorBuf[3]);
         if (result < 3) {
             throw std::invalid_argument("Invalid color HEX format, need at least 3 hex pairs");
@@ -60,7 +59,10 @@ static void parse_color(const char *input, Color &targetColor)
         std::transform(colorBuf.begin(), colorBuf.end(), targetColor.begin(), [](auto x) { return x / 255.f; });
 
         // Optionally, patch the alpha channel if not specified
-        if (result == 3) targetColor[3] = 1;
+        if (result == 3 && alphaEnabled()) targetColor[3] = 1;
+        return;
+    } else if (input[0] == '#') {
+        parse_color(input + 1, targetColor);
         return;
     }
 
