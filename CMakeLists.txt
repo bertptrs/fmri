@@ -16,7 +16,7 @@ file(GLOB fmri_SRC
 option(WITH_LAUNCHER "build GUI launcher" ON)
 option(WITH_DEINPLACE "build deinplace tool" ON)
 
-add_executable(fmri ${fmri_SRC})
+add_executable(fmri ${fmri_SRC} src/common/config_files.cpp src/common/config_files.hpp)
 
 # Enable better warnings
 target_compile_options(fmri PRIVATE "-Wall" "-Wextra" "-pedantic")
@@ -63,7 +63,7 @@ endif()
 if (WITH_LAUNCHER)
 	# Build isntructions for the launcher tool
 	find_package(GTK3 REQUIRED COMPONENTS gtk gtkmm)
-	add_executable(fmri-launcher src/tools/launcher.cpp)
+	add_executable(fmri-launcher src/tools/launcher.cpp src/common/config_files.cpp src/common/config_files.hpp)
 	target_compile_options(fmri-launcher PRIVATE "-Wall" "-Wextra" "-pedantic")
 	target_link_libraries(fmri-launcher GTK3::gtkmm Boost::filesystem GTK3::gtk)
 	install(TARGETS fmri-launcher DESTINATION bin)

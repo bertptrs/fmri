@@ -5,6 +5,7 @@
 #include <GL/gl.h>
 #include "Options.hpp"
 #include "visualisations.hpp"
+#include "../common/config_files.hpp"
 
 using namespace fmri;
 
@@ -82,23 +83,6 @@ static void use_color(const boost::program_options::variables_map& vm, const cha
     }
 }
 
-std::ifstream getConfigFile(const char * name)
-{
-    // Determine the XDG_CONFIG_HOME
-    char configBuf[PATH_MAX];
-    if (char* configHome = std::getenv("XDG_CONFIG_HOME"); configHome != nullptr) {
-        std::strncpy(configBuf, configHome, sizeof(configBuf));
-    } else {
-        std::snprintf(configBuf, sizeof(configBuf), "%s/.config", getenv("HOME"));
-    }
-
-    char fileBuf[PATH_MAX];
-    std::snprintf(fileBuf, sizeof(fileBuf), "%s/fmri/%s", configBuf, name);
-
-    std::ifstream configFile(fileBuf);
-    return configFile;
-}
-
 Options::Options(int argc, char * const argv[]):
         layerTransparency_(1),
         interactionTransparency_(1),
@@ -158,11 +142,11 @@ Options::Options(int argc, char * const argv[]):
         // Boost handles priority as: first defined wins. So, first CLI, then brain mode, then config.
         store(command_line_parser(argc, argv).options(composed).positional(positionals).run(), vm);
         if (brainMode) {
-            if (auto config = getConfigFile("brain.ini"); config.good()) {
+            if (auto config = get_xdg_config(BRAIN_CONFIG_FILE); config.good()) {
                 store(parse_config_file(config, desc, true), vm);
             }
         }
-        if (auto config = getConfigFile("main.ini"); config.good()) {
+        if (auto config = get_xdg_config(MAIN_CONFIG_FILE); config.good()) {
             store(parse_config_file(config, desc, true), vm);
         }
 
