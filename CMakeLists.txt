@@ -65,7 +65,11 @@ if (WITH_LAUNCHER)
 	find_package(GTK3 REQUIRED COMPONENTS gtk gtkmm)
 	add_executable(fmri-launcher src/tools/launcher.cpp src/common/config_files.cpp src/common/config_files.hpp)
 	target_compile_options(fmri-launcher PRIVATE "-Wall" "-Wextra" "-pedantic")
-	target_link_libraries(fmri-launcher GTK3::gtkmm Boost::filesystem GTK3::gtk)
+	target_link_libraries(fmri-launcher
+			GTK3::gtkmm
+			Boost::filesystem
+			Boost::program_options
+			GTK3::gtk)
 	install(TARGETS fmri-launcher DESTINATION bin)
 endif()
 

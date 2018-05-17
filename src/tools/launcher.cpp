@@ -2,6 +2,8 @@
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/program_options.hpp>
+#include "../common/config_files.hpp"
 
 using namespace std::string_literals;
 
@@ -60,8 +62,8 @@ char* wrap_string(std::string_view str) {
     }
 
     auto wrapper = new char[str.size() + 1];
-    auto ptr = std::copy(str.begin(), str.end(), wrapper);
-    *ptr = '\0';
+    str.copy(wrapper, str.size());
+    wrapper[str.size()] = '\0';
 
     return wrapper;
 }
@@ -126,6 +128,14 @@ private:
     void findExecutable();
     void addRowWithLabel(const std::string& label, Gtk::Widget& widget);
     void addHeaderRow(const std::string& header);
+
+    void setDefaultsFromFile(const char* file);
+
+    void setPath(Gtk::FileChooserButton &target, const boost::program_options::variables_map &vm, const char *name);
+
+    void setColor(Gtk::ColorButton &target, const boost::program_options::variables_map &vm, const char *name);
+
+    void setSlider(Gtk::Scale &target, const boost::program_options::variables_map &vm, const char *name);
 };
 
 Launcher::Launcher()
@@ -147,7 +157,7 @@ Launcher::Launcher()
         layerDistance(Gtk::Adjustment::create(10, 0, 100, 0, 0.1, 0)),
         layerTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
-        interactionLimit(Gtk::Adjustment::create(10000, 4096, std::numeric_limits<int>::max()), 10000),
+        interactionLimit(Gtk::Adjustment::create(10000, 1, std::numeric_limits<int>::max()), 10000),
         startButton("Start FMRI")
 {
     set_default_size(480, 320);
@@ -197,6 +207,8 @@ Launcher::Launcher()
     addRowWithLabel("Interaction transparency", interactionTransparency);
     addRowWithLabel("Interaction limit", interactionLimit);
     addRowWithLabel("Brain mode", brainSwitch);
+
+    setDefaultsFromFile(fmri::MAIN_CONFIG_FILE);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
     //grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
@@ -351,6 +363,80 @@ void Launcher::addHeaderRow(const std::string &header)
     auto label = getManagedLabel(header);
     label->set_markup("<b>" + header + "</b>");
     grid.attach(*label, 0, currentRow, 2, 1);
+}
+
+void Launcher::setDefaultsFromFile(const char *file)
+{
+    using namespace boost::program_options;
+
+    auto configFile = fmri::get_xdg_config(file);
+    if (!configFile.good()) {
+        return;
+    }
+
+    options_description options;
+    options.add_options()
+            ("weights", value<std::string>())
+            ("network", value<std::string>())
+            ("labels", value<std::string>())
+            ("means", value<std::string>())
+            ("path-color", value<std::string>())
+            ("layer-opacity", value<float>())
+            ("interaction-opacity", value<float>())
+            ("layer-distance", value<float>())
+            ("interaction-limit", value<int>())
+            ("neutral-color", value<std::string>())
+            ("positive-color", value<std::string>())
+            ("negative-color", value<std::string>())
+            ("background-color", value<std::string>());
+
+    variables_map vm;
+    store(parse_config_file(configFile, options, true), vm);
+
+    setPath(weightsChooser, vm, "weights");
+    setPath(modelChooser, vm, "network");
+    setPath(labelChooser, vm, "labels");
+    setPath(meansChooser, vm, "means");
+
+    setColor(pathColor, vm, "path-color");
+    setColor(neutralColor, vm, "neutral-color");
+    setColor(positiveColor, vm, "positive-color");
+    setColor(negativeColor, vm, "negative-color");
+
+    setSlider(layerDistance, vm, "layer-distance");
+    setSlider(layerTransparency, vm, "layer-opacity");
+    setSlider(interactionTransparency, vm, "interaction-opacity");
+
+    if (vm.count("interaction-limit")) {
+        interactionLimit.set_value(vm["interaction-limit"].as<int>());
+    }
+}
+
+void
+Launcher::setPath(Gtk::FileChooserButton &target, const boost::program_options::variables_map &vm, const char *name)
+{
+    if (vm.count(name)) {
+        target.set_filename(vm[name].as<std::string>());
+    }
+}
+
+void Launcher::setColor(Gtk::ColorButton &target, const boost::program_options::variables_map &vm, const char *name)
+{
+    if (vm.count(name)) {
+        auto res = vm[name].as<std::string>();
+        if (std::isxdigit(res[0])) {
+            res = "#"s + res;
+        }
+        target.set_rgba(Gdk::RGBA(res));
+    }
+}
+
+void Launcher::setSlider(Gtk::Scale &target, const boost::program_options::variables_map &vm, const char *name)
+{
+    if (vm.count(name)) {
+        target.set_value(vm[name].as<float>());
+    }
+
 }
 
 int main(int argc, char** argv)
