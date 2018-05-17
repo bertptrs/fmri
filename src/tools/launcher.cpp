@@ -119,6 +119,7 @@ private:
     Gtk::Scale interactionTransparency;
     Gtk::SpinButton interactionLimit;
     Gtk::Switch brainSwitch;
+    Gtk::Button brainButton;
     Gtk::Button startButton;
 
     void start();
@@ -136,6 +137,8 @@ private:
     void setColor(Gtk::ColorButton &target, const boost::program_options::variables_map &vm, const char *name);
 
     void setSlider(Gtk::Scale &target, const boost::program_options::variables_map &vm, const char *name);
+
+    void loadBrainDefaults();
 };
 
 Launcher::Launcher()
@@ -158,6 +161,7 @@ Launcher::Launcher()
         layerTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionLimit(Gtk::Adjustment::create(10000, 1, std::numeric_limits<int>::max()), 10000),
+        brainButton("Load brain-mode defaults"),
         startButton("Start FMRI")
 {
     set_default_size(480, 320);
@@ -207,10 +211,12 @@ Launcher::Launcher()
     addRowWithLabel("Interaction transparency", interactionTransparency);
     addRowWithLabel("Interaction limit", interactionLimit);
     addRowWithLabel("Brain mode", brainSwitch);
+    grid.attach_next_to(brainButton, brainSwitch, Gtk::PositionType::POS_BOTTOM, 1, 1);
 
     setDefaultsFromFile(fmri::MAIN_CONFIG_FILE);
 
     startButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::start));
+    brainButton.signal_clicked().connect(sigc::mem_fun(*this, &Launcher::loadBrainDefaults));
     //grid.attach_next_to(startButton, Gtk::PositionType::POS_BOTTOM, 2, 1);
     show_all_children(true);
 }
@@ -436,7 +442,20 @@ void Launcher::setSlider(Gtk::Scale &target, const boost::program_options::varia
     if (vm.count(name)) {
         target.set_value(vm[name].as<float>());
     }
+}
 
+void Launcher::loadBrainDefaults()
+{
+    layerDistance.set_value(0.8);
+    layerTransparency.set_value(0.2);
+    interactionTransparency.set_value(1);
+
+    negativeColor.set_rgba(Gdk::RGBA("#000"));
+    positiveColor.set_rgba(Gdk::RGBA("#fff"));
+    neutralColor.set_rgba(Gdk::RGBA("#777"));
+
+    setDefaultsFromFile(fmri::BRAIN_CONFIG_FILE);
+    brainSwitch.set_state(true);
 }
 
 int main(int argc, char** argv)
