@@ -15,8 +15,12 @@ std::ifstream fmri::get_xdg_config(const char *filename) noexcept
         std::snprintf(configBuf, sizeof(configBuf), "%s/.config", getenv("HOME"));
     }
 
+    // Work around an unfair warning. If this exceeds my array limit, I have other problems.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
     char fileBuf[PATH_MAX];
     std::snprintf(fileBuf, sizeof(fileBuf), "%s/fmri/%s", configBuf, filename);
+#pragma GCC diagnostic pop
 
     std::ifstream configFile(fileBuf);
     return configFile;
