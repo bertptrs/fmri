@@ -72,6 +72,7 @@ namespace fmri
             bool mouse_1_pressed = false;
             bool mouse_2_pressed = false;
             bool brainMode;
+            bool videoMode = false;
         } options;
         std::array<float, 3> pos;
         std::array<float, 2> angle;
@@ -99,5 +100,7 @@ namespace fmri
         void loadGLItems();
 
         bool isLoading() const;
+
+        void nextInput();
     };
 }

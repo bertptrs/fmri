@@ -195,6 +195,10 @@ void RenderingState::handleKey(unsigned char x)
             reset();
             break;
 
+        case 'm':
+            toggle(options.videoMode);
+            break;
+
         case 'p':
             toggle(options.renderInteractionPaths);
             break;
@@ -384,6 +388,10 @@ void RenderingState::renderOverlayText() const
                        "i: toggle interactions visible\n"
                        "o: toggle activated nodes only\n"
                        "p: toggle interaction paths visible\n"
+                       "m: toggle movie mode\n"
+                       "h: reset camera position\n"
+                       "Right arrow: next input image\n"
+                       "Left arrow: previous input image\n"
                        "+/-: increase/decrease particle size\n"
                        "q: quit\n";
     }
@@ -393,6 +401,14 @@ void RenderingState::renderOverlayText() const
     glColor3f(1, 1, 0);
     renderText(overlayText.str(), 2, 10);
     restorePerspectiveProjection();
+}
+
+void RenderingState::nextInput()
+{
+    ++currentData;
+    if (currentData == visualisations.end()) {
+        currentData = visualisations.begin();
+    }
 }
 
 void RenderingState::handleSpecialKey(int key)
@@ -410,10 +426,7 @@ void RenderingState::handleSpecialKey(int key)
             break;
 
         case GLUT_KEY_RIGHT:
-            ++currentData;
-            if (currentData == visualisations.end()) {
-                currentData = visualisations.begin();
-            }
+            nextInput();
             break;
 
         case GLUT_KEY_F1:
@@ -518,6 +531,9 @@ void RenderingState::idleFunc()
         }
         if (options.mouse_2_pressed) {
             move('s', false);
+        }
+        if (options.videoMode) {
+            nextInput();
         }
         throttleIdleFunc();
     }
