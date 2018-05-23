@@ -87,7 +87,8 @@ Options::Options(int argc, char * const argv[]):
         layerTransparency_(1),
         interactionTransparency_(1),
         pathColor_({1, 1, 1, 0.1}),
-        brainMode_(false)
+        brainMode_(false),
+        inputMillis_(1000)
 {
     using namespace boost::program_options;
 
@@ -131,6 +132,7 @@ Options::Options(int argc, char * const argv[]):
                 ("positive-color", value<std::string>(), "Color for showing positive states")
                 ("negative-color", value<std::string>(), "Color for showing negative states")
                 ("background-color", value<std::string>()->default_value("#00000000"), "Color for showing neutral states")
+                ("input-millis", value_for(inputMillis_), "Milliseconds for which an input is shown in movie mode")
                 ("dump,d", value<std::string>(&dumpPath), "dump convolutional images in this directory");
 
         cli.add(desc);
@@ -244,4 +246,9 @@ float Options::interactionTransparency() const
 bool Options::brainMode() const
 {
     return brainMode_;
+}
+
+int Options::inputMillis() const
+{
+    return inputMillis_;
 }

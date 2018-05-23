@@ -118,6 +118,7 @@ private:
     Gtk::Scale layerTransparency;
     Gtk::Scale interactionTransparency;
     Gtk::SpinButton interactionLimit;
+    Gtk::SpinButton inputMillis;
     Gtk::Switch brainSwitch;
     Gtk::Button brainButton;
     Gtk::Button startButton;
@@ -161,6 +162,7 @@ Launcher::Launcher()
         layerTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionTransparency(Gtk::Adjustment::create(1, 0, 1, 0.0, 1.f / 256)),
         interactionLimit(Gtk::Adjustment::create(10000, 1, std::numeric_limits<int>::max()), 10000),
+        inputMillis(Gtk::Adjustment::create(1000, 1, std::numeric_limits<int>::max()), 0),
         brainButton("Load brain-mode defaults"),
         startButton("Start FMRI")
 {
@@ -210,6 +212,7 @@ Launcher::Launcher()
     addRowWithLabel("Layer transparency", layerTransparency);
     addRowWithLabel("Interaction transparency", interactionTransparency);
     addRowWithLabel("Interaction limit", interactionLimit);
+    addRowWithLabel("Input milliseconds", inputMillis);
     addRowWithLabel("Brain mode", brainSwitch);
     grid.attach_next_to(brainButton, brainSwitch, Gtk::PositionType::POS_BOTTOM, 1, 1);
 
@@ -394,7 +397,8 @@ void Launcher::setDefaultsFromFile(const char *file)
             ("neutral-color", value<std::string>())
             ("positive-color", value<std::string>())
             ("negative-color", value<std::string>())
-            ("background-color", value<std::string>());
+            ("background-color", value<std::string>())
+            ("input-millis", value<int>());
 
     variables_map vm;
     store(parse_config_file(configFile, options, true), vm);
@@ -415,6 +419,10 @@ void Launcher::setDefaultsFromFile(const char *file)
 
     if (vm.count("interaction-limit")) {
         interactionLimit.set_value(vm["interaction-limit"].as<int>());
+    }
+
+    if (vm.count("input-millis")) {
+        inputMillis.set_value(vm["input-millis"].as<int>());
     }
 }
 

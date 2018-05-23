@@ -78,6 +78,8 @@ namespace fmri
         std::array<float, 2> angle;
         std::vector<std::vector<std::pair<std::unique_ptr<LayerVisualisation>, std::unique_ptr<Animation>>>> visualisations;
         std::future<decltype(visualisations)> loadingFuture;
+        std::chrono::milliseconds frameTime;
+        std::chrono::steady_clock::time_point lastFrame;
 
         decltype(visualisations)::iterator currentData;
 

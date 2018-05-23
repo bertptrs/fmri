@@ -409,6 +409,8 @@ void RenderingState::nextInput()
     if (currentData == visualisations.end()) {
         currentData = visualisations.begin();
     }
+
+    lastFrame = std::chrono::steady_clock::now();
 }
 
 void RenderingState::handleSpecialKey(int key)
@@ -454,6 +456,7 @@ void RenderingState::loadOptions(const Options &programOptions)
     options.layerAlpha = programOptions.layerTransparency();
     options.interactionAlpha = programOptions.interactionTransparency();
     options.brainMode = programOptions.brainMode();
+    frameTime = std::chrono::milliseconds(programOptions.inputMillis());
 
     loadingFuture = std::async(std::launch::async, loadVisualisations, programOptions);
 }
@@ -532,7 +535,7 @@ void RenderingState::idleFunc()
         if (options.mouse_2_pressed) {
             move('s', false);
         }
-        if (options.videoMode) {
+        if (options.videoMode && std::chrono::steady_clock::now() - lastFrame > frameTime) {
             nextInput();
         }
         throttleIdleFunc();

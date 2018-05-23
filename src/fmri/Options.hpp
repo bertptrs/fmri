@@ -27,6 +27,7 @@ namespace fmri {
 
         const vector<string>& inputs() const;
         bool brainMode() const;
+        int inputMillis() const;
 
     private:
         float layerTransparency_;
@@ -39,5 +40,6 @@ namespace fmri {
         string dumpPath;
         vector<string> inputPaths;
         bool brainMode_;
+        int inputMillis_;
     };
 }
