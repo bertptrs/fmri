@@ -266,6 +266,7 @@ void Launcher::start()
     float_parameter(argv, "--interaction-opacity", interactionTransparency.get_value());
     float_parameter(argv, "--layer-distance", layerDistance.get_value());
     int_parameter(argv, "--interaction-limit", interactionLimit.get_value());
+    int_parameter(argv, "--input-millis", inputMillis.get_value());
 
     if (labelChooser.get_file()) {
         argv.push_back(wrap_string("-l"));
