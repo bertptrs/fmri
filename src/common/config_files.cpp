@@ -10,7 +10,7 @@ std::ifstream fmri::get_xdg_config(const char *filename) noexcept
     // Determine the XDG_CONFIG_HOME
     char configBuf[PATH_MAX];
     if (char* configHome = std::getenv("XDG_CONFIG_HOME"); configHome != nullptr) {
-        std::strncpy(configBuf, configHome, sizeof(configBuf));
+        std::strncpy(configBuf, configHome, sizeof(configBuf) - 1);
     } else {
         std::snprintf(configBuf, sizeof(configBuf), "%s/.config", getenv("HOME"));
     }
