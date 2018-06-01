@@ -7,6 +7,12 @@ const char* fmri::MAIN_CONFIG_FILE = "main.ini";
 
 std::ifstream fmri::get_xdg_config(const char *filename) noexcept
 {
+    std::ifstream configFile(filename);
+    if (configFile) {
+        return configFile;
+    }
+
+
     // Determine the XDG_CONFIG_HOME
     char configBuf[PATH_MAX];
     if (char* configHome = std::getenv("XDG_CONFIG_HOME"); configHome != nullptr) {
@@ -22,6 +28,6 @@ std::ifstream fmri::get_xdg_config(const char *filename) noexcept
     std::snprintf(fileBuf, sizeof(fileBuf), "%s/fmri/%s", configBuf, filename);
 #pragma GCC diagnostic pop
 
-    std::ifstream configFile(fileBuf);
+    configFile.open(fileBuf);
     return configFile;
 }
