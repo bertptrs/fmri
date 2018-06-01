@@ -104,7 +104,6 @@ Options::Options(int argc, char * const argv[]):
             interactionTransparency_ = 1;
             layerTransparency_ = 0.2;
         }
-        bool show_help = false;
         options_description desc;
         options_description cli("Options");
         positional_options_description positionals;
@@ -115,8 +114,8 @@ Options::Options(int argc, char * const argv[]):
                 ("input", value<std::vector<std::string>>(&inputPaths)->required()->composing());
 
         cli.add_options()
-                ("brain-mode,b", bool_switch(&brainMode_), "Enable brain mode")
-                ("help,h", bool_switch(&show_help), "Show this help message");
+                ("brain-mode,b", bool_switch(), "Enable brain mode")
+                ("help,h", bool_switch(), "Show this help message");
 
         desc.add_options()
                 ("weights,w", value<std::string>(&weightsPath)->required(), "weights file for the network")
@@ -143,18 +142,17 @@ Options::Options(int argc, char * const argv[]):
 
         // Boost handles priority as: first defined wins. So, first CLI, then brain mode, then config.
         store(command_line_parser(argc, argv).options(composed).positional(positionals).run(), vm);
-        if (brainMode) {
+        if (vm.count("help")) {
+            std::cout << "Usage: " << argv[0] << " [OPTIONS] [INPUTS]\n\n" << cli << '\n';
+            std::exit(0);
+        }
+        if (vm.count("brain-mode")) {
             if (auto config = get_xdg_config(BRAIN_CONFIG_FILE); config.good()) {
                 store(parse_config_file(config, desc, true), vm);
             }
         }
         if (auto config = get_xdg_config(MAIN_CONFIG_FILE); config.good()) {
             store(parse_config_file(config, desc, true), vm);
-        }
-
-        if (show_help) {
-            std::cout << "Usage: " << argv[0] << " [OPTIONS] [INPUTS]\n\n" << cli << '\n';
-            std::exit(0);
         }
 
         notify(vm);
