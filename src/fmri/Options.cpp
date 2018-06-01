@@ -114,8 +114,8 @@ Options::Options(int argc, char * const argv[]):
                 ("input", value<std::vector<std::string>>(&inputPaths)->required()->composing());
 
         cli.add_options()
-                ("brain-mode,b", bool_switch(), "Enable brain mode")
-                ("help,h", bool_switch(), "Show this help message");
+                ("brain-mode,b", "Enable brain mode")
+                ("help,h", "Show this help message");
 
         desc.add_options()
                 ("weights,w", value<std::string>(&weightsPath)->required(), "weights file for the network")
@@ -147,6 +147,7 @@ Options::Options(int argc, char * const argv[]):
             std::exit(0);
         }
         if (vm.count("brain-mode")) {
+            brainMode_ = true;
             if (auto config = get_xdg_config(BRAIN_CONFIG_FILE); config.good()) {
                 store(parse_config_file(config, desc, true), vm);
             }
